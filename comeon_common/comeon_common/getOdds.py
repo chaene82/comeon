@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
 import numpy as np
 from betbtc import getBetBtcEventData, getBetBtcMaketOdds
-from getPinnacle import getPinnacleEventData, getPinnacleEventOdds
+from Pinnacle import getPinnacleEventData, getPinnacleEventOdds
 from tennis_config import *
 
 

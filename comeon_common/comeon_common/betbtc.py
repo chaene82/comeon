@@ -38,11 +38,7 @@ def checkBetBtcBalance() :
     
     
 
-result = requests.get("http://www.betbtc.co/api/market?id=463807",headers=headers).json()
-result
 
-now = datetime.datetime.now()
-date_id = now.strftime("%Y%m%d")
 
 #with open("betbtc/" + date_id + "_tennis_leagues.json", 'w') as fp:
 #    json.dump(leagues, fp)
