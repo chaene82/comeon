@@ -54,27 +54,31 @@ def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds) :
     
                     
                     clause = insert(tbl_odds).values(event_id=event_id, \
-                                                   type_id = 1, \
+                                                   bettyp_id = 1, \
                                                    way = 1, \
-                                                   pinnacle_back=home_ml, \
-                                                   pinnacle_update=dt) 
+                                                   bookie_id = 1, \
+                                                   backlay = 1,\
+                                                   odds=home_ml, \
+                                                   odds_update=dt) 
     
                     clause = clause.on_conflict_do_update(
-                    index_elements=['event_id', 'type_id','way'],
-                    set_=dict(pinnacle_back=home_ml,pinnacle_update=dt)
+                    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
+                    set_=dict(odds=home_ml,odds_update=dt)
                     )
                     
                     con.execute(clause)  
                     
                     clause = insert(tbl_odds).values(event_id=event_id, \
-                                                   type_id = 1, \
+                                                   bettyp_id = 1, \
                                                    way = 2, \
-                                                   pinnacle_back=away_ml, \
-                                                   pinnacle_update=dt) 
+                                                   bookie_id = 1, \
+                                                   backlay = 1,\
+                                                   odds=away_ml, \
+                                                   odds_update=dt) 
     
                     clause = clause.on_conflict_do_update(
-                    index_elements=['event_id', 'type_id','way'],
-                    set_=dict(pinnacle_back=away_ml,pinnacle_update=dt)
+                    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
+                    set_=dict(odds=away_ml,odds_update=dt)
                     )
                     
                     con.execute(clause)                  
@@ -106,34 +110,61 @@ def setBetBecEventOdds(betbtc_event_id, event_id, home_name, away_name, tbl_odds
     if not isinstance(home_lay, float)  : home_lay = np.nan
     if not isinstance(away_back, float) : away_back = np.nan
     if not isinstance(away_lay, float)  : away_lay = np.nan
-        
     
-    clause = insert(tbl_odds).values(event_id=event_id, \
-                                               type_id = 1, \
-                                               way = 1, \
-                                               betbtc_back=home_back, \
-                                               betbtc_lay=home_lay, \
-                                               betbtc_update=dt) 
-
+    
+    
+    
+    
+    clause = insert(tbl_odds).values(event_id=event_id,bettyp_id = 1,way = 1,bookie_id = 2,backlay = 1,odds=home_back, \
+                                               odds_update=dt) 
+    
     clause = clause.on_conflict_do_update(
-    index_elements=['event_id', 'type_id','way'],
-    set_=dict(betbtc_back=home_back,betbtc_lay=home_lay,betbtc_update=dt)
+    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
+    set_=dict(odds=home_back,odds_update=dt)
     )
     con.execute(clause)   
-
+    
     clause = insert(tbl_odds).values(event_id=event_id, \
-                                               type_id = 1, \
-                                               way = 2, \
-                                               betbtc_back=away_back, \
-                                               betbtc_lay=away_lay, \
-                                               betbtc_update=dt) 
-
+                                               bettyp_id = 1, \
+                                               way = 1, \
+                                               bookie_id = 2, \
+                                               backlay = 2,\
+                                               odds=home_lay, \
+                                               odds_update=dt) 
+    
     clause = clause.on_conflict_do_update(
-    index_elements=['event_id', 'type_id','way'],
-    set_=dict(betbtc_back=away_back,betbtc_lay=away_lay,betbtc_update=dt)
+    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
+    set_=dict(odds=home_lay,odds_update=dt)
+    )
+    con.execute(clause)  
+    
+    clause = insert(tbl_odds).values(event_id=event_id, \
+                                               bettyp_id = 1, \
+                                               way = 2, \
+                                               bookie_id = 2, \
+                                               backlay = 1,\
+                                               odds=away_back,\
+                                               odds_update=dt) 
+    
+    clause = clause.on_conflict_do_update(
+    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
+    set_=dict(odds=away_back,odds_update=dt)
     )
     con.execute(clause)  
 
+    clause = insert(tbl_odds).values(event_id=event_id, \
+                                               bettyp_id = 1, \
+                                               way = 2, \
+                                               bookie_id = 2, \
+                                               backlay = 2,\
+                                               odds=away_lay, \
+                                               odds_update=dt) 
+
+    clause = clause.on_conflict_do_update(
+    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
+    set_=dict(odds=away_lay,odds_update=dt)
+    )
+    con.execute(clause)  
 
 
 def getOdds() :
