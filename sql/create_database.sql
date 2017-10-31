@@ -5,7 +5,29 @@
 -- Dumped from database version 9.6.5
 -- Dumped by pg_dump version 9.6.5
 
--- Started on 2017-10-31 15:54:27
+-- Started on 2017-10-31 16:05:20
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
+
+DROP DATABASE tennis;
+--
+-- TOC entry 2227 (class 1262 OID 16648)
+-- Name: tennis; Type: DATABASE; Schema: -; Owner: tennis
+--
+
+CREATE DATABASE tennis WITH TEMPLATE = template0 ;
+
+
+ALTER DATABASE tennis OWNER TO tennis;
+
+\connect tennis
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -25,7 +47,7 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 2229 (class 0 OID 0)
+-- TOC entry 2230 (class 0 OID 0)
 -- Dependencies: 1
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
@@ -68,7 +90,7 @@ CREATE SEQUENCE tbl_bettyp_bettyp_id_seq
 ALTER TABLE tbl_bettyp_bettyp_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2230 (class 0 OID 0)
+-- TOC entry 2231 (class 0 OID 0)
 -- Dependencies: 196
 -- Name: tbl_bettyp_bettyp_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -111,7 +133,7 @@ CREATE SEQUENCE tbl_bookie_bookie_id_seq
 ALTER TABLE tbl_bookie_bookie_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2231 (class 0 OID 0)
+-- TOC entry 2232 (class 0 OID 0)
 -- Dependencies: 198
 -- Name: tbl_bookie_bookie_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -167,7 +189,7 @@ CREATE SEQUENCE tbl_match_match_id_seq
 ALTER TABLE tbl_match_match_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2232 (class 0 OID 0)
+-- TOC entry 2233 (class 0 OID 0)
 -- Dependencies: 186
 -- Name: tbl_match_match_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -211,7 +233,7 @@ CREATE SEQUENCE tbl_odds_odds_id_seq
 ALTER TABLE tbl_odds_odds_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2233 (class 0 OID 0)
+-- TOC entry 2234 (class 0 OID 0)
 -- Dependencies: 200
 -- Name: tbl_odds_odds_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -259,7 +281,7 @@ CREATE SEQUENCE tbl_player_player_id_seq
 ALTER TABLE tbl_player_player_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2234 (class 0 OID 0)
+-- TOC entry 2235 (class 0 OID 0)
 -- Dependencies: 188
 -- Name: tbl_player_player_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -305,7 +327,7 @@ CREATE SEQUENCE tbl_rating_rating_id_seq
 ALTER TABLE tbl_rating_rating_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2235 (class 0 OID 0)
+-- TOC entry 2236 (class 0 OID 0)
 -- Dependencies: 202
 -- Name: tbl_rating_rating_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -482,7 +504,7 @@ CREATE SEQUENCE tbl_tournament_tournament_id_seq
 ALTER TABLE tbl_tournament_tournament_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2236 (class 0 OID 0)
+-- TOC entry 2237 (class 0 OID 0)
 -- Dependencies: 194
 -- Name: tbl_tournament_tournament_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -557,7 +579,7 @@ COPY tbl_bettyp (bettyp_id, bettyp_name) FROM stdin;
 
 
 --
--- TOC entry 2237 (class 0 OID 0)
+-- TOC entry 2238 (class 0 OID 0)
 -- Dependencies: 196
 -- Name: tbl_bettyp_bettyp_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tennis
 --
@@ -576,7 +598,7 @@ COPY tbl_bookie (bookie_id, bookie_name, bookie_account_name, bookie_api_endpoin
 
 
 --
--- TOC entry 2238 (class 0 OID 0)
+-- TOC entry 2239 (class 0 OID 0)
 -- Dependencies: 198
 -- Name: tbl_bookie_bookie_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tennis
 --
@@ -595,7 +617,7 @@ COPY tbl_match (match_id, tournament_id, "MatchDate", "time", surface, player1_i
 
 
 --
--- TOC entry 2239 (class 0 OID 0)
+-- TOC entry 2240 (class 0 OID 0)
 -- Dependencies: 186
 -- Name: tbl_match_match_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tennis
 --
@@ -614,7 +636,7 @@ COPY tbl_odds (odds_id, event_id, match_id, bettyp_id, bookie_id, way, backlay, 
 
 
 --
--- TOC entry 2240 (class 0 OID 0)
+-- TOC entry 2241 (class 0 OID 0)
 -- Dependencies: 200
 -- Name: tbl_odds_odds_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tennis
 --
@@ -633,7 +655,7 @@ COPY tbl_player (player_id, firstname, lastname, name_long, name_short, plays, c
 
 
 --
--- TOC entry 2241 (class 0 OID 0)
+-- TOC entry 2242 (class 0 OID 0)
 -- Dependencies: 188
 -- Name: tbl_player_player_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tennis
 --
@@ -652,7 +674,7 @@ COPY tbl_rating (rating_id, player_id, "FromDate", "ToDate", "SW1YALL", "SW3MALL
 
 
 --
--- TOC entry 2242 (class 0 OID 0)
+-- TOC entry 2243 (class 0 OID 0)
 -- Dependencies: 202
 -- Name: tbl_rating_rating_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tennis
 --
@@ -711,7 +733,7 @@ COPY tbl_tournament (tournament_id, name, location, category, pin_league_id, te_
 
 
 --
--- TOC entry 2243 (class 0 OID 0)
+-- TOC entry 2244 (class 0 OID 0)
 -- Dependencies: 194
 -- Name: tbl_tournament_tournament_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tennis
 --
@@ -832,7 +854,16 @@ CREATE INDEX ix_tbl_te_matchlist_index ON tbl_te_matchlist USING btree (index);
 CREATE INDEX ix_tbl_te_player_index ON tbl_te_player USING btree (index);
 
 
--- Completed on 2017-10-31 15:54:28
+--
+-- TOC entry 2229 (class 0 OID 0)
+-- Dependencies: 6
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+-- Completed on 2017-10-31 16:05:20
 
 --
 -- PostgreSQL database dump complete
