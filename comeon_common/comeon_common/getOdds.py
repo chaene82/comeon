@@ -28,7 +28,8 @@ def connect(db, user, password, host='localhost', port=5433):
     con = create_engine(url, client_encoding='utf8')
 
     # We then bind the connection to MetaData()
-    meta = MetaData(bind=con, reflect=True)
+    meta = MetaData()
+    meta.reflect(con)
 
     return con, meta
     
@@ -98,13 +99,23 @@ def setBetBecEventOdds(betbtc_event_id, event_id, home_name, away_name, tbl_odds
         away_back = np.nan
         away_lay = np.nan
     else :      
-        home_odd = list(odds[0].values())[0]
-        home_back = home_odd['Back'][0][0]
-        home_lay = home_odd['Lay'][0][0]
-    
-        away_odd = list(odds[1].values())[0]
-        away_back = away_odd['Back'][0][0]
-        away_lay = away_odd['Lay'][0][0]
+        if home_name in odds[0] :
+            home_odd = list(odds[0].values())[0]
+            home_back = home_odd['Back'][0][0]
+            home_lay = home_odd['Lay'][0][0]
+        elif home_name in odds[1] :
+            home_odd = list(odds[1].values())[0]
+            home_back = home_odd['Back'][0][0]
+            home_lay = home_odd['Lay'][0][0]
+        
+        if away_name in odds[0] :
+            away_odd = list(odds[0].values())[0]
+            away_back = away_odd['Back'][0][0]
+            away_lay = away_odd['Lay'][0][0]
+        elif away_name in odds[1] : 
+            away_odd = list(odds[1].values())[0]
+            away_back = away_odd['Back'][0][0]
+            away_lay = away_odd['Lay'][0][0]
 
     if not isinstance(home_back, float) : home_back = np.nan
     if not isinstance(home_lay, float)  : home_lay = np.nan

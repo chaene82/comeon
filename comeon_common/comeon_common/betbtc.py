@@ -21,7 +21,8 @@ def getBetBtcEventData():
 
 
 def getBetBtcMaketOdds(event_id):
-    return requests.get("http://www.betbtc.co/api/market?id=" + str(event_id),headers=headers).json()
+    data = requests.get("http://www.betbtc.co/api/market?id=" + str(event_id),headers=headers)
+    return data.json()
     
 
 #def placeBetBtcBet() :
