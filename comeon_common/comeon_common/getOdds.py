@@ -11,9 +11,9 @@ from sqlalchemy import create_engine, MetaData, select
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
 import numpy as np
-from betbtc import getBetBtcEventData, getBetBtcMaketOdds
-from Pinnacle import getPinnacleEventData, getPinnacleEventOdds
-from tennis_config import *
+from .betbtc import getBetBtcEventData, getBetBtcMaketOdds
+from .Pinnacle import getPinnacleEventData, getPinnacleEventOdds
+from .tennis_config import *
 
 
 ## Internal functions
