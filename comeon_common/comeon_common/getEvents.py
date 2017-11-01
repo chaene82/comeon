@@ -28,7 +28,8 @@ def connect(db, user, password, host='localhost', port=5433):
     con = create_engine(url, client_encoding='utf8')
 
     # We then bind the connection to MetaData()
-    meta = MetaData(bind=con, reflect=True)
+    meta = MetaData()
+    meta.reflect(con)
 
     return con, meta
     
