@@ -39,7 +39,7 @@ def removeTime (datetime) :
 
   
             
-def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds) :
+def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds, con) :
     dt = datetime.now()
 
     for league in pinnacle_odds['leagues']:
@@ -84,7 +84,7 @@ def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds) :
                     con.execute(clause)                  
                 
 
-def setBetBecEventOdds(betbtc_event_id, event_id, home_name, away_name, tbl_odds) :
+def setBetBecEventOdds(betbtc_event_id, event_id, home_name, away_name, tbl_odds, con) :
     dt = datetime.now()
     
     
@@ -173,7 +173,6 @@ def getOdds() :
     
     
     
-    tbl_events = meta.tables['tbl_events']
     tbl_odds = meta.tables['tbl_odds']
 
     pinnacle_odds = getPinnacleEventOdds()
@@ -183,15 +182,15 @@ def getOdds() :
     events = con.execute('Select pinnacle_event_id, event_id from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
     for event in events :
         print(event[0])
-        setPinnacleEventOdds(pinnacle_odds, event[0], event[1], tbl_odds)
+        setPinnacleEventOdds(pinnacle_odds, event[0], event[1], tbl_odds, con)
     
     events = con.execute('Select betbtc_event_id, event_id, home_player_name, away_player_name from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
     for event in events :
         print(event[0])
-        setBetBecEventOdds(event[0], event[1], event[2], event[3], tbl_odds)
+        setBetBecEventOdds(event[0], event[1], event[2], event[3], tbl_odds, con)
               
         
-getOdds()        
+#getOdds()        
 
 
 

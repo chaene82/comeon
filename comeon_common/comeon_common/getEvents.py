@@ -11,9 +11,9 @@ from sqlalchemy import create_engine, MetaData, select
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
 import numpy as np
-from betbtc import getBetBtcEventData, getBetBtcMaketOdds
-from Pinnacle import getPinnacleEventData, getPinnacleEventOdds
-from tennis_config import *
+from .betbtc import getBetBtcEventData, getBetBtcMaketOdds
+from .Pinnacle import getPinnacleEventData, getPinnacleEventOdds
+from .tennis_config import *
 
 
 ## Internal functions
@@ -37,7 +37,7 @@ def removeTime (datetime) :
 
 
 
-def setBetBtcEvents(betbtc_event, tbl_events) :
+def setBetBtcEvents(betbtc_event, tbl_events, con) :
     """
     add all new events to the table
     update existing events
@@ -67,7 +67,7 @@ def setBetBtcEvents(betbtc_event, tbl_events) :
             
             con.execute(clause)
 
-def setPinnacleEvents(pinnacle_event, tbl_events) :
+def setPinnacleEvents(pinnacle_event, tbl_events, con) :
     dt = datetime.now()
     for league in pinnacle_event['league'] :
         for event in league['events'] :
@@ -101,17 +101,16 @@ def getEvents() :
     
     
     tbl_events = meta.tables['tbl_events']
-    tbl_odds = meta.tables['tbl_odds']
     
     betbtc_event = getBetBtcEventData()
-    setBetBtcEvents(betbtc_event, tbl_events) 
+    setBetBtcEvents(betbtc_event, tbl_events, con) 
                 
     pinnacle_event = getPinnacleEventData()
-    setPinnacleEvents(pinnacle_event, tbl_events)       
+    setPinnacleEvents(pinnacle_event, tbl_events, con)       
         
      
 
-getEvents()
+#getEvents()
     
     
     
