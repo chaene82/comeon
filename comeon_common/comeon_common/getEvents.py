@@ -72,26 +72,27 @@ def setPinnacleEvents(pinnacle_event, tbl_events, con) :
     dt = datetime.now()
     for league in pinnacle_event['league'] :
         for event in league['events'] :
-            print("pinnacle_event_id", event['id'])
-            print("StartDate", (event['starts']))
-            print("home_player_name", (event['home']))
-            print("away_player_name", (event['away']))
-            print("live", (event['liveStatus']))
-            
-            clause = insert(tbl_events).values(pinnacle_event_id=event['id'], \
-                                               StartDate=removeTime(event['starts']), \
-                                               StartDateTime=event['starts'], \
-                                               home_player_name=((event['home'])), \
-                                               away_player_name=((event['away'])), \
-                                               Live=(event['liveStatus']), \
-                                               LastUpdate=dt)
-    
-            clause = clause.on_conflict_do_update(
-            index_elements=['StartDate', 'home_player_name','away_player_name'],
-            set_=dict(pinnacle_event_id=event['id'],Live=(event['liveStatus']) ,LastUpdate=dt)
-            )
-            
-            con.execute(clause)     
+            if not "Set" in (event['home']) or not "Set" in (event['away']) : 
+                print("pinnacle_event_id", event['id'])
+                print("StartDate", (event['starts']))
+                print("home_player_name", (event['home']))
+                print("away_player_name", (event['away']))
+                print("live", (event['liveStatus']))
+                
+                clause = insert(tbl_events).values(pinnacle_event_id=event['id'], \
+                                                   StartDate=removeTime(event['starts']), \
+                                                   StartDateTime=event['starts'], \
+                                                   home_player_name=((event['home'])), \
+                                                   away_player_name=((event['away'])), \
+                                                   Live=(event['liveStatus']), \
+                                                   LastUpdate=dt)
+        
+                clause = clause.on_conflict_do_update(
+                index_elements=['StartDate', 'home_player_name','away_player_name'],
+                set_=dict(pinnacle_event_id=event['id'],Live=(event['liveStatus']) ,LastUpdate=dt)
+                )
+                
+                con.execute(clause)     
             
 
 

@@ -28,6 +28,7 @@ def getPinnacleEventData():
 def getPinnacleEventOdds():
     return api.market_data.get_odds(33)
     
+data = api.market_data.get_fixtures(33)
     
 #atp_list = []
 #for i in tennis_leagues:
