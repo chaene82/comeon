@@ -53,6 +53,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                       .where(tbl_odds.columns.event_id == event_id)\
                       .where(tbl_odds.columns.bettyp_id == bettyp)\
                       .where(tbl_odds.columns.bookie_id == bookie)\
+                      .where(tbl_odds.columns.backlay == 1)\
                       .where(tbl_odds.columns.way == 1)            
                       
             h_odd = con.execute(h).fetchone()  
@@ -66,6 +67,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                           .where(tbl_odds.columns.event_id == event_id)\
                           .where(tbl_odds.columns.bettyp_id == bettyp)\
                           .where(tbl_odds.columns.bookie_id == check_bookie)\
+                          .where(tbl_odds.columns.backlay == 1)\
                           .where(tbl_odds.columns.way == 2)            
                       
                 a_odd = con.execute(a).fetchone()   
