@@ -22,7 +22,7 @@ DROP DATABASE tennis;
 -- Name: tennis; Type: DATABASE; Schema: -; Owner: tennis
 --
 
-CREATE DATABASE tennis WITH TEMPLATE = template0 ENCODING = 'UTF8' LC_COLLATE = 'English_United States.1252' LC_CTYPE = 'English_United States.1252';
+CREATE DATABASE tennis WITH TEMPLATE = template0 ENCODING = 'UTF8' ;
 
 
 ALTER DATABASE tennis OWNER TO tennis;

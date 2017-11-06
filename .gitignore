@@ -5,7 +5,8 @@ __pycache__/
 *pyc
 
 # Configs
-*config.py
+*tennis_config.py
+comeon_common/comeon_common/tennis_config.py
 
 # C extensions
 *.so
