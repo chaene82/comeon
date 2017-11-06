@@ -49,40 +49,42 @@ def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds, c
             if event['id'] == pinnacle_event_id:
                 
                 event_odds = event
-                if 'moneyline' in event_odds['periods'][0] :
-                    home_ml = event_odds['periods'][0]['moneyline']['home']
-                    away_ml = event_odds['periods'][0]['moneyline']['away']
-    
-                    
-                    clause = insert(tbl_odds).values(event_id=event_id, \
-                                                   bettyp_id = 1, \
-                                                   way = 1, \
-                                                   bookie_id = 1, \
-                                                   backlay = 1,\
-                                                   odds=home_ml, \
-                                                   odds_update=dt) 
-    
-                    clause = clause.on_conflict_do_update(
-                    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
-                    set_=dict(odds=home_ml,odds_update=dt)
-                    )
-                    
-                    con.execute(clause)  
-                    
-                    clause = insert(tbl_odds).values(event_id=event_id, \
-                                                   bettyp_id = 1, \
-                                                   way = 2, \
-                                                   bookie_id = 1, \
-                                                   backlay = 1,\
-                                                   odds=away_ml, \
-                                                   odds_update=dt) 
-    
-                    clause = clause.on_conflict_do_update(
-                    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
-                    set_=dict(odds=away_ml,odds_update=dt)
-                    )
-                    
-                    con.execute(clause)                  
+                for line in event_odds['periods'] :
+                    if 'moneyline' in event_odds['periods'][0] and line['number'] == 0 :
+                        
+                        home_ml = line['moneyline']['home']
+                        away_ml = line['moneyline']['away']
+        
+                        
+                        clause = insert(tbl_odds).values(event_id=event_id, \
+                                                       bettyp_id = 1, \
+                                                       way = 1, \
+                                                       bookie_id = 1, \
+                                                       backlay = 1,\
+                                                       odds=home_ml, \
+                                                       odds_update=dt) 
+        
+                        clause = clause.on_conflict_do_update(
+                        index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
+                        set_=dict(odds=home_ml,odds_update=dt)
+                        )
+                        
+                        con.execute(clause)  
+                        
+                        clause = insert(tbl_odds).values(event_id=event_id, \
+                                                       bettyp_id = 1, \
+                                                       way = 2, \
+                                                       bookie_id = 1, \
+                                                       backlay = 1,\
+                                                       odds=away_ml, \
+                                                       odds_update=dt) 
+        
+                        clause = clause.on_conflict_do_update(
+                        index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
+                        set_=dict(odds=away_ml,odds_update=dt)
+                        )
+                        
+                        con.execute(clause)                  
                 
 
 def setBetBecEventOdds(betbtc_event_id, event_id, home_name, away_name, tbl_odds, con) :
