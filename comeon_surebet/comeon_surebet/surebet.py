@@ -135,7 +135,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         
                         else :
                             
-                            surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 1)
+                            surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 5)
                             db_surebet_id = con.execute(surebet_sql).fetchone() 
                             print("No winnings after comision !")
                             if db_surebet_id == None :
