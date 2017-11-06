@@ -8,6 +8,7 @@ Created on Wed Nov  1 14:27:52 2017
 from sqlalchemy import create_engine, MetaData, select
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
+import numpy as np
 from .tennis_config import *
 
 
@@ -56,7 +57,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                       
             h_odd = con.execute(h).fetchone()  
             
-            if h_odd == None :
+            if h_odd == None or np.isnan(h_odd[0]) :
                 continue
             
             for check_bookie in bookies :
@@ -68,8 +69,17 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                           .where(tbl_odds.columns.way == 2)            
                       
                 a_odd = con.execute(a).fetchone()   
+               
+                if a_odd == None or np.isnan(a_odd[0]) :
+                    continue
                 
-                surebet = (1 / h_odd[0]) +  (1 / a_odd[0])
+                home_odds = h_odd[0]
+                away_odds = a_odd[0]
+                
+                if not isinstance(home_odds, float) : home_odds = np.nan
+                if not isinstance(away_odds, float) : away_odds = np.nan
+                
+                surebet = (1 / home_odds) +  (1 / away_odds)
                                
                 if surebet < 1 :
                     print("surebet on event", event_id)
@@ -80,11 +90,11 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                     
                     if ((1 - surebet) * 100) > margin :
                     
-                        home_stake = round(stake_total / h_odd[0],2)
-                        away_stake = round(stake_total / a_odd[0],2)
+                        home_stake = round(stake_total / home_odds,2)
+                        away_stake = round(stake_total /away_odds,2)
                         
-                        home_return = home_stake * h_odd[0]
-                        away_return = away_stake * a_odd[0]
+                        home_return = home_stake * home_odds
+                        away_return = away_stake * away_odds
 
                         if bookie == 2 :
                             home_return = home_return * 0.96
@@ -109,8 +119,8 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 clause = insert(tbl_surebet).values(event_id=event_id, \
                                                    home_bookie_id=bookie, \
                                                    away_bookie_id=check_bookie, \
-                                                   home_odds=h_odd[0], \
-                                                   away_odds=a_odd[0], \
+                                                   home_odds=home_odds, \
+                                                   away_odds=away_odds, \
                                                    min_profit=round((min(home_return, away_return) - 100 ),2), \
                                                    max_profit=round((max(home_return, away_return) - 100 ),2), \
                                                    status=1,\
@@ -124,7 +134,27 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 print("already exists in the database")
                         
                         else :
+                            
+                            surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 1)
+                            db_surebet_id = con.execute(surebet_sql).fetchone() 
                             print("No winnings after comision !")
+                            if db_surebet_id == None :
+                            
+                                clause = insert(tbl_surebet).values(event_id=event_id, \
+                                                   home_bookie_id=bookie, \
+                                                   away_bookie_id=check_bookie, \
+                                                   home_odds=home_odds, \
+                                                   away_odds=away_odds, \
+                                                   min_profit=round((min(home_return, away_return) - 100 ),2), \
+                                                   max_profit=round((max(home_return, away_return) - 100 ),2), \
+                                                   status=5,\
+                                                   update=dt)
+                                
+                                
+                                con.execute(clause) 
+                                print("store to database")
+                            else :
+                                print("already exists in the database")    
 
                             
                         
