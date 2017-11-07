@@ -103,15 +103,15 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         if check_bookie == 2 :
                             away_return = away_return * 0.96
                             
-                        if min(home_return, away_return) - 100 > 0 :
+                        if min(home_return, away_return) - (home_stake + away_stake) > 0 :
                         
                             print("home stake ", home_stake)
                             print("away stake ", away_stake)   
                             print("home return ", home_return)
                             print("away return ", away_return)  
                             
-                            print("min profit ", min(home_return, away_return) - 100 )
-                            print("max profit ", max(home_return, away_return) - 100 ) 
+                            print("min profit ", min(home_return, away_return) - (home_stake + away_stake) )
+                            print("max profit ", max(home_return, away_return) - (home_stake + away_stake) ) 
                             
                             surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 1)
                             db_surebet_id = con.execute(surebet_sql).fetchone() 
@@ -123,8 +123,8 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                                    away_bookie_id=check_bookie, \
                                                    home_odds=home_odds, \
                                                    away_odds=away_odds, \
-                                                   min_profit=round((min(home_return, away_return) - 100 ),2), \
-                                                   max_profit=round((max(home_return, away_return) - 100 ),2), \
+                                                   min_profit=round((min(home_return, away_return) - (home_stake + away_stake) ),2), \
+                                                   max_profit=round((max(home_return, away_return) - (home_stake + away_stake) ),2), \
                                                    status=1,\
                                                    update=dt)
                                 
@@ -147,8 +147,8 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                                    away_bookie_id=check_bookie, \
                                                    home_odds=home_odds, \
                                                    away_odds=away_odds, \
-                                                   min_profit=round((min(home_return, away_return) - 100 ),2), \
-                                                   max_profit=round((max(home_return, away_return) - 100 ),2), \
+                                                   min_profit=round((min(home_return, away_return) - (home_stake + away_stake) ),2), \
+                                                   max_profit=round((max(home_return, away_return) - (home_stake + away_stake) ),2), \
                                                    status=5,\
                                                    update=dt)
                                 
