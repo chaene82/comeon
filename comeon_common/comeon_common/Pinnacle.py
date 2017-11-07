@@ -11,15 +11,35 @@ import pandas as pd
 import json
 import datetime
 import os
+from sqlalchemy import create_engine, MetaData, select
 from pinnacle.apiclient import APIClient
+from .tennis_config import *
 
 dir = os.path.dirname(__file__)
 os.chdir(dir)
 
 import urllib.request
 
-api = APIClient('CH983245', 'Skoda1$$')
 
+
+def connect(db, user, password, host='localhost', port=5433):
+    '''Returns a connection and a metadata object'''
+    # We connect with the help of the PostgreSQL URL
+    # postgresql://federer:grandestslam@localhost:5432/tennis
+    url = 'postgresql://{}:{}@{}:{}/{}'
+    url = url.format(user, password, host, port, db)
+
+    # The return value of create_engine() is our connection object
+    con = create_engine(url, client_encoding='utf8')
+
+    # We then bind the connection to MetaData()
+    meta = MetaData()
+    meta.reflect(con)
+
+    return con, meta
+
+con, meta = connect(pg_db, pg_user, pg_pwd, pg_host, pq_port)
+api = APIClient('CH983245', 'Skoda1$$')
 sport_ids = api.reference_data.get_sports()
 
 def getPinnacleEventData():
@@ -28,76 +48,80 @@ def getPinnacleEventData():
 def getPinnacleEventOdds():
     return api.market_data.get_odds(33)
     
-data = api.market_data.get_fixtures(33)
+def checkPinnacleBalance() :
+    account = api.account.get_account()
+    availiable = account['availableBalance']
+    blocked = account['outstandingTransactions']
+    return availiable + blocked, availiable, blocked
+
+
+def checkPinnacleBetForPlace(pin_event_id, pin_league_id, type_id, way, backlay, odds, stake) :
+    sports_id = 33
+    pin_league_id = 192175
+    pin_event_id = 783630159
+#    stake = 10
+    if type_id == 1 :
+        period_number = 0
+        bettype = "MONEYLINE"
     
-#atp_list = []
-#for i in tennis_leagues:
-#    if i['name'][:3] == 'ATP' : 
-#        print(i['name'])
-#        print(i['id'])
-#        atp_list.append(i['id'])
+    if way == 1 :
+        team = 'TEAM1'
+    elif way == 2 :
+        team = 'TEAM2'
+    else:
+        return -99, "way not correct"        
+    
+    bet_data = api.market_data.get_line(sports_id, league_id=pin_league_id, event_id=pin_event_id, period_number = period_number, bet_type = bettype, team=team)
+    
+    ## Check if the bet still okay
+    
+    if stake < bet_data['minRiskStake'] :
+        return -2, "Stake smaller as minRiskStake"
+        
+    if stake > bet_data['maxRiskStake'] :
+        return -3, "Stake bigger then maxRiskStake"
+        
+    if odds > bet_data['price'] : 
+        return -4, "odds smaller then requested"
+    
+    balance = checkPinnacleBalance()
+    
+    if stake >= balance[0] :
+        return -11, "Not enough balance"
+        
+    return 0, "okay"
+
+def placePinnacleBet(pin_event_id, pin_line_id, type_id,  way, backlay, odds, stake) :
+    sports_id = 33
+    stake = 10
+    
+    if type_id == 1 :
+        period_number = 0
+        bettype = "MONEYLINE"
+    
+    if way == 1 :
+        team = 'TEAM1'
+    elif way == 2 :
+        team = 'TEAM2'
+    else:
+        return -99, "way not correct", None
         
 
-#tennis_periods =  api.reference_data.get_periods(33)       
-#        
-#tennis_events = api.market_data.get_fixtures(33) #, league_ids=atp_list)
-#
-#tennis_odds = api.market_data.get_odds(33)
-#
-##tennis_settled = api.market_data.get_settled_fixtures(33)
-##
-##home = tennis_odds['leagues'][0]['events'][0]['periods'][0]['moneyline']['home']
-##away = tennis_odds['leagues'][0]['events'][0]['periods'][0]['moneyline']['away']
-##
-##home1 = tennis_odds['leagues'][0]['events'][0]['periods'][1]['moneyline']['home']
-##away1 = tennis_odds['leagues'][0]['events'][0]['periods'][1]['moneyline']['away']
-##
-##
-##3455
-##
-##matches = pd.DataFrame()
-##d1 = tennis_events['league']
-##for i in d1 :
-##    tournament = (i['name'])
-##    events = i['events'] 
-##    
-##    for event in events:
-##        row = pd.DataFrame()
-##        print(event['id'])
-##        print(event['home'])
-##        print(event['away'])
-##        print(event['starts'])
-##        
-##        d = {'tournament' : tournament, 'pineventId' :  event['id'],
-##             'startDate' : event['starts'],
-##             'home' : event['home'], 'away' : event['away']}
-##        #row['tournament'] = tornament
-##        #row['pineventId'] = event['id']
-##        #row['startDate'] = event['starts']
-##        #row['home'] = event['home']
-##        #row['away'] = event['away']
-##        
-##        data = pd.DataFrame([d], columns=d.keys())
-##        matches = matches.append(data)
-#
-#
-#
-#tennis_matches_done = api.market_data.get_settled_fixtures(33) 
-#
-### Create a file repository
-#
-#now = datetime.datetime.now()
-#date_id = now.strftime("%Y%m%d")
-#
-#
-#with open("pinnacle/" + date_id + "_tennis_periods.json", 'w') as fp:
-#    json.dump(tennis_periods, fp)
-#    
-#with open("pinnacle/" + date_id + "_tennis_events.json", 'w') as fp:
-#    json.dump(tennis_events, fp)   
-#    
-#with open("pinnacle/" + date_id + "_tennis_odds.json", 'w') as fp:
-#    json.dump(tennis_odds, fp)
-#    
-#with open("pinnacle/" + date_id + "_tennis_matches_done.json", 'w') as fp:
-#    json.dump(tennis_matches_done, fp)       
+    
+    response = api.betting.place_bet(sports_id, pin_event_id, pin_line_id, period_number, bettype, stake, team=team, accept_better_line=True)
+    if response['status'] == 'ACCEPTED' :
+        print("bet places on event" , pin_event_id)        
+        return response['betId'], "bet placed", response
+    else :
+        print("bet was not place")
+        return -1, "error placing bet, Errorcode " + response['errorCode'], response
+           
+
+    
+def checkPinaccleUnsettledBet(pin_bet_id) :   
+    response = api.betting.get_bets(betids = pin_bet_id)
+    
+    return response['betStatus'], response
+
+
+   
