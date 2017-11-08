@@ -40,6 +40,8 @@ def getBalance() :
     
     
     tbl_balance = meta.tables['tbl_balance']
+    tbl_bookie = meta.tables['tbl_bookie']
+    
     
     betbtc_total, btbtc_availiable, betbtc_blocked = checkBetBtcBalance()
     pin_total, pin_availiable, pin_blocked = checkPinnacleBalance()    
@@ -64,3 +66,19 @@ def getBalance() :
                     blocked_balance=betbtc_blocked, \
                     date=dt)
     con.execute(clause)    
+    
+    balance_sql = select([tbl_bookie]).where(tbl_bookie.columns.bookie_id == 1)
+    bookie = con.execute(balance_sql).fetchone() 
+    
+    if pin_total < bookie[8] :
+        print("Pinnacle Balance to small, please deposit ", pin_total)
+    elif pin_total > bookie[9] :
+        print("Pinnacle Balance to high, please withdraw ", pin_total)
+        
+    balance_sql = select([tbl_bookie]).where(tbl_bookie.columns.bookie_id == 2)
+    bookie = con.execute(balance_sql).fetchone() 
+    
+    if betbtc_total < bookie[8] :
+        print("BetBtc Balance to small, please deposit ", betbtc_total)
+    elif betbtc_total > bookie[9] :
+        print("BetBtc Balance to high, please withdraw ", betbtc_total)        

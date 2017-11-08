@@ -81,7 +81,7 @@ def checkBetBtcBalance() :
     balance = requests.get("http://www.betbtc.co/api/user/balance",headers=headers).json()
     availiable = balance[0]['Balance']
     blocked = balance[0]['Blocked']
-    return availiable + blocked, availiable, blocked
+    return float(availiable) + float(blocked), availiable, blocked
 
 def checkBetBtcSettledBet(betbtc_bet_id) :
     response =  requests.get("http://www.betbtc.co/api/user/statement",headers=headers).json()

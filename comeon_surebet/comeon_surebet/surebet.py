@@ -41,6 +41,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
     bettyps = [1]
     stake_total = 100
     margin = 0
+    high_risk_margin = 1
     
     #ways = [1,2]
     bookies = [1,2]
@@ -94,6 +95,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                     
                         home_prob = (1/surebet) / home_odds
                         away_prob = (1/surebet) / away_odds
+                        
                                     
                         
                         home_stake = round(stake_total * home_prob,1)
@@ -106,21 +108,23 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         print("away stake ", away_stake)   
                         print("home return ", home_return)
                         print("away return ", away_return)  
+                        print("home prop ", home_prob)
+                        print("away prop ", away_prob)                        
 
                         if bookie == 2 :
                             home_return = home_return * 0.96
                         if check_bookie == 2 :
                             away_return = away_return * 0.96
                             
-                        if min(home_return, away_return) - (stake_total) > 0 :
-                        
-                            print("home stake ", home_stake)
-                            print("away stake ", away_stake)   
-                            print("home return ", home_return)
-                            print("away return ", away_return)  
+                        theoretical_winnings = (home_return * home_prob) + (away_return * away_prob)
                             
+                        print("Theoretical Winnings ", theoretical_winnings)
+                            
+                        if min(home_return, away_return) - (stake_total) > 0 :
+
                             print("min profit ", min(home_return, away_return) - (stake_total) )
                             print("max profit ", max(home_return, away_return) - (stake_total) ) 
+                            
                             
                             surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 1)
                             db_surebet_id = con.execute(surebet_sql).fetchone() 
@@ -135,6 +139,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                                    min_profit=round((min(home_return, away_return) - (stake_total) ),2), \
                                                    max_profit=round((max(home_return, away_return) - (stake_total) ),2), \
                                                    status=1,\
+                                                   surebet_typ=1,\
                                                    update=dt)
                                 
                                 
@@ -143,6 +148,36 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 print("store to database")
                             else :
                                 print("already exists in the database")
+                                
+                        elif (theoretical_winnings - (stake_total)) / (stake_total) * 100 > high_risk_margin :   
+                            
+                            print("high risk surebet found ", theoretical_winnings)
+                            print("min profit ", min(home_return, away_return) - (stake_total) )
+                            print("max profit ", max(home_return, away_return) - (stake_total) )                             
+
+                            surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 1).where(tbl_surebet.columns.surebet_typ == 2)
+                            db_surebet_id = con.execute(surebet_sql).fetchone() 
+                            
+                            if db_surebet_id == None :
+                            
+                                clause = insert(tbl_surebet).values(event_id=event_id, \
+                                                   home_bookie_id=bookie, \
+                                                   away_bookie_id=check_bookie, \
+                                                   home_odds=home_odds, \
+                                                   away_odds=away_odds, \
+                                                   min_profit=round((min(home_return, away_return) - (stake_total) ),2), \
+                                                   max_profit=round((max(home_return, away_return) - (stake_total) ),2), \
+                                                   status=1,\
+                                                   theoretical_winnings=theoretical_winnings,\
+                                                   surebet_typ=2,\
+                                                   update=dt)
+                                
+                                
+                                con.execute(clause)  
+                                
+                                print("store to database")
+                            else :
+                                print("already exists in the database")                            
                         
                         else :
                             
