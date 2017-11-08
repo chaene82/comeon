@@ -575,6 +575,22 @@ CREATE TABLE tbl_tournament (
 
 ALTER TABLE tbl_tournament OWNER TO tennis;
 
+
+CREATE TABLE tbl_product
+(
+    product_id integer NOT NULL,
+    product_name character varying(100) COLLATE pg_catalog."default",
+    product_type character varying(50) COLLATE pg_catalog."default",
+    start_date timestamp with time zone,
+    CONSTRAINT tbl_product_pkey PRIMARY KEY (product_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE tbl_product
+    OWNER to tennis;
 --
 -- TOC entry 203 (class 1259 OID 16817)
 -- Name: tbl_tournament_tournament_id_seq; Type: SEQUENCE; Schema: public; Owner: tennis
@@ -589,6 +605,8 @@ CREATE SEQUENCE tbl_tournament_tournament_id_seq
 
 
 ALTER TABLE tbl_tournament_tournament_id_seq OWNER TO tennis;
+
+
 
 --
 -- TOC entry 2243 (class 0 OID 0)

@@ -48,10 +48,10 @@ def setBetBtcEvents(betbtc_event, tbl_events, con) :
         # looking for Match Odds
         if event[7] == "Match Odds" :
             print("betbtc_event_id" ,(event[0]))
-            print("betfair_event_id", (event[5]))
-            print("StartDate", (event[3]))
-            print("home_player_name", (event[6][0]['name']))
-            print("away_player_name", (event[6][1]['name']))
+            #print("betfair_event_id", (event[5]))
+            #print("StartDate", (event[3]))
+            #print("home_player_name", (event[6][0]['name']))
+            #print("away_player_name", (event[6][1]['name']))
             
             clause = insert(tbl_events).values(betbtc_event_id=event[0], \
                                                StartDate=removeTime(event[3]), \
@@ -74,10 +74,10 @@ def setPinnacleEvents(pinnacle_event, tbl_events, con) :
         for event in league['events'] :
             if not "Set" in (event['home']) or not "Set" in (event['away']) : 
                 print("pinnacle_event_id", event['id'])
-                print("StartDate", (event['starts']))
-                print("home_player_name", (event['home']))
-                print("away_player_name", (event['away']))
-                print("live", (event['liveStatus']))
+                #print("StartDate", (event['starts']))
+                #print("home_player_name", (event['home']))
+                #print("away_player_name", (event['away']))
+                #print("live", (event['liveStatus']))
                 
                 clause = insert(tbl_events).values(pinnacle_event_id=event['id'], \
                                                    StartDate=removeTime(event['starts']), \
