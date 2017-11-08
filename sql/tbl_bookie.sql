@@ -18,6 +18,8 @@ SET row_security = off;
 
 SET search_path = public, pg_catalog;
 
+\connect tennis
+
 --
 -- TOC entry 2182 (class 0 OID 16756)
 -- Dependencies: 187
