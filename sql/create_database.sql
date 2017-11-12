@@ -243,32 +243,72 @@ ALTER SEQUENCE tbl_events_event_id_seq OWNED BY tbl_events.event_id;
 -- Name: tbl_match; Type: TABLE; Schema: public; Owner: tennis
 --
 
-CREATE TABLE tbl_match (
-    match_id integer NOT NULL,
-    tournament_id integer NOT NULL,
-    "MatchDate" date,
-    "time" character varying(10),
-    surface character varying(20),
-    player1_id integer NOT NULL,
-    player2_id integer NOT NULL,
-    winner integer,
-    score character(20),
-    player1_set1 double precision,
-    player2_set1 double precision,
-    player1_set2 double precision,
-    player2_set2 double precision,
-    player1_set3 double precision,
-    player2_set3 double precision,
-    player1_set4 double precision,
-    player2_set4 double precision,
-    player1_set5 double precision,
-    player2_set5 double precision,
-    te_link character varying(100),
-    update timestamp with time zone
+CREATE TABLE public.tbl_match
+(
+  match_id integer NOT NULL DEFAULT nextval('tbl_match_match_id_seq'::regclass),
+  tournament_id integer NOT NULL,
+  "MatchDate" date,
+  "time" character varying(10),
+  surface character varying(20),
+  player1_id integer NOT NULL,
+  player2_id integer NOT NULL,
+  winner integer,
+  score character(20),
+  player1_set1 double precision,
+  player2_set1 double precision,
+  player1_set2 double precision,
+  player2_set2 double precision,
+  player1_set3 double precision,
+  player2_set3 double precision,
+  player1_set4 double precision,
+  player2_set4 double precision,
+  player1_set5 double precision,
+  player2_set5 double precision,
+  te_link character varying(100),
+  update timestamp with time zone,
+  "MatchDateYearWeek" integer,
+  sm_tourney_level character varying(10),
+  player1_seed numeric,
+  player1_entry character varying(10),
+  player2_seed numeric,
+  player2_entry character varying(10),
+  player1_age numeric,
+  player2_age numeric,
+  sm_player1_rank integer,
+  sm_player1_rank_point integer,
+  sm_player2_rank integer,
+  sm_player2_rank_point integer,
+  best_of integer,
+  round character varying(10),
+  minutes integer,
+  player1_ace integer,
+  player1_df integer,
+  player1_svpt integer,
+  player1_1st_in integer,
+  player1_1st_won integer,
+  player1_2nd_won integer,
+  player1_sv_games integer,
+  player1_bp_saved integer,
+  player1_bp_faced integer,
+  player2_ace integer,
+  player2_df integer,
+  player2_svpt integer,
+  player2_1st_in integer,
+  player2_1st_won integer,
+  player2_2nd_won integer,
+  player2_sv_games integer,
+  player2_bp_saved integer,
+  player2_bp_faced integer,
+  player1_odds numeric,
+  player2_odds numeric,
+  CONSTRAINT tbl_match_pk PRIMARY KEY (match_id),
+  CONSTRAINT "unique" UNIQUE ("MatchDate", player1_id, player2_id)
+)
+WITH (
+  OIDS=FALSE
 );
-
-
-ALTER TABLE tbl_match OWNER TO tennis;
+ALTER TABLE public.tbl_match
+  OWNER TO tennis;
 
 --
 -- TOC entry 193 (class 1259 OID 16778)
