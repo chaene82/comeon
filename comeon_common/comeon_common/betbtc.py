@@ -70,7 +70,7 @@ def getBetBtcEventData():
 
 def getBetBtcMaketOdds(event_id):
     data = requests.get("http://www.betbtc.co/api/market?id=" + str(event_id),headers=headers)
-    time.sleep(1)
+    time.sleep(0.2)
     return data.json()
     
 
