@@ -197,8 +197,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                                    min_profit=round((min(home_return, away_return) - (stake_total) ),2), \
                                                    max_profit=round((max(home_return, away_return) - (stake_total) ),2), \
                                                    status=5,\
-                                                   theoretical_winnings=theoretical_winnings,\                                                   
-                                                   update=dt)
+                                                   theoretical_winnings=theoretical_winnings,update=dt)
                                 
                                 
                                 con.execute(clause) 
