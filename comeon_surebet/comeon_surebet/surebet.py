@@ -40,7 +40,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
     surebet_numbers = 0
     bettyps = [1]
     stake_total = 100
-    margin = 1
+    margin = 0.25
     
     high_risk_margin = 1
     betbtc_margin = 4
