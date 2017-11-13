@@ -40,8 +40,11 @@ def searchSurebetEvent(event_id, tbl_surebet) :
     surebet_numbers = 0
     bettyps = [1]
     stake_total = 100
-    margin = 0
+    margin = 1
+    
     high_risk_margin = 1
+    betbtc_margin = 4
+    
     
     #ways = [1,2]
     bookies = [1,2]
@@ -112,9 +115,9 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         print("away prop ", away_prob)                        
 
                         if bookie == 2 :
-                            home_return = home_return * 0.96
+                            home_return = (home_stake - home_return) * (1 - (betbtc_margin/100)) + home_stake
                         if check_bookie == 2 :
-                            away_return = away_return * 0.96
+                            away_return = (away_stake - away_return) * (1 - (betbtc_margin/100)) + away_stake
                             
                         theoretical_winnings = (home_return * home_prob) + (away_return * away_prob)
                             
