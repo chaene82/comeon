@@ -627,6 +627,47 @@ CREATE TABLE tbl_te_matchlist (
 
 ALTER TABLE tbl_te_matchlist OWNER TO tennis;
 
+-- Table: public.tbl_player
+
+-- DROP TABLE public.tbl_player;
+
+CREATE TABLE public.tbl_player
+(
+  player_id integer NOT NULL DEFAULT nextval('tbl_player_player_id_seq'::regclass),
+  firstname character(50),
+  lastname character(50),
+  name_long character varying(200),
+  name_short character varying(100),
+  plays character(50),
+  country character(50),
+  dayofbirth date,
+  "ITF_ID" integer,
+  te_link character varying(200),
+  update timestamp with time zone,
+  sackmann_id integer,
+  "IOC" character varying(20),
+  CONSTRAINT unique_te_link UNIQUE (te_link)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.tbl_player
+  OWNER TO tennis;
+
+-- Sequence: public.tbl_player_player_id_seq
+
+-- DROP SEQUENCE public.tbl_player_player_id_seq;
+
+CREATE SEQUENCE public.tbl_player_player_id_seq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 76727
+  CACHE 1;
+ALTER TABLE public.tbl_player_player_id_seq
+  OWNER TO tennis;
+
+
 --
 -- TOC entry 208 (class 1259 OID 17077)
 -- Name: tbl_te_player; Type: TABLE; Schema: public; Owner: tennis
