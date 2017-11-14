@@ -11,29 +11,12 @@ import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine, MetaData, select
 from datetime import datetime
+from comeon_common import connect
+
 
 from sqlalchemy.dialects.postgresql import insert
 
-
-def connect(user, password, db, host='localhost', port=5432):
-    '''Returns a connection and a metadata object'''
-    # We connect with the help of the PostgreSQL URL
-    # postgresql://federer:grandestslam@localhost:5432/tennis
-    url = 'postgresql://{}:{}@{}:{}/{}'
-    url = url.format(user, password, host, port, db)
-
-    # The return value of create_engine() is our connection object
-    con = create_engine(url, client_encoding='utf8')
-    
-    meta = MetaData(bind=con, reflect=True)
-
-
-    # We then bind the connection to MetaData()
-
-    return con, meta
-
-
-con_postgres, meta = connect('tennis', 'tennis', 'tennis', port=5433)  
+con_postgres, meta = connect()  
 tbl_player = meta.tables['tbl_player']
 tbl_tournament = meta.tables['tbl_tournament']
 tbl_match = meta.tables['tbl_match']  
@@ -201,5 +184,5 @@ def transform_te_player(con_postgres):
     
 
 
-transform_te_match(con_postgres)
-transform_te_player(con_postgres)
+#transform_te_match(con_postgres)
+#transform_te_player(con_postgres)

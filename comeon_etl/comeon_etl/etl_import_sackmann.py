@@ -10,7 +10,7 @@ Created on Sun Oct 15 10:25:53 2017
 import pandas as pd
 
 from datetime import datetime
-from sqlalchemy import create_engine
+from comeon_common import connect
 
 
 
@@ -19,22 +19,6 @@ from sqlalchemy import create_engine
 
 now = datetime.now()
 
-
-
-
-def connect(user, password, db, host='localhost', port=5432):
-    '''Returns a connection and a metadata object'''
-    # We connect with the help of the PostgreSQL URL
-    # postgresql://federer:grandestslam@localhost:5432/tennis
-    url = 'postgresql://{}:{}@{}:{}/{}'
-    url = url.format(user, password, host, port, db)
-
-    # The return value of create_engine() is our connection object
-    con = create_engine(url, client_encoding='utf8')
-
-    # We then bind the connection to MetaData()
-
-    return con
 
     
     
@@ -74,8 +58,8 @@ def etl_import_sackmann_matchlist(con_postgres,sackmann_starting_year, sackmann_
 
 
     
-def etl_import_sackmann (year, path) :
-    con_postgres = connect('tennis', 'tennis', 'tennis', port=5433)    
+def etl_import_sackmann(year, path) :
+    con_postgres = connect()    
 
     
     sackmann_starting_year = year
@@ -86,6 +70,5 @@ def etl_import_sackmann (year, path) :
     
 ## Testing
     etl_import_sackmann_player(con_postgres, sackmann_player_path)
-    etl_import_sackmann_matchlist(con_postgres,sackmann_starting_year, sackmann_atp_matchs, sackmann_chall_matchs, sackmann_futures_matchs)
+    etl_import_sackmann_matchlist(con_postgres, sackmann_starting_year, sackmann_atp_matchs, sackmann_chall_matchs, sackmann_futures_matchs)
 
-etl_import_sackmann(2017, "/home/chrhae/Documents/Privat/data/ffhs/DAS/ML/tennis_atp/")

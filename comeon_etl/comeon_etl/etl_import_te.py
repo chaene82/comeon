@@ -10,24 +10,15 @@ Created on Sun Oct 15 10:25:53 2017
 import pandas as pd
 import sqlite3
 from datetime import datetime
+import sqlalchemy
 from sqlalchemy import create_engine
+from comeon_common import connect
+#from .tennis_config import *
 
 
-conn_sqllite3 = sqlite3.connect('../te_data.db')
 
-def connect(user, password, db, host='localhost', port=5432):
-    '''Returns a connection and a metadata object'''
-    # We connect with the help of the PostgreSQL URL
-    # postgresql://federer:grandestslam@localhost:5432/tennis
-    url = 'postgresql://{}:{}@{}:{}/{}'
-    url = url.format(user, password, host, port, db)
-
-    # The return value of create_engine() is our connection object
-    con = create_engine(url, client_encoding='utf8')
-
-    # We then bind the connection to MetaData()
-
-    return con
+conn_sqllite3 = sqlite3.connect('c:\\users/haenec/python/home/comeon/data/te_data.db')
+con_postgres = connect()    
 
     
 def etl_import_te_matchlist(conn_sqllite3, con_postgres, days = 10000) :
@@ -66,7 +57,7 @@ def etl_import_te_matchlist(conn_sqllite3, con_postgres, days = 10000) :
     
     
     
-    df_input.to_sql('tbl_te_matchlist', con_postgres, if_exists='replace')
+    df_input.to_sql(name='tbl_te_matchlist', con=con_postgres, if_exists='replace', index=False)
     
 
 def etl_import_te_player(conn_sqllite3, con_postgres, days = 10000) :
@@ -82,9 +73,9 @@ def etl_import_te_player(conn_sqllite3, con_postgres, days = 10000) :
     df_player.to_sql('tbl_te_player', con_postgres, if_exists='replace')
 
     
-con_postgres = connect('tennis', 'tennis', 'tennis', port=5433)    
-
     
-## Testing
-etl_import_te_matchlist(conn_sqllite3, con_postgres, 100)
-etl_import_te_player(conn_sqllite3, con_postgres, 100)
+def etl_import_te(days=100) :
+
+    ## Testing
+    etl_import_te_matchlist(conn_sqllite3, con_postgres)
+    etl_import_te_player(conn_sqllite3, con_postgres)

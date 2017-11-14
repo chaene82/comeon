@@ -9,29 +9,13 @@ from sqlalchemy import create_engine, MetaData, select
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
 import numpy as np
-from .tennis_config import *
+from comeon_common import connect
 
-
-def connect(db, user, password, host='localhost', port=5433):
-    '''Returns a connection and a metadata object'''
-    # We connect with the help of the PostgreSQL URL
-    # postgresql://federer:grandestslam@localhost:5432/tennis
-    url = 'postgresql://{}:{}@{}:{}/{}'
-    url = url.format(user, password, host, port, db)
-
-    # The return value of create_engine() is our connection object
-    con = create_engine(url, client_encoding='utf8')
-
-    # We then bind the connection to MetaData()
-    meta = MetaData()
-    meta.reflect(con)
-
-    return con, meta
 
 
 def searchSurebetEvent(event_id, tbl_surebet) :
     dt = datetime.now()
-    con, meta = connect(pg_db, pg_user, pg_pwd, pg_host, pq_port)    
+    con, meta = connect()    
           
     tbl_odds = meta.tables['tbl_odds']
     
@@ -219,7 +203,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
 
 
 def searchSurebet() :
-    con, meta = connect(pg_db, pg_user, pg_pwd, pg_host, pq_port)  
+    con, meta = connect()  
     tbl_surebet = meta.tables['tbl_surebet']
     events = con.execute('Select event_id from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
     for event in events :

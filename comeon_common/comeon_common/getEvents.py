@@ -14,24 +14,9 @@ import numpy as np
 from .betbtc import getBetBtcEventData, getBetBtcMaketOdds
 from .Pinnacle import getPinnacleEventData, getPinnacleEventOdds
 from .tennis_config import *
+from .base import connect
 
 
-## Internal functions
-def connect(db, user, password, host='localhost', port=5433):
-    '''Returns a connection and a metadata object'''
-    # We connect with the help of the PostgreSQL URL
-    # postgresql://federer:grandestslam@localhost:5432/tennis
-    url = 'postgresql://{}:{}@{}:{}/{}'
-    url = url.format(user, password, host, port, db)
-
-    # The return value of create_engine() is our connection object
-    con = create_engine(url, client_encoding='utf8')
-
-    # We then bind the connection to MetaData()
-    meta = MetaData()
-    meta.reflect(con)
-
-    return con, meta
     
 def removeTime (datetime) :
     return datetime[:10]
