@@ -11,7 +11,7 @@ import pandas as pd
 
 from datetime import datetime
 from comeon_common import connect
-
+from .tennis_config import *
 
 
 
@@ -27,6 +27,9 @@ def etl_import_sackmann_player(con_postgres, sackmann_player_path) :
     players = pd.read_csv(sackmann_player_path,  sep=',' ,encoding='iso-8859-1', header=None)
     players.columns=["id", "firstname", "lastname", "plays", "dob", "IOC"]
     
+    print("Load Sackmann player list")    
+
+    
     players['id'] = players['id'].astype('int')
     players['firstname'] = players['firstname'].astype('str')
     players['lastname'] = players['lastname'].astype('str')
@@ -34,6 +37,8 @@ def etl_import_sackmann_player(con_postgres, sackmann_player_path) :
     players['IOC'] = players['IOC'].astype('str')
     
     players['update'] = pd.to_datetime('now')
+
+    print("Store Sackmann player list")    
     
     players.iloc[0:].to_sql('tbl_sackmann_players', con_postgres, if_exists='replace')
 
@@ -58,9 +63,10 @@ def etl_import_sackmann_matchlist(con_postgres,sackmann_starting_year, sackmann_
 
 
     
-def etl_import_sackmann(year, path) :
-    con_postgres = connect()    
-
+def etl_import_sackmann(year) :
+    con_postgres, meta = connect()   
+    
+    path = atp_path
     
     sackmann_starting_year = year
     sackmann_player_path = path + "atp_players.csv"

@@ -18,7 +18,7 @@ def connect(db=pg_db, user=pg_user, password=pg_pwd, host=pg_host, port=pq_port)
     url = url.format(user, password, host, port, db)
 
     # The return value of create_engine() is our connection object
-    con = create_engine(url, client_encoding='utf8')
+    con = create_engine(url , client_encoding='utf8')
 
     # We then bind the connection to MetaData()
     meta = MetaData()

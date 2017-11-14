@@ -142,10 +142,9 @@ def transform_sackmanm_player():
     df_player.apply(updateSackmannPlayer, axis = 1)
     
 
-def transform_sackmann():
+def etl_transform_sackmann():
 
-    
-    #transform_sackmanm_player()
+    transform_sackmanm_player()
     transform_sackmann_match()
 
     

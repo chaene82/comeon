@@ -183,6 +183,6 @@ def transform_te_player(con_postgres):
     df_player.apply(updatePlayer, axis = 1)
     
 
-
-#transform_te_match(con_postgres)
-#transform_te_player(con_postgres)
+def etl_transform_te():
+    transform_te_match(con_postgres)
+    transform_te_player(con_postgres)

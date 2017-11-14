@@ -18,15 +18,17 @@ from .tennis_config import *
 
 
 conn_sqllite3 = sqlite3.connect(sqllite3_path)
-con_postgres = connect()    
+con_postgres, meta = connect()    
 
     
 def etl_import_te_matchlist(conn_sqllite3, con_postgres, days = 10000) :
+    print("load Tennis Explorer Matchlist")
     df_input = pd.read_sql('select * from tmp_te_matchlist where "MatchDate" > date("now","-' + str(days) + ' days") ', conn_sqllite3)
     
     df_input = df_input.drop_duplicates()
     df_input = df_input.drop('index', axis=1)
     
+
     # Change Data Type
     df_input['MatchDate'] = pd.to_datetime(df_input.MatchDate)
     df_input['away'] = df_input['away'].str.replace(r"\(.*\)","")
@@ -56,11 +58,12 @@ def etl_import_te_matchlist(conn_sqllite3, con_postgres, days = 10000) :
     df_input['update'] = pd.to_datetime('now')
     
     
-    
+    print("Store Tennis Explorer Matchlist")    
     df_input.to_sql(name='tbl_te_matchlist', con=con_postgres, if_exists='replace', index=False)
     
 
 def etl_import_te_player(conn_sqllite3, con_postgres, days = 10000) :
+    print("Load Tennis Explorer player list")    
             
     df_player = pd.read_sql('select * from tmp_te_player where etl_date > date("now","-' + str(days) + ' days") ', conn_sqllite3)
     df_player = df_player.drop_duplicates()
@@ -69,7 +72,9 @@ def etl_import_te_player(conn_sqllite3, con_postgres, days = 10000) :
     
     df_player['etl_date'] = pd.to_datetime(df_player.etl_date)
     df_player['update'] = pd.to_datetime('now')
-    
+ 
+    print("Store Tennis Explorer player list")    
+
     df_player.to_sql('tbl_te_player', con_postgres, if_exists='replace')
 
     
@@ -77,5 +82,5 @@ def etl_import_te_player(conn_sqllite3, con_postgres, days = 10000) :
 def etl_import_te(days=100) :
 
     ## Testing
-    etl_import_te_matchlist(conn_sqllite3, con_postgres)
-    etl_import_te_player(conn_sqllite3, con_postgres)
+    etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
+    etl_import_te_player(conn_sqllite3, con_postgres, days=days)
