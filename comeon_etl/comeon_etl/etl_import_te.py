@@ -13,11 +13,11 @@ from datetime import datetime
 import sqlalchemy
 from sqlalchemy import create_engine
 from comeon_common import connect
-#from .tennis_config import *
+from .tennis_config import *
 
 
 
-conn_sqllite3 = sqlite3.connect('c:\\users/haenec/python/home/comeon/data/te_data.db')
+conn_sqllite3 = sqlite3.connect(sqllite3_path)
 con_postgres = connect()    
 
     
