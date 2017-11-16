@@ -12,7 +12,7 @@ from comeon_etl import etl_transform_te, etl_transform_sackmann
 #sqllite3_path = 'c:\\users/haenec/python/home/comeon/data/te_data.db'
 
 etl_import_te(days=10000)
-etl_import_sackmann(2010)
+etl_import_sackmann(2001)
 
 etl_transform_te()
 etl_transform_sackmann()

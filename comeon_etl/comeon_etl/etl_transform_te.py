@@ -37,6 +37,8 @@ def splitName(Name) :
 
 def createPlayer(row) :
     
+    print("create player ")
+    
     home_link = row['home_link']
     home_player_id = con_postgres.execute("Select player_id from tbl_player WHERE te_link = '" + home_link +"'").fetchone()
     
@@ -117,7 +119,7 @@ def createMatch(row) :
         winner = 2 
     
     score = str(row['home_result'])[:1] + ':' + str(row['away_result'])[:1]
-    MatchDateYearWeek = int(str(row['MatchDate'].to_datetime().year) + str(row['MatchDate'].to_datetime().isocalendar()[1]))
+    MatchDateYearWeek = int(str(row['MatchDate'].to_datetime().year) + str('%02d' % row['MatchDate'].to_datetime().isocalendar()[1]))
         
     # insert or update new Match (event)
     clause = insert(tbl_match).values(tournament_id=tournament_id[0], \

@@ -200,6 +200,7 @@ CREATE TABLE tbl_events (
     event_id integer DEFAULT nextval('tbl_event_event_id_seq'::regclass) NOT NULL,
     betbtc_event_id bigint,
     pinnacle_event_id bigint,
+    pinnacle_league_id bigint,	
     betfair_event_id numeric,
     "StartDate" date,
     "Home_player_id" bigint,

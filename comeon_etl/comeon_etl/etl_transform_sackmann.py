@@ -12,6 +12,7 @@ import numpy as np
 from sqlalchemy import create_engine, MetaData, select, update
 from datetime import datetime
 from comeon_common import connect
+import psycopg2
 from sqlalchemy.dialects.postgresql import insert
 
 
@@ -21,7 +22,6 @@ from sqlalchemy.dialects.postgresql import insert
 con_postgres, meta = connect()  
 tbl_player = meta.tables['tbl_player']
 tbl_match = meta.tables['tbl_match']  
-
 
 
 def updateSackmannPlayer(row) :
@@ -52,6 +52,7 @@ def updateSackmannMatches(row) :
     #print(row)
     
     dt = datetime.now()
+    print("new row")
     
 
     home_sackmann_id = int(row['winner_id'])
@@ -71,8 +72,9 @@ def updateSackmannMatches(row) :
     month = tourney_date_str[4:6] 
     day = tourney_date_str[6:8] 
     date = year + '-' + month + '-' + day
-    week = datetime.strptime(date, '%Y-%m-%d').isocalendar()[1]
+    week = '%02d' % datetime.strptime(date, '%Y-%m-%d').isocalendar()[1]
     MatchDateYearWeek = int(year + str(week))
+    print(MatchDateYearWeek)
         
 
     stm = select([tbl_match.c.match_id]).\
@@ -80,12 +82,12 @@ def updateSackmannMatches(row) :
                  where(tbl_match.c.player2_id == away_player_id[0]).\
                  where(tbl_match.c.MatchDateYearWeek == MatchDateYearWeek)
     
-    match_id = con_postgres.execute(stm).fetchone()  
+    tbl_match_id = con_postgres.execute(stm).fetchone()  
     
-    if match_id != None :
-        print("Match found for ID ", match_id[0])
+    if tbl_match_id != None :
+        print("Match found for ID ", tbl_match_id[0])
         # insert or update new Match (event)
-        stm = update(tbl_match).where(match_id==match_id).\
+        stm = update(tbl_match).where(tbl_match.columns.match_id==tbl_match_id[0]).\
                  values(surface=row['surface'],
                         sm_tourney_level=row['tourney_level'],\
                         player1_seed=row['winner_seed'],\
@@ -120,6 +122,7 @@ def updateSackmannMatches(row) :
                         player2_bp_saved=row['l_bpSaved'],\
                         player2_bp_faced=row['l_bpFaced'],\
                         update=dt)
+        #print(str(stm))
         #print(str(stm))
         con_postgres.execute(stm)
 
