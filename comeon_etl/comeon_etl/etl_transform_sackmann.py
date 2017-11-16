@@ -52,7 +52,7 @@ def updateSackmannMatches(row) :
     #print(row)
     
     dt = datetime.now()
-    print("new row")
+#    print("new row")
     
 
     home_sackmann_id = int(row['winner_id'])
@@ -74,7 +74,7 @@ def updateSackmannMatches(row) :
     date = year + '-' + month + '-' + day
     week = '%02d' % datetime.strptime(date, '%Y-%m-%d').isocalendar()[1]
     MatchDateYearWeek = int(year + str(week))
-    print(MatchDateYearWeek)
+#    print(MatchDateYearWeek)
         
 
     stm = select([tbl_match.c.match_id]).\
@@ -126,7 +126,50 @@ def updateSackmannMatches(row) :
         #print(str(stm))
         con_postgres.execute(stm)
 
-    
+    elif row['minutes'] >0 :
+        print("New Match")
+        # insert or update new Match (event)
+        stm = insert(tbl_match).\
+                 values(surface=row['surface'],      
+                        player1_id=home_player_id[0],\
+                        player2_id=away_player_id[0],\
+                        MatchDateYearWeek=MatchDateYearWeek,\
+                        sm_tourney_level=row['tourney_level'],\
+                        player1_seed=row['winner_seed'],\
+                        player1_entry=row['winner_entry'],\
+                        player2_seed=row['loser_seed'],\
+                        player2_entry=row['loser_entry'],\
+                        player1_age=row['winner_age'],\
+                        player2_age=row['loser_age'],\
+                        sm_player1_rank=row['winner_rank'],\
+                        sm_player1_rank_point=row['winner_rank_points'],\
+                        sm_player2_rank=row['loser_rank'],\
+                        sm_player2_rank_point=row['loser_rank_points'],\
+                        minutes=row['minutes'],\
+                        best_of=row['best_of'],\
+                        round=row['round'],\
+                        player1_ace=row['w_ace'],\
+                        player1_df=row['w_df'],\
+                        player1_svpt=row['w_svpt'],\
+                        player1_1st_in=row['w_1stIn'],\
+                        player1_1st_won=row['w_1stWon'],\
+                        player1_2nd_won=row['w_2ndWon'],\
+                        player1_sv_games=row['w_SvGms'],\
+                        player1_bp_saved=row['w_bpSaved'],\
+                        player1_bp_faced=row['w_bpFaced'],\
+                        player2_ace=row['l_ace'],\
+                        player2_df=row['l_df'],\
+                        player2_svpt=row['l_svpt'],\
+                        player2_1st_in=row['l_1stIn'],\
+                        player2_1st_won=row['l_1stWon'],\
+                        player2_2nd_won=row['l_2ndWon'],\
+                        player2_sv_games=row['l_SvGms'],\
+                        player2_bp_saved=row['l_bpSaved'],\
+                        player2_bp_faced=row['l_bpFaced'],\
+                        update=dt)
+        #print(str(stm))
+        #print(str(stm))
+        con_postgres.execute(stm)        
 
 
         

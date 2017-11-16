@@ -76,7 +76,7 @@ def setPinnacleEvents(pinnacle_event, tbl_events, con) :
         
                 clause = clause.on_conflict_do_update(
                 index_elements=['StartDate', 'home_player_name','away_player_name'],
-                set_=dict(pinnacle_event_id=event['id'],Live=(event['liveStatus']) ,LastUpdate=dt)
+                set_=dict(pinnacle_event_id=event['id'], pinnacle_league_id=league_id, Live=(event['liveStatus']) ,LastUpdate=dt)
                 )
                 
                 con.execute(clause)     

@@ -57,8 +57,8 @@ def checkPinnacleBalance() :
 
 def checkPinnacleBetForPlace(pin_event_id, pin_league_id, type_id, way, backlay, odds, stake) :
     sports_id = 33
-    pin_league_id = 192175
-    pin_event_id = 783630159
+#    pin_league_id = 10240
+#    pin_event_id = 783630159
 #    stake = 10
     if type_id == 1 :
         period_number = 0

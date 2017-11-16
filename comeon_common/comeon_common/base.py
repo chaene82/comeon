@@ -7,6 +7,7 @@ Created on Mon Nov 13 17:08:55 2017
 
 from sqlalchemy import create_engine, MetaData, select
 from sqlalchemy.dialects.postgresql import insert
+import logging
 from .tennis_config import *
 
 ## Internal functions
@@ -25,3 +26,33 @@ def connect(db=pg_db, user=pg_user, password=pg_pwd, host=pg_host, port=pq_port)
     meta.reflect(con)
 
     return con, meta
+
+
+def startBetLogging(application) :
+    logger = logging.getLogger(application)
+    logger.setLevel(logging.DEBUG)
+    
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    # No File Handler (Logging over Rundeck)
+    #fh = logging.FileHandler(application + 'debug.log')
+    #fh.setLevel(logging.DEBUG)
+    
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    #fh.setFormatter(formatter)
+    
+    #logger.addHandler(fh)
+    logger.addHandler(ch)
+    
+    return logger# -*- coding: utf-8 -*-
+
+
+def stopBetLogging(application) :
+    logger = logging.getLogger(application)
+    
+    ch = logging.StreamHandler()
+    #fh = logging.FileHandler(application + 'debug.log')
+    
+    #logger.removeHandler(fh)
+    logger.removeHandler(ch)

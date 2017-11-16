@@ -13,7 +13,7 @@ import numpy as np
 from .betbtc import checkBetBtcBalance
 from .Pinnacle import checkPinnacleBalance
 from .tennis_config import *
-from .getPrice import getEthEurPrice
+from .getPrice import getBtcEurPrice
 from .base import connect
 
 
@@ -30,7 +30,7 @@ def getBalance() :
     betbtc_total, btbtc_availiable, betbtc_blocked = checkBetBtcBalance()
     pin_total, pin_availiable, pin_blocked = checkPinnacleBalance()    
     
-    btceur = getEthEurPrice()
+    btceur = getBtcEurPrice()
     betbtc_total_eur = float(betbtc_total) * float(btceur)
     
     # Insert Pinnancle

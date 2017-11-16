@@ -10,8 +10,31 @@ from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
 import numpy as np
 from comeon_common import connect
+from comeon_common import startBetLogging
+from comeon_common import checkBetforPlace, placeBet
+
+log = startBetLogging("surebet")
+con, meta = connect()  
+tbl_surebet = meta.tables['tbl_surebet']
+tbl_events = meta.tables['tbl_events']
 
 
+
+
+def placeSureBet(surebet_typ, event_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake) :
+    
+    # get add required information
+    
+    home_status = checkBetforPlace(home_odds_id, home_odds, home_stake)     
+    away_status = checkBetforPlace(away_odds_id, away_odds, away_stake)
+    
+    if home_status and away_status :
+        home_bet_status = placeBet(home_odds_id, home_odds, home_stake, product_id=surebet_typ, surebet_id=0) 
+        if home_bet_status :
+            away_bet_status = placeBet(away_odds_id, away_odds, away_stake, product_id=surebet_typ, surebet_id=0) 
+            if away_bet_status :
+                return True
+    return False
 
 def searchSurebetEvent(event_id, tbl_surebet) :
     dt = datetime.now()
@@ -37,21 +60,21 @@ def searchSurebetEvent(event_id, tbl_surebet) :
     for bettyp in bettyps :
         for bookie in bookies :
     
-            h = select([tbl_odds.columns.odds])\
+            h = select([tbl_odds.columns.odds, tbl_odds.columns.odds_id])\
                       .where(tbl_odds.columns.event_id == event_id)\
                       .where(tbl_odds.columns.bettyp_id == bettyp)\
                       .where(tbl_odds.columns.bookie_id == bookie)\
                       .where(tbl_odds.columns.backlay == 1)\
                       .where(tbl_odds.columns.way == 1)            
                       
-            h_odd = con.execute(h).fetchone()  
+            h_odd = con.execute(h).fetchone()
             
             if h_odd == None or np.isnan(h_odd[0]) :
                 continue
             
             for check_bookie in bookies :
                    
-                a = select([tbl_odds.columns.odds])\
+                a = select([tbl_odds.columns.odds, tbl_odds.columns.odds_id])\
                           .where(tbl_odds.columns.event_id == event_id)\
                           .where(tbl_odds.columns.bettyp_id == bettyp)\
                           .where(tbl_odds.columns.bookie_id == check_bookie)\
@@ -65,6 +88,9 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                 
                 home_odds = h_odd[0]
                 away_odds = a_odd[0]
+                
+                home_odds_id = h_odd[1]
+                away_odds_id = a_odd[1]
                 
                 if not isinstance(home_odds, float) : home_odds = np.nan
                 if not isinstance(away_odds, float) : away_odds = np.nan
@@ -115,6 +141,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                             
                             surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 1)
                             db_surebet_id = con.execute(surebet_sql).fetchone() 
+                            surebet_typ=1
                             
                             if db_surebet_id == None :
                             
@@ -127,13 +154,17 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                                    max_profit=round((max(home_return, away_return) - (stake_total) ),2), \
                                                    status=1,\
                                                    theoretical_winnings=theoretical_winnings,\
-                                                   surebet_typ=1,\
+                                                   surebet_typ=surebet_typ,\
                                                    update=dt)
-                                
-                                
+                                log.info("store to database")                                 
                                 con.execute(clause)  
                                 
-                                print("store to database")
+                                
+                                surebetStatus = placeSureBet(surebet_typ, event_id, bookie, home_odds, home_stake, check_bookie, away_odds, away_stake)
+                                
+                                log.info("SureBet place?", surebetStatus)  
+                                
+
                             else :
                                 print("already exists in the database")
                                 
@@ -201,6 +232,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
     
     if surebet_numbers == 0 :
         print("no surebet found for event", event_id)
+
 
 
 def searchSurebet() :
