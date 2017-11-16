@@ -5,7 +5,7 @@
 -- Dumped from database version 9.6.5
 -- Dumped by pg_dump version 9.6.5
 
--- Started on 2017-11-14 16:10:38
+-- Started on 2017-11-16 10:45:14
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -18,7 +18,7 @@ SET row_security = off;
 
 DROP DATABASE tennis;
 --
--- TOC entry 2249 (class 1262 OID 16749)
+-- TOC entry 2263 (class 1262 OID 16749)
 -- Name: tennis; Type: DATABASE; Schema: -; Owner: tennis
 --
 
@@ -47,7 +47,7 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 2252 (class 0 OID 0)
+-- TOC entry 2266 (class 0 OID 0)
 -- Dependencies: 1
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
@@ -123,7 +123,7 @@ CREATE SEQUENCE tbl_bettyp_bettyp_id_seq
 ALTER TABLE tbl_bettyp_bettyp_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2253 (class 0 OID 0)
+-- TOC entry 2267 (class 0 OID 0)
 -- Dependencies: 186
 -- Name: tbl_bettyp_bettyp_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -168,7 +168,7 @@ CREATE SEQUENCE tbl_bookie_bookie_id_seq
 ALTER TABLE tbl_bookie_bookie_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2254 (class 0 OID 0)
+-- TOC entry 2268 (class 0 OID 0)
 -- Dependencies: 188
 -- Name: tbl_bookie_bookie_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -200,7 +200,6 @@ CREATE TABLE tbl_events (
     event_id integer DEFAULT nextval('tbl_event_event_id_seq'::regclass) NOT NULL,
     betbtc_event_id bigint,
     pinnacle_event_id bigint,
-    pinnacle_league_id bigint,	
     betfair_event_id numeric,
     "StartDate" date,
     "Home_player_id" bigint,
@@ -209,7 +208,8 @@ CREATE TABLE tbl_events (
     away_player_name character varying(100),
     "Live" integer,
     "LastUpdate" timestamp with time zone,
-    "StartDateTime" timestamp with time zone
+    "StartDateTime" timestamp with time zone,
+    pinnacle_league_id bigint
 );
 
 
@@ -231,7 +231,7 @@ CREATE SEQUENCE tbl_events_event_id_seq
 ALTER TABLE tbl_events_event_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2255 (class 0 OID 0)
+-- TOC entry 2269 (class 0 OID 0)
 -- Dependencies: 191
 -- Name: tbl_events_event_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -289,31 +289,31 @@ CREATE TABLE tbl_match (
     player2_entry character varying(10),
     player1_age numeric,
     player2_age numeric,
-    sm_player1_rank integer,
-    sm_player1_rank_point integer,
-    sm_player2_rank integer,
-    sm_player2_rank_point integer,
+    sm_player1_rank numeric,
+    sm_player1_rank_point numeric,
+    sm_player2_rank numeric,
+    sm_player2_rank_point numeric,
     best_of integer,
     round character varying(10),
-    minutes integer,
-    player1_ace integer,
-    player1_df integer,
-    player1_svpt integer,
-    player1_1st_in integer,
-    player1_1st_won integer,
-    player1_2nd_won integer,
-    player1_sv_games integer,
-    player1_bp_saved integer,
-    player1_bp_faced integer,
-    player2_ace integer,
-    player2_df integer,
-    player2_svpt integer,
-    player2_1st_in integer,
-    player2_1st_won integer,
-    player2_2nd_won integer,
-    player2_sv_games integer,
-    player2_bp_saved integer,
-    player2_bp_faced integer,
+    minutes numeric,
+    player1_ace numeric,
+    player1_df numeric,
+    player1_svpt numeric,
+    player1_1st_in numeric,
+    player1_1st_won numeric,
+    player1_2nd_won numeric,
+    player1_sv_games numeric,
+    player1_bp_saved numeric,
+    player1_bp_faced numeric,
+    player2_ace numeric,
+    player2_df numeric,
+    player2_svpt numeric,
+    player2_1st_in numeric,
+    player2_1st_won numeric,
+    player2_2nd_won numeric,
+    player2_sv_games numeric,
+    player2_bp_saved numeric,
+    player2_bp_faced numeric,
     player1_odds numeric,
     player2_odds numeric
 );
@@ -357,7 +357,7 @@ CREATE SEQUENCE tbl_odds_odds_id_seq
 ALTER TABLE tbl_odds_odds_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2256 (class 0 OID 0)
+-- TOC entry 2270 (class 0 OID 0)
 -- Dependencies: 193
 -- Name: tbl_odds_odds_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -415,6 +415,45 @@ CREATE TABLE tbl_orderbook (
 ALTER TABLE tbl_orderbook OWNER TO tennis;
 
 --
+-- TOC entry 207 (class 1259 OID 17115)
+-- Name: tbl_player_player_id_seq; Type: SEQUENCE; Schema: public; Owner: tennis
+--
+
+CREATE SEQUENCE tbl_player_player_id_seq
+    START WITH 76727
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE tbl_player_player_id_seq OWNER TO tennis;
+
+--
+-- TOC entry 208 (class 1259 OID 17117)
+-- Name: tbl_player; Type: TABLE; Schema: public; Owner: tennis
+--
+
+CREATE TABLE tbl_player (
+    player_id integer DEFAULT nextval('tbl_player_player_id_seq'::regclass) NOT NULL,
+    firstname character(50),
+    lastname character(50),
+    name_long character varying(200),
+    name_short character varying(100),
+    plays character(50),
+    country character(50),
+    dayofbirth date,
+    "ITF_ID" integer,
+    te_link character varying(200),
+    update timestamp with time zone,
+    sackmann_id integer,
+    "IOC" character varying(20)
+);
+
+
+ALTER TABLE tbl_player OWNER TO tennis;
+
+--
 -- TOC entry 202 (class 1259 OID 16934)
 -- Name: tbl_product; Type: TABLE; Schema: public; Owner: tennis
 --
@@ -467,7 +506,7 @@ CREATE SEQUENCE tbl_rating_rating_id_seq
 ALTER TABLE tbl_rating_rating_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2257 (class 0 OID 0)
+-- TOC entry 2271 (class 0 OID 0)
 -- Dependencies: 195
 -- Name: tbl_rating_rating_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -476,7 +515,7 @@ ALTER SEQUENCE tbl_rating_rating_id_seq OWNED BY tbl_rating.rating_id;
 
 
 --
--- TOC entry 210 (class 1259 OID 17091)
+-- TOC entry 212 (class 1259 OID 17437)
 -- Name: tbl_sackmann_match; Type: TABLE; Schema: public; Owner: tennis
 --
 
@@ -537,7 +576,7 @@ CREATE TABLE tbl_sackmann_match (
 ALTER TABLE tbl_sackmann_match OWNER TO tennis;
 
 --
--- TOC entry 209 (class 1259 OID 17084)
+-- TOC entry 211 (class 1259 OID 17430)
 -- Name: tbl_sackmann_players; Type: TABLE; Schema: public; Owner: tennis
 --
 
@@ -594,7 +633,7 @@ CREATE TABLE tbl_surebet (
 ALTER TABLE tbl_surebet OWNER TO tennis;
 
 --
--- TOC entry 207 (class 1259 OID 17071)
+-- TOC entry 209 (class 1259 OID 17417)
 -- Name: tbl_te_matchlist; Type: TABLE; Schema: public; Owner: tennis
 --
 
@@ -628,49 +667,8 @@ CREATE TABLE tbl_te_matchlist (
 
 ALTER TABLE tbl_te_matchlist OWNER TO tennis;
 
--- Table: public.tbl_player
-
--- DROP TABLE public.tbl_player;
-
-CREATE TABLE public.tbl_player
-(
-  player_id integer NOT NULL DEFAULT nextval('tbl_player_player_id_seq'::regclass),
-  firstname character(50),
-  lastname character(50),
-  name_long character varying(200),
-  name_short character varying(100),
-  plays character(50),
-  country character(50),
-  dayofbirth date,
-  "ITF_ID" integer,
-  te_link character varying(200),
-  update timestamp with time zone,
-  sackmann_id integer,
-  "IOC" character varying(20),
-  CONSTRAINT unique_te_link UNIQUE (te_link)
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE public.tbl_player
-  OWNER TO tennis;
-
--- Sequence: public.tbl_player_player_id_seq
-
--- DROP SEQUENCE public.tbl_player_player_id_seq;
-
-CREATE SEQUENCE public.tbl_player_player_id_seq
-  INCREMENT 1
-  MINVALUE 1
-  MAXVALUE 9223372036854775807
-  START 76727
-  CACHE 1;
-ALTER TABLE public.tbl_player_player_id_seq
-  OWNER TO tennis;
-
-
 --
--- TOC entry 208 (class 1259 OID 17077)
+-- TOC entry 210 (class 1259 OID 17423)
 -- Name: tbl_te_player; Type: TABLE; Schema: public; Owner: tennis
 --
 
@@ -722,7 +720,7 @@ CREATE SEQUENCE tbl_tournament_tournament_id_seq
 ALTER TABLE tbl_tournament_tournament_id_seq OWNER TO tennis;
 
 --
--- TOC entry 2258 (class 0 OID 0)
+-- TOC entry 2272 (class 0 OID 0)
 -- Dependencies: 197
 -- Name: tbl_tournament_tournament_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tennis
 --
@@ -731,7 +729,7 @@ ALTER SEQUENCE tbl_tournament_tournament_id_seq OWNED BY tbl_tournament.tourname
 
 
 --
--- TOC entry 2087 (class 2604 OID 16825)
+-- TOC entry 2094 (class 2604 OID 16825)
 -- Name: tbl_bettyp bettyp_id; Type: DEFAULT; Schema: public; Owner: tennis
 --
 
@@ -739,7 +737,7 @@ ALTER TABLE ONLY tbl_bettyp ALTER COLUMN bettyp_id SET DEFAULT nextval('tbl_bett
 
 
 --
--- TOC entry 2088 (class 2604 OID 16826)
+-- TOC entry 2095 (class 2604 OID 16826)
 -- Name: tbl_bookie bookie_id; Type: DEFAULT; Schema: public; Owner: tennis
 --
 
@@ -747,7 +745,7 @@ ALTER TABLE ONLY tbl_bookie ALTER COLUMN bookie_id SET DEFAULT nextval('tbl_book
 
 
 --
--- TOC entry 2090 (class 2604 OID 16828)
+-- TOC entry 2097 (class 2604 OID 16828)
 -- Name: tbl_odds odds_id; Type: DEFAULT; Schema: public; Owner: tennis
 --
 
@@ -755,7 +753,7 @@ ALTER TABLE ONLY tbl_odds ALTER COLUMN odds_id SET DEFAULT nextval('tbl_odds_odd
 
 
 --
--- TOC entry 2091 (class 2604 OID 16829)
+-- TOC entry 2098 (class 2604 OID 16829)
 -- Name: tbl_rating rating_id; Type: DEFAULT; Schema: public; Owner: tennis
 --
 
@@ -763,7 +761,7 @@ ALTER TABLE ONLY tbl_rating ALTER COLUMN rating_id SET DEFAULT nextval('tbl_rati
 
 
 --
--- TOC entry 2092 (class 2604 OID 16830)
+-- TOC entry 2099 (class 2604 OID 16830)
 -- Name: tbl_tournament tournament_id; Type: DEFAULT; Schema: public; Owner: tennis
 --
 
@@ -771,7 +769,7 @@ ALTER TABLE ONLY tbl_tournament ALTER COLUMN tournament_id SET DEFAULT nextval('
 
 
 --
--- TOC entry 2102 (class 2606 OID 16833)
+-- TOC entry 2110 (class 2606 OID 16833)
 -- Name: tbl_events match; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -780,7 +778,7 @@ ALTER TABLE ONLY tbl_events
 
 
 --
--- TOC entry 2106 (class 2606 OID 16835)
+-- TOC entry 2114 (class 2606 OID 16835)
 -- Name: tbl_odds odds_unique; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -789,7 +787,7 @@ ALTER TABLE ONLY tbl_odds
 
 
 --
--- TOC entry 2116 (class 2606 OID 16926)
+-- TOC entry 2124 (class 2606 OID 16926)
 -- Name: tbl_balance tbl_balance_pkey; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -798,7 +796,7 @@ ALTER TABLE ONLY tbl_balance
 
 
 --
--- TOC entry 2098 (class 2606 OID 16837)
+-- TOC entry 2106 (class 2606 OID 16837)
 -- Name: tbl_bettyp tbl_bettyp_pk; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -807,7 +805,7 @@ ALTER TABLE ONLY tbl_bettyp
 
 
 --
--- TOC entry 2100 (class 2606 OID 16839)
+-- TOC entry 2108 (class 2606 OID 16839)
 -- Name: tbl_bookie tbl_bookie_pk; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -816,7 +814,7 @@ ALTER TABLE ONLY tbl_bookie
 
 
 --
--- TOC entry 2104 (class 2606 OID 16841)
+-- TOC entry 2112 (class 2606 OID 16841)
 -- Name: tbl_events tbl_events_pkey; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -825,7 +823,7 @@ ALTER TABLE ONLY tbl_events
 
 
 --
--- TOC entry 2120 (class 2606 OID 16961)
+-- TOC entry 2130 (class 2606 OID 16961)
 -- Name: tbl_match tbl_match_pk; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -834,7 +832,7 @@ ALTER TABLE ONLY tbl_match
 
 
 --
--- TOC entry 2108 (class 2606 OID 16845)
+-- TOC entry 2116 (class 2606 OID 16845)
 -- Name: tbl_odds tbl_odds_pk; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -843,7 +841,7 @@ ALTER TABLE ONLY tbl_odds
 
 
 --
--- TOC entry 2124 (class 2606 OID 16972)
+-- TOC entry 2134 (class 2606 OID 16972)
 -- Name: tbl_orderbook tbl_orderbook_pkey; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -852,7 +850,7 @@ ALTER TABLE ONLY tbl_orderbook
 
 
 --
--- TOC entry 2118 (class 2606 OID 16938)
+-- TOC entry 2126 (class 2606 OID 16938)
 -- Name: tbl_product tbl_product_pkey; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -861,7 +859,7 @@ ALTER TABLE ONLY tbl_product
 
 
 --
--- TOC entry 2110 (class 2606 OID 16847)
+-- TOC entry 2118 (class 2606 OID 16847)
 -- Name: tbl_rating tbl_rating_pk; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -870,7 +868,7 @@ ALTER TABLE ONLY tbl_rating
 
 
 --
--- TOC entry 2114 (class 2606 OID 16894)
+-- TOC entry 2122 (class 2606 OID 16894)
 -- Name: tbl_surebet tbl_surebet_pkey; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -879,7 +877,7 @@ ALTER TABLE ONLY tbl_surebet
 
 
 --
--- TOC entry 2112 (class 2606 OID 16849)
+-- TOC entry 2120 (class 2606 OID 16849)
 -- Name: tbl_tournament tbl_tournament_pk; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -888,7 +886,7 @@ ALTER TABLE ONLY tbl_tournament
 
 
 --
--- TOC entry 2122 (class 2606 OID 16963)
+-- TOC entry 2132 (class 2606 OID 16963)
 -- Name: tbl_match unique; Type: CONSTRAINT; Schema: public; Owner: tennis
 --
 
@@ -897,7 +895,16 @@ ALTER TABLE ONLY tbl_match
 
 
 --
--- TOC entry 2127 (class 1259 OID 17097)
+-- TOC entry 2138 (class 2606 OID 17125)
+-- Name: tbl_player unique_te_link; Type: CONSTRAINT; Schema: public; Owner: tennis
+--
+
+ALTER TABLE ONLY tbl_player
+    ADD CONSTRAINT unique_te_link UNIQUE (te_link);
+
+
+--
+-- TOC entry 2141 (class 1259 OID 17443)
 -- Name: ix_tbl_sackmann_match_index; Type: INDEX; Schema: public; Owner: tennis
 --
 
@@ -905,7 +912,7 @@ CREATE INDEX ix_tbl_sackmann_match_index ON tbl_sackmann_match USING btree (inde
 
 
 --
--- TOC entry 2126 (class 1259 OID 17090)
+-- TOC entry 2140 (class 1259 OID 17436)
 -- Name: ix_tbl_sackmann_players_index; Type: INDEX; Schema: public; Owner: tennis
 --
 
@@ -913,7 +920,7 @@ CREATE INDEX ix_tbl_sackmann_players_index ON tbl_sackmann_players USING btree (
 
 
 --
--- TOC entry 2125 (class 1259 OID 17083)
+-- TOC entry 2139 (class 1259 OID 17429)
 -- Name: ix_tbl_te_player_index; Type: INDEX; Schema: public; Owner: tennis
 --
 
@@ -921,7 +928,39 @@ CREATE INDEX ix_tbl_te_player_index ON tbl_te_player USING btree (index);
 
 
 --
--- TOC entry 2251 (class 0 OID 0)
+-- TOC entry 2127 (class 1259 OID 17227)
+-- Name: pk_match_id; Type: INDEX; Schema: public; Owner: tennis
+--
+
+CREATE UNIQUE INDEX pk_match_id ON tbl_match USING btree (match_id);
+
+
+--
+-- TOC entry 2135 (class 1259 OID 17230)
+-- Name: pk_player_id; Type: INDEX; Schema: public; Owner: tennis
+--
+
+CREATE UNIQUE INDEX pk_player_id ON tbl_player USING btree (player_id);
+
+
+--
+-- TOC entry 2128 (class 1259 OID 17229)
+-- Name: player_week; Type: INDEX; Schema: public; Owner: tennis
+--
+
+CREATE INDEX player_week ON tbl_match USING btree (player1_id, player2_id, "MatchDateYearWeek");
+
+
+--
+-- TOC entry 2136 (class 1259 OID 17238)
+-- Name: te_link; Type: INDEX; Schema: public; Owner: tennis
+--
+
+CREATE UNIQUE INDEX te_link ON tbl_player USING btree (te_link);
+
+
+--
+-- TOC entry 2265 (class 0 OID 0)
 -- Dependencies: 6
 -- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
@@ -929,7 +968,7 @@ CREATE INDEX ix_tbl_te_player_index ON tbl_te_player USING btree (index);
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2017-11-14 16:10:38
+-- Completed on 2017-11-16 10:45:14
 
 --
 -- PostgreSQL database dump complete
