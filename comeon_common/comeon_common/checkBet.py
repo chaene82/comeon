@@ -57,5 +57,3 @@ def checkBetforPlace(odds_id, request_odds, request_stake) :
     else :
         return False
 
-
-checkBetforPlace(10608, 1.88, 50)
