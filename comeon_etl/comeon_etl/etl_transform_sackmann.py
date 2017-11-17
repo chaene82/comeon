@@ -36,7 +36,7 @@ def updateSackmannPlayer(row) :
     #print("looking for player", player_id)
     if player_id != None :
         
-        print("update Player", player_id[0])
+        #print("update Player", player_id[0])
      
     
         clause = update(tbl_player).values(sackmann_id=row['id'], \
@@ -85,7 +85,7 @@ def updateSackmannMatches(row) :
     tbl_match_id = con_postgres.execute(stm).fetchone()  
     
     if tbl_match_id != None :
-        print("Match found for ID ", tbl_match_id[0])
+        #print("Match found for ID ", tbl_match_id[0])
         # insert or update new Match (event)
         stm = update(tbl_match).where(tbl_match.columns.match_id==tbl_match_id[0]).\
                  values(surface=row['surface'],
@@ -127,7 +127,7 @@ def updateSackmannMatches(row) :
         con_postgres.execute(stm)
 
     elif row['minutes'] >0 :
-        print("New Match")
+        #print("New Match")
         # insert or update new Match (event)
         stm = insert(tbl_match).\
                  values(surface=row['surface'],      

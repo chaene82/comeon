@@ -37,7 +37,7 @@ def splitName(Name) :
 
 def createPlayer(row) :
     
-    print("create player ")
+    #print("create player ")
     
     home_link = row['home_link']
     home_player_id = con_postgres.execute("Select player_id from tbl_player WHERE te_link = '" + home_link +"'").fetchone()
@@ -63,8 +63,8 @@ def createPlayer(row) :
 def updatePlayer(row) :
     dt = datetime.now()
 
-    print("update player", row['player_name'], )
-    print("dob", convertDate(row['player_dob']), )
+    #print("update player", row['player_name'], )
+    #print("dob", convertDate(row['player_dob']), )
     
     first_name, last_name = splitName(row['player_name'])
     player_link = row['player_url']
