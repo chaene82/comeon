@@ -162,7 +162,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 
                                 surebetStatus = placeSureBet(surebet_typ, event_id, bookie, home_odds, home_stake, check_bookie, away_odds, away_stake)
                                 
-                                log.info("SureBet place?", surebetStatus)  
+                                log.info("SureBet place? " + str(surebetStatus))  
                                 
 
                             else :
