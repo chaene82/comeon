@@ -6,8 +6,8 @@ Created on Thu Nov 16 12:31:14 2017
 """
 
 from .base import connect
-from .betbtc import checkBetBtcBetForPlace
-from .Pinnacle import checkPinnacleBetForPlace
+from .betbtc import checkBetBtcBetForPlace, checkBetBtcBalance
+from .Pinnacle import checkPinnacleBetForPlace, checkPinnacleBalance
 from .base import startBetLogging
 from .getPrice import getBtcEurPrice
 
@@ -38,6 +38,12 @@ def checkBetforPlace(odds_id, request_odds, request_stake) :
     
     if bookie_id == 1 :
         #Pinnacle
+        # check balance
+        balance = checkPinnacleBalance()
+        if request_stake > balance[1]:
+            log.info("not enough balance on pinnacle")
+            return False
+        
         status, message = checkPinnacleBetForPlace(pinnalce_event_id, pinnacle_league_id, bettyp_id, way, backlay, request_odds, request_stake)
 
     elif bookie_id == 2 :
@@ -47,8 +53,16 @@ def checkBetforPlace(odds_id, request_odds, request_stake) :
         else :
             player_name = away_player_name
         btc_stake = request_stake / getBtcEurPrice()
-            
+        balance = checkBetBtcBalance()
+        if btc_stake > balance[1]:
+            log.info("not enough balance on betbtc")
+            return False
+        
+        
         status, message = checkBetBtcBetForPlace(betbtc_event_id, player_name, backlay, request_odds, btc_stake)
+    
+    # Check for Balance
+    
     
     
     
