@@ -5,7 +5,7 @@ Created on Wed Nov  1 14:27:52 2017
 @author: haenec
 """
 
-from sqlalchemy import create_engine, MetaData, select
+from sqlalchemy import create_engine, MetaData, select, update
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
 import numpy as np
@@ -24,6 +24,9 @@ tbl_events = meta.tables['tbl_events']
 def placeSureBet(surebet_typ, event_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake) :
     
     # get add required information
+    
+    log.debug("odds id " + str(home_odds_id))
+
     
     home_status = checkBetforPlace(home_odds_id, home_odds, home_stake)     
     away_status = checkBetforPlace(away_odds_id, away_odds, away_stake)
@@ -122,7 +125,9 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         print("home return ", home_return)
                         print("away return ", away_return)  
                         print("home prop ", home_prob)
-                        print("away prop ", away_prob)                        
+                        print("away prop ", away_prob)         
+                        log.info("Home Odds " + str(home_odds_id))
+                        log.info("Away Odds " + str(away_odds_id))                            
 
                         if bookie == 2 :
                             home_return = (home_return - home_stake) * (1 - (betbtc_margin/100)) + home_stake
@@ -138,6 +143,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                             print("min profit ", min(home_return, away_return) - (stake_total) )
                             print("max profit ", max(home_return, away_return) - (stake_total) ) 
                             
+                        
                             
                             surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 1)
                             db_surebet_id = con.execute(surebet_sql).fetchone() 
@@ -145,7 +151,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                             
                             if db_surebet_id == None :
                             
-                                clause = insert(tbl_surebet).values(event_id=event_id, \
+                                clause = insert(tbl_surebet).returning(tbl_surebet.columns.surebet_id).values(event_id=event_id, \
                                                    home_bookie_id=bookie, \
                                                    away_bookie_id=check_bookie, \
                                                    home_odds=home_odds, \
@@ -157,12 +163,23 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                                    surebet_typ=surebet_typ,\
                                                    update=dt)
                                 log.info("store to database")                                 
-                                con.execute(clause)  
+                                result = con.execute(clause)  
                                 
+                                for id in result :
+                                    surebet_id = id[0]
                                 
-                                surebetStatus = placeSureBet(surebet_typ, event_id, bookie, home_odds, home_stake, check_bookie, away_odds, away_stake)
+                                log.info("Surebet ID " + str(surebet_id))  
+                                
+                                surebetStatus = placeSureBet(surebet_typ, event_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake)
                                 
                                 log.info("SureBet place? " + str(surebetStatus))  
+                                
+                                if surebetStatus :
+                                    clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=2)
+                                    con.execute(clause) 
+                                else :
+                                    clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=6)                              
+                                    con.execute(clause) 
                                 
 
                             else :

@@ -20,6 +20,8 @@ con, meta = connect()
 
 def checkBetforPlace(odds_id, request_odds, request_stake) :
     
+    log.debug("odds id " + str(odds_id))
+    
     data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, home_player_name, away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id FROM public.tbl_odds o inner join public.tbl_events e using(event_id) where odds_id =" + str(odds_id) + ";").fetchone()
     
     event_id = data[1]
