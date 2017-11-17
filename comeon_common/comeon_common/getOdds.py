@@ -40,6 +40,8 @@ def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds, c
                         
                         home_ml = line['moneyline']['home']
                         away_ml = line['moneyline']['away']
+                        
+                        line_id = line['lineId']
         
                         
                         clause = insert(tbl_odds).values(event_id=event_id, \
@@ -48,11 +50,12 @@ def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds, c
                                                        bookie_id = 1, \
                                                        backlay = 1,\
                                                        odds=home_ml, \
+                                                       pin_line_id=line_id, \
                                                        odds_update=dt) 
         
                         clause = clause.on_conflict_do_update(
                         index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
-                        set_=dict(odds=home_ml,odds_update=dt)
+                        set_=dict(odds=home_ml,pin_line_id=line_id,odds_update=dt)
                         )
                         
                         con.execute(clause)  
@@ -63,11 +66,12 @@ def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds, c
                                                        bookie_id = 1, \
                                                        backlay = 1,\
                                                        odds=away_ml, \
+                                                       pin_line_id=line_id, \
                                                        odds_update=dt) 
         
                         clause = clause.on_conflict_do_update(
                         index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
-                        set_=dict(odds=away_ml,odds_update=dt)
+                        set_=dict(odds=away_ml,pin_line_id=line_id,odds_update=dt)
                         )
                         
                         con.execute(clause)                  

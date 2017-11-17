@@ -25,7 +25,7 @@ tbl_orderbook = meta.tables['tbl_orderbook']
 
 def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0) :
     dt = datetime.now()
-    data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, home_player_name, away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id FROM public.tbl_odds o inner join public.tbl_events e using(event_id) where odds_id =" + str(odds_id) + ";").fetchone()
+    data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, home_player_name, away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id, pin_line_id FROM public.tbl_odds o inner join public.tbl_events e using(event_id) where odds_id =" + str(odds_id) + ";").fetchone()
     
     event_id = data[1]
     bettyp_id = data[2]
@@ -38,6 +38,7 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0) :
     pinnacle_league_id = data[10]
     pinnalce_event_id = data[11]
     betbtc_event_id = data[12]
+    pin_line_id = data[13]
     
     if bookie_id == 1 :
         #Pinnacle
@@ -45,7 +46,7 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0) :
         
         stake = request_stake
         currency = 'EUR'
-        #status, message, resultset = placePinnacleBet(pinnalce_event_id, pinnacle_league_id, bettyp_id, way, backlay, request_odds, request_stake)
+        #status, message, resultset = placePinnacleBet(pinnalce_event_id, pin_line_id, bettyp_id, way, backlay, request_odds, request_stake)
         status, message, resultset = 0, '', ''
 
     elif bookie_id == 2 :

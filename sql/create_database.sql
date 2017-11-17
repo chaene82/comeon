@@ -5,7 +5,7 @@
 -- Dumped from database version 9.6.5
 -- Dumped by pg_dump version 9.6.5
 
--- Started on 2017-11-16 10:45:14
+-- Started on 2017-11-17 08:45:21
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -261,7 +261,7 @@ ALTER TABLE tbl_match_match_id_seq OWNER TO tennis;
 
 CREATE TABLE tbl_match (
     match_id integer DEFAULT nextval('tbl_match_match_id_seq'::regclass) NOT NULL,
-    tournament_id integer NOT NULL,
+    tournament_id integer,
     "MatchDate" date,
     "time" character varying(10),
     surface character varying(20),
@@ -335,7 +335,9 @@ CREATE TABLE tbl_odds (
     way integer NOT NULL,
     backlay integer NOT NULL,
     odds_update timestamp without time zone,
-    odds double precision
+    odds double precision,
+    pin_line_id bigint,
+    betbtc_max_stake bigint
 );
 
 
@@ -968,7 +970,7 @@ CREATE UNIQUE INDEX te_link ON tbl_player USING btree (te_link);
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2017-11-16 10:45:14
+-- Completed on 2017-11-17 08:45:21
 
 --
 -- PostgreSQL database dump complete
