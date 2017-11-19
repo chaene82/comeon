@@ -40,7 +40,7 @@ def checkBetforPlace(odds_id, request_odds, request_stake) :
         #Pinnacle
         # check balance
         balance = checkPinnacleBalance()
-        if request_stake > balance[1]:
+        if request_stake > float(balance[1]):
             log.info("not enough balance on pinnacle")
             return False
         
@@ -54,7 +54,7 @@ def checkBetforPlace(odds_id, request_odds, request_stake) :
             player_name = away_player_name
         btc_stake = request_stake / getBtcEurPrice()
         balance = checkBetBtcBalance()
-        if btc_stake > balance[1]:
+        if btc_stake > float(balance[1]):
             log.info("not enough balance on betbtc")
             return False
         
