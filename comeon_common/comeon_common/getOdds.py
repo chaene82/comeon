@@ -35,8 +35,10 @@ def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds, c
             if event['id'] == pinnacle_event_id:
                 
                 event_odds = event
+                i = 0
                 for line in event_odds['periods'] :
-                    if 'moneyline' in event_odds['periods'][0] and line['number'] == 0 :
+                    if 'moneyline' in event_odds['periods'][i] and line['number'] == 0 :
+                        #print(line)
                         
                         home_ml = line['moneyline']['home']
                         away_ml = line['moneyline']['away']
@@ -74,7 +76,8 @@ def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds, c
                         set_=dict(odds=away_ml,pin_line_id=line_id,odds_update=dt)
                         )
                         
-                        con.execute(clause)                  
+                        con.execute(clause)           
+                    i = i +1
                 
 
 def setBetBecEventOdds(betbtc_event_id, event_id, home_name, away_name, tbl_odds, con) :
