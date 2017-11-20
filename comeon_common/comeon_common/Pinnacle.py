@@ -76,10 +76,10 @@ def checkPinnacleBetForPlace(pin_event_id, pin_league_id, type_id, way, backlay,
     ## Check if the bet still okay
     
     if stake < bet_data['minRiskStake'] :
-        return -2, "Stake smaller as minRiskStake" + bet_data
+        return -2, "Stake smaller as minRiskStake" + str(bet_data)
         
     if stake > bet_data['maxRiskStake'] :
-        return -3, "Stake bigger then maxRiskStake" + bet_data
+        return -3, "Stake bigger then maxRiskStake" + str(bet_data)
         
     if odds > bet_data['price'] : 
         return -4, "odds smaller then requested"
