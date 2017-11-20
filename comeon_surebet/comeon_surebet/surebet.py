@@ -196,7 +196,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                             
                             if db_surebet_id == None :
                             
-                                clause = insert(tbl_surebet).values(event_id=event_id, \
+                                clause = insert(tbl_surebet).returning(tbl_surebet.columns.surebet_id).values(event_id=event_id, \
                                                    home_bookie_id=bookie, \
                                                    away_bookie_id=check_bookie, \
                                                    home_odds=home_odds, \
@@ -209,9 +209,25 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                                    update=dt)
                                 
                                 
-                                con.execute(clause)  
+                                log.info("store to database")                                 
+                                result = con.execute(clause)  
                                 
-                                print("store to database")
+                                for id in result :
+                                    surebet_id = id[0]
+                                
+                                log.info("Surebet ID " + str(surebet_id))  
+                                
+                                surebetStatus = placeSureBet(surebet_typ, event_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake)
+                                
+                                log.info("SureBet place? " + str(surebetStatus))  
+                                
+                                if surebetStatus :
+                                    clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=2)
+                                    con.execute(clause) 
+                                else :
+                                    clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=6)                              
+                                    con.execute(clause) 
+                                    
                             else :
                                 print("already exists in the database")                            
                         
