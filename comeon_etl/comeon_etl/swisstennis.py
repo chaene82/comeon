@@ -108,11 +108,11 @@ def modelSwisstennis(start_value=0.1, days_between_run=7, look_back_weeks=52, Mo
     #conn = sqlite3.connect('/home/chrhae/dev/comeon/data/tennis-data.db')
     
     if ModelName == 'SW1YC' :
-        tennis = pd.read_sql("Select * FROM 'temp_tennis-data.co.uk' where surface = 'Clay'", conn)
+        tennis = pd.read_sql('SELECT "MatchDate" as Date, player1_id as Winner, player2_id as Loser FROM public.tbl_match  where te_link is not null and surface = "Clay"', conn)
     elif ModelName == 'SW1YH' :
-        tennis = pd.read_sql("Select * FROM 'temp_tennis-data.co.uk' where surface = 'Hard'", conn)
+        tennis = pd.read_sql('SELECT "MatchDate" as Date, player1_id as Winner, player2_id as Loser FROM public.tbl_match  where te_link is not null and surface = "Hard"', conn)
     elif ModelName == 'SW1YG' :
-        tennis = pd.read_sql("Select * FROM 'temp_tennis-data.co.uk' where surface = 'Grass'", conn)        
+        tennis = pd.read_sql('SELECT "MatchDate" as Date, player1_id as Winner, player2_id as Loser FROM public.tbl_match  where te_link is not null and surface = "Grass"', conn)        
     else :
         tennis = pd.read_sql('SELECT "MatchDate" as Date, player1_id as Winner, player2_id as Loser FROM public.tbl_match  where te_link is not null', conn)
     #tennis = pd.read_excel("../tennis_all.xlsx")
