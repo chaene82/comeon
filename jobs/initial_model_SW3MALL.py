@@ -8,5 +8,5 @@ Created on Mon Nov 13 17:25:55 2017
 
 from comeon_etl import modelSwisstennis
 
-modelSwisstennis(start_value=0.1, days_between_run=7, look_back_weeks=12, ModelName='SW3MALL', StartDate="01/01/01")
+modelSwisstennis(start_value=0.1, days_between_run=7, look_back_weeks=12, ModelName='SW3MALL', StartDate="01/05/09")
 
