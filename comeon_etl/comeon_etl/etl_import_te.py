@@ -76,6 +76,24 @@ def etl_import_te_player(conn_sqllite3, con_postgres, days = 10000) :
     print("Store Tennis Explorer player list")    
 
     df_player.to_sql('tbl_te_player', con_postgres, if_exists='replace')
+    
+    
+def etl_import_te_ranking(conn_sqllite3, con_postgres, days = 10000) :
+    print("Load Tennis Explorer ranking list")    
+            
+    df_ranking = pd.read_sql('select * from tmp_te_ranking where "StartDate" > date("now","-' + str(days) + ' days") ', conn_sqllite3)
+    df_ranking = df_ranking.drop_duplicates()
+    
+    df_ranking = df_ranking.drop('index', axis=1)
+    
+    df_ranking['StartDate'] = pd.to_datetime(df_ranking.StartDate)
+    df_ranking['StartDate'] = pd.to_datetime(df_ranking.StartDate)
+    df_ranking['rank'] = df_ranking['rank'].str[:-1]
+    df_ranking['rank'] = df_ranking['rank'].astype('int')
+ 
+    print("Store Tennis Explorer ranking list")    
+
+    df_ranking.to_sql('tbl_te_ranking', con_postgres, if_exists='replace')    
 
     
     
@@ -84,3 +102,4 @@ def etl_import_te(days=100) :
     ## Testing
     etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
     etl_import_te_player(conn_sqllite3, con_postgres, days=days)
+    etl_import_te_ranking(conn_sqllite3, con_postgres, days=days)
