@@ -120,14 +120,14 @@ def checkBetBtcBetForPlace(betbtc_event_id, player_name, backlay, odds, stake) :
                     btc_stake = value[0][1]
                     if backlay == 1 :
                         if btc_odds < odds:
-                            return -4, "odds smaller then requested"
+                            return -4, "odds smaller then requested" + str(data)
                         if stake > btc_stake:
-                            return -3, "Stake bigger then maxRiskStake"
+                            return -3, "Stake bigger then maxRiskStake" + str(data)
                     else :
                          if btc_odds > odds:
-                            return -4, "odds smaller then requested"                       
+                            return -4, "odds smaller then requested" + str(data)                       
                     if stake > btc_stake:
-                       return -3, "Stake bigger then maxRiskStake"
+                       return -3, "Stake bigger then maxRiskStake" + str(data)
                     return 0, "okay"
     return -1, "bet not found"
                             

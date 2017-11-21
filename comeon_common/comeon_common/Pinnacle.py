@@ -82,7 +82,7 @@ def checkPinnacleBetForPlace(pin_event_id, pin_league_id, type_id, way, backlay,
         return -3, "Stake bigger then maxRiskStake" + str(bet_data)
         
     if odds > bet_data['price'] : 
-        return -4, "odds smaller then requested"
+        return -4, "odds smaller then requested" + str(bet_data)
     
     balance = checkPinnacleBalance()
     
