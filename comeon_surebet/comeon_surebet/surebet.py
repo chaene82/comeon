@@ -271,7 +271,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
 def searchSurebet() :
     con, meta = connect()  
     tbl_surebet = meta.tables['tbl_surebet']
-    events = con.execute('Select event_id from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now() and Live = 0' )
+    events = con.execute('Select event_id from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
     for event in events :
         print(event[0])
         searchSurebetEvent(event[0], tbl_surebet)
