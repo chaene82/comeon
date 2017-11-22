@@ -273,7 +273,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
 
     
     if surebet_numbers == 0 :
-        log.info("no surebet found for event", event_id)
+        log.info("no surebet found for event" + str(event_id))
 
 
 
