@@ -110,11 +110,11 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                 surebet = (1 / home_odds) +  (1 / away_odds)
                                
                 if surebet < 1 :
-                    log.info("surebet on event" + event_id)
-                    log.info("home odds " + h_odd[0], bookie, )
-                    log.info("away odds " + a_odd[0], check_bookie)    
+                    log.info("surebet on event" + str(event_id))
+                    log.info("home odds " + str(h_odd[0]) + " " + str(bookie) )
+                    log.info("away odds " + str(a_odd[0]) + " " + str(check_bookie))    
                     
-                    log.info("sure bet" + (1 - surebet) * 100)
+                    log.info("sure bet" + str((1 - surebet) * 100))
                     
                     if ((1 - surebet) * 100) > margin :
                     
@@ -129,12 +129,12 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         home_return = home_stake * home_odds
                         away_return = away_stake * away_odds
                         
-                        log.info("home stake " + home_stake)
-                        log.info("away stake " + away_stake)   
-                        log.info("home return " + home_return)
-                        log.info("away return " + away_return)  
-                        log.info("home prop " + home_prob)
-                        log.info("away prop " + away_prob)         
+                        log.info("home stake " + str(home_stake))
+                        log.info("away stake " + str(away_stake))   
+                        log.info("home return " + str(home_return))
+                        log.info("away return " + str(away_return))  
+                        log.info("home prop " + str(home_prob))
+                        log.info("away prop " + str(away_prob))         
                         log.info("Home Odds " + str(home_odds_id))
                         log.info("Away Odds " + str(away_odds_id))                            
 
@@ -145,12 +145,12 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                             
                         theoretical_winnings = (home_return * home_prob) + (away_return * away_prob)
                             
-                        log.info("Theoretical Winnings " + theoretical_winnings)
+                        log.info("Theoretical Winnings " + str(theoretical_winnings))
                             
                         if min(home_return, away_return) - (stake_total) > 0 :
 
-                            log.info("min profit " + min(home_return, away_return) - (stake_total) )
-                            log.info("max profit " + max(home_return, away_return) - (stake_total) ) 
+                            log.info("min profit " + str(min(home_return, away_return) - (stake_total) ))
+                            log.info("max profit " + str(max(home_return, away_return) - (stake_total) ))
                             
                         
                             
@@ -196,9 +196,9 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 
                         elif (theoretical_winnings - (stake_total)) / (stake_total) * 100 > high_risk_margin :   
                             
-                            log.info("high risk surebet found " + theoretical_winnings)
-                            log.info("min profit " + min(home_return, away_return) - (stake_total) )
-                            log.info("max profit " + max(home_return, away_return) - (stake_total) )                             
+                            log.info("high risk surebet found " + str(theoretical_winnings))
+                            log.info("min profit " + str(min(home_return, away_return) - (stake_total) ))
+                            log.info("max profit " + str(max(home_return, away_return) - (stake_total) ))                             
 
                             surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 1).where(tbl_surebet.columns.surebet_typ == 2)
                             db_surebet_id = con.execute(surebet_sql).fetchone() 
