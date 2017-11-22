@@ -21,7 +21,7 @@ tbl_events = meta.tables['tbl_events']
 
 
 
-def placeSureBet(surebet_typ, event_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake) :
+def placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake) :
     
     # get add required information
     
@@ -31,12 +31,21 @@ def placeSureBet(surebet_typ, event_id, home_odds_id, home_odds, home_stake, awa
     home_status = checkBetforPlace(home_odds_id, home_odds, home_stake)     
     away_status = checkBetforPlace(away_odds_id, away_odds, away_stake)
     
-    if home_status and away_status :
-        home_bet_status = placeBet(home_odds_id, home_odds, home_stake, product_id=surebet_typ, surebet_id=0) 
-        if home_bet_status :
-            away_bet_status = placeBet(away_odds_id, away_odds, away_stake, product_id=surebet_typ, surebet_id=0) 
+    if (home_stake <= away_stake) :
+    
+        if home_status and away_status :
+            home_bet_status = placeBet(home_odds_id, home_odds, home_stake, product_id=surebet_typ, surebet_id=surebet_id) 
+            if home_bet_status :
+                away_bet_status = placeBet(away_odds_id, away_odds, away_stake, product_id=surebet_typ, surebet_id=surebet_id) 
+                if away_bet_status :
+                    return True
+    else :
+        if home_status and away_status :
+            away_bet_status = placeBet(away_odds_id, away_odds, away_stake, product_id=surebet_typ, surebet_id=surebet_id) 
             if away_bet_status :
-                return True
+                home_bet_status = placeBet(home_odds_id, home_odds, home_stake, product_id=surebet_typ, surebet_id=surebet_id) 
+                if home_bet_status :
+                    return True
     return False
 
 def searchSurebetEvent(event_id, tbl_surebet) :
@@ -101,11 +110,11 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                 surebet = (1 / home_odds) +  (1 / away_odds)
                                
                 if surebet < 1 :
-                    print("surebet on event", event_id)
-                    print("home odds", h_odd[0], bookie, )
-                    print("away odds", a_odd[0], check_bookie)    
+                    log.info("surebet on event" + event_id)
+                    log.info("home odds " + h_odd[0], bookie, )
+                    log.info("away odds " + a_odd[0], check_bookie)    
                     
-                    print("sure bet", (1 - surebet) * 100)
+                    log.info("sure bet" + (1 - surebet) * 100)
                     
                     if ((1 - surebet) * 100) > margin :
                     
@@ -120,12 +129,12 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         home_return = home_stake * home_odds
                         away_return = away_stake * away_odds
                         
-                        print("home stake ", home_stake)
-                        print("away stake ", away_stake)   
-                        print("home return ", home_return)
-                        print("away return ", away_return)  
-                        print("home prop ", home_prob)
-                        print("away prop ", away_prob)         
+                        log.info("home stake " + home_stake)
+                        log.info("away stake " + away_stake)   
+                        log.info("home return " + home_return)
+                        log.info("away return " + away_return)  
+                        log.info("home prop " + home_prob)
+                        log.info("away prop " + away_prob)         
                         log.info("Home Odds " + str(home_odds_id))
                         log.info("Away Odds " + str(away_odds_id))                            
 
@@ -136,12 +145,12 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                             
                         theoretical_winnings = (home_return * home_prob) + (away_return * away_prob)
                             
-                        print("Theoretical Winnings ", theoretical_winnings)
+                        log.info("Theoretical Winnings " + theoretical_winnings)
                             
                         if min(home_return, away_return) - (stake_total) > 0 :
 
-                            print("min profit ", min(home_return, away_return) - (stake_total) )
-                            print("max profit ", max(home_return, away_return) - (stake_total) ) 
+                            log.info("min profit " + min(home_return, away_return) - (stake_total) )
+                            log.info("max profit " + max(home_return, away_return) - (stake_total) ) 
                             
                         
                             
@@ -170,7 +179,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 
                                 log.info("Surebet ID " + str(surebet_id))  
                                 
-                                surebetStatus = placeSureBet(surebet_typ, event_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake)
+                                surebetStatus = placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake)
                                 
                                 log.info("SureBet place? " + str(surebetStatus))  
                                 
@@ -183,13 +192,13 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 
 
                             else :
-                                print("already exists in the database")
+                               log.info("already exists in the database")
                                 
                         elif (theoretical_winnings - (stake_total)) / (stake_total) * 100 > high_risk_margin :   
                             
-                            print("high risk surebet found ", theoretical_winnings)
-                            print("min profit ", min(home_return, away_return) - (stake_total) )
-                            print("max profit ", max(home_return, away_return) - (stake_total) )                             
+                            log.info("high risk surebet found " + theoretical_winnings)
+                            log.info("min profit " + min(home_return, away_return) - (stake_total) )
+                            log.info("max profit " + max(home_return, away_return) - (stake_total) )                             
 
                             surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 1).where(tbl_surebet.columns.surebet_typ == 2)
                             db_surebet_id = con.execute(surebet_sql).fetchone() 
@@ -217,7 +226,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 
                                 log.info("Surebet ID " + str(surebet_id))  
                                 
-                                surebetStatus = placeSureBet(surebet_typ, event_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake)
+                                surebetStatus = placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake)
                                 
                                 log.info("SureBet place? " + str(surebetStatus))  
                                 
@@ -229,13 +238,13 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                     con.execute(clause) 
                                     
                             else :
-                                print("already exists in the database")                            
+                                log.info("already exists in the database")                            
                         
                         else :
                             
                             surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 5)
                             db_surebet_id = con.execute(surebet_sql).fetchone() 
-                            print("No winnings after commissions !")
+                            log.info("No winnings after commissions !")
                             if db_surebet_id == None :
                             
                                 clause = insert(tbl_surebet).values(event_id=event_id, \
@@ -250,21 +259,21 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 
                                 
                                 con.execute(clause) 
-                                print("store to database")
+                                log.info("store to database")
                             else :
-                                print("already exists in the database")    
+                                log.info("already exists in the database")    
 
                             
                         
                         surebet_numbers = surebet_numbers + 1
                     else :
-                        print("sure bet to small !")
+                        log.info("sure bet to small !")
          
                     
 
     
     if surebet_numbers == 0 :
-        print("no surebet found for event", event_id)
+        log.info("no surebet found for event", event_id)
 
 
 
@@ -273,6 +282,6 @@ def searchSurebet() :
     tbl_surebet = meta.tables['tbl_surebet']
     events = con.execute('Select event_id from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
     for event in events :
-        print(event[0])
+        log.debug(event[0])
         searchSurebetEvent(event[0], tbl_surebet)
     
