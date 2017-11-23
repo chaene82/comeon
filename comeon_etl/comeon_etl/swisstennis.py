@@ -191,14 +191,16 @@ def modelSwisstennis(start_value=0.1, days_between_run=7, look_back_weeks=52, Mo
         curr_ranking['FromDate'] = FromDate
         curr_ranking['ToDate'] = ToDate-timedelta(seconds=1)   
     
-        
-        all_ranking = all_ranking.append(curr_ranking)           
+        curr_ranking.to_sql("temp_ranking_" + ModelName, conn, if_exists='append')
+        #all_ranking = all_ranking.append(curr_ranking)           
                     
         FromDate = ToDate
+        
+        
     # loop trough all players
     
     
     
-    all_ranking.to_sql("temp_ranking_" + ModelName, conn, if_exists='replace')
-    all_ranking.to_csv("ranking_"+ ModelName +".csv")
+    #all_ranking.to_sql("temp_ranking_" + ModelName, conn, if_exists='replace')
+    #all_ranking.to_csv("ranking_"+ ModelName +".csv")
     
