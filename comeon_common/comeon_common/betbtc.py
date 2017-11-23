@@ -70,7 +70,7 @@ def getBetBtcEventData():
 
 def getBetBtcMaketOdds(event_id):
     data = requests.get("http://www.betbtc.co/api/market?id=" + str(event_id),headers=headers)
-    time.sleep(0.2)
+    time.sleep(0.5)
     return data.json()
     
 
@@ -86,18 +86,32 @@ def checkBetBtcBalance() :
 def checkBetBtcSettledBet(betbtc_bet_id) :
     response =  requests.get("http://www.betbtc.co/api/user/statement",headers=headers).json()
     for line in response :
-        if betbtc_bet_id == line['id'] :
-            return 'Settled', line
+        if str(betbtc_bet_id) in line['description'] :
+            if line['credit'] == None:
+                winnings = 0
+            else :
+                winnings = line['credit']
+            return 'settled', winnings, line
+        
+    status, line = checkBetBtcOpenBet(betbtc_bet_id)
     
-    return 'Not Found', None
+    if status == 1:
+        return 'unmatched', 0, line
+    elif status == 2:
+        return 'matched', 0, line
+    
+    return 'Not Found', 0, None
 
 def checkBetBtcOpenBet(betbtc_bet_id) :
     response =  requests.get("http://www.betbtc.co/api/bet/",headers=headers).json()
     for line in response :
         if betbtc_bet_id == line[0] :
-            return line
+            if line[2] == 'Unmatched' :
+                return 1, line
+            elif line[2] == 'Matched' :
+                return 2, line
     
-    return 'Not Found', None
+    return 0, None
     
     
     
@@ -144,8 +158,17 @@ def placeBetBtcBet(betbtc_event_id, player_name, backlay, odds, stake) :
 
     response = requests.post(url, headers=headers)    
     data = response.json()
-    return data
-    
+    if data[0]['status'] == 'OK' :
+        status, line = checkBetBtcOpenBet(data[0]['id'])
+        if status == 2 :
+            return data[0]['id'], "bet placed and matched", data
+        if status == 1 :
+            return data[0]['id'], "bet placed and unmatched", data
+        else :
+            return data[0]['id'], "problem by checking bet", data
+    else :
+        return -1, "error placing bet, Errorcode " + response['errorCode'], response
+
     
     
 def closeBetBtcBet(betbtc_event_id) :
