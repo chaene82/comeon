@@ -202,6 +202,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
 
                             surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 1).where(tbl_surebet.columns.surebet_typ == 2)
                             db_surebet_id = con.execute(surebet_sql).fetchone() 
+                            surebet_typ=2                            
                             
                             if db_surebet_id == None :
                             
@@ -214,7 +215,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                                    max_profit=round((max(home_return, away_return) - (stake_total) ),2), \
                                                    status=1,\
                                                    theoretical_winnings=theoretical_winnings,\
-                                                   surebet_typ=2,\
+                                                   surebet_typ=surebet_typ,\
                                                    update=dt)
                                 
                                 
