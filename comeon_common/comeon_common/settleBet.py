@@ -5,8 +5,9 @@ Created on Thu Nov 16 12:31:14 2017
 @author: haenec
 """
 
-from .betbtc import placeBetBtcBet
-from .Pinnacle import placePinnacleBet
+from .betbtc import placeBetBtcBet, checkBetBtcSettledBet
+from .Pinnacle import placePinnacleBet, checkPinnacleSettledBet
+from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
 from .base import startBetLogging
 from .getPrice import getBtcEurPrice
@@ -25,81 +26,63 @@ tbl_orderbook = meta.tables['tbl_orderbook']
 
 def settleBet(order_id) :
     dt = datetime.now()
-    data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, home_player_name, away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id, pin_line_id FROM public.tbl_odds o inner join public.tbl_events e using(event_id) where odds_id =" + str(odds_id) + ";").fetchone()
     
-    event_id = data[1]
-    bettyp_id = data[2]
-    bookie_id = data[3]
-    way = data[4]
-    backlay = data[5]
-    odds = data[7]
-    home_player_name = data[8]
-    away_player_name = data[9]
-    pinnacle_league_id = data[10]
-    pinnalce_event_id = data[11]
-    betbtc_event_id = data[12]
-    pin_line_id = data[13]
-    
-    if bookie_id == 1 :
-        #Pinnacle
-        # still deactivted
-        
-        stake = request_stake
-        currency = 'EUR'
-        #bet_id, message, resultset = placePinnacleBet(pinnalce_event_id, pin_line_id, bettyp_id, way, backlay, request_odds, request_stake)
-        bet_id, message, resultset = 1, '', ''
-        
-        if bet_id > 0:
-            status == 0
-        else :
-            status = -1
+    log.info("Checking for Order ID " + str(order_id))
 
-    elif bookie_id == 2 :
-        #BetBTC
-        if way == 1:
-            player_name = home_player_name
-        else :
-            player_name = away_player_name
-            
-        stake = request_stake / getBtcEurPrice()
-        currency = 'BTC'
-         
-        #still deactivated
-        #bet_id, message, resultset = placeBetBtcBet(betbtc_event_id, player_name, backlay, request_odds, stake)
-        bet_id, message, resultset = 1, '', ''   
-        
-        if (bet_id > 0 and message == "bet placed and matched") :
-            status == 0
-        else :
-            status = -1
+    stmt = select([tbl_orderbook]).where(tbl_orderbook.c.order_id == order_id)
     
+    lines = con.execute(stmt)    
     
-    log.info("place Bet for [ID " + str(odds_id) + "] " + message )
-    log.debug("Full resultset :  " + str(resultset))
-    
-    if status == 0:
-              
+    for line in lines :
+        bookie_id = line['bookie_id']
+        bet_id = line['bookie_bet_id']
+        stakes = line['turnover_local']
         
-        clause = insert(tbl_orderbook).values(product_id=product_id, \
-                                               odds_id = odds_id, \
-                                               bookie_id= bookie_id, \
-                                               bookie_bet_id = bet_id, \
-                                               backlay_id = backlay,\
-                                               bettype_id=bettyp_id, \
-                                               way=way, \
-                                               odds=request_odds,\
-                                               turnover_eur=request_stake, \
-                                               turnover_local=stake, \
-                                               Currency=currency,\
-                                               betdate=dt,\
-                                               status=1,\
-                                               surebet_id=surebet_id, \
-                                               update=dt) 
-            
-        con.execute(clause) 
-        
-        return True
-    else :
-        
-        return False
+        if bookie_id == 1 :
+            #pinnacle bet 
+            bet_status, winnings, odds, response = checkPinnacleSettledBet(bet_id)
+            winnings = float(winnings) 
+            winnings_local = winnings
+            winnings_eur = winnings
+            net_winnings_local = winnings
+            net_winnings_eur = winnings            
+        elif bookie_id == 2 :
+            bet_status, winnings, odds, response = checkBetBtcSettledBet(bet_id)
+            winnings = float(winnings) + float(stakes)
+            odds = float(odds) 
 
+
+            winnings_eur = round(winnings * getBtcEurPrice(), 2)
+            winnings_local = winnings
+            net_winnings_eur = winnings_eur
+            net_winnings_local = winnings_local   
+        else :
+            bet_status, winnings, odds, response = 'matched', 0, 0, 0
+  
+      
+        odds = float(odds) 
+        if bet_status == 'settled' :
+            if winnings > 0 :
+                status = 2
+                log.info("Bet won: Order ID " + str(order_id))
+            else :
+                status = 3
+                log.info("Bet lost: Order ID " + str(order_id))
+                
+            clause = update(tbl_orderbook).where(tbl_orderbook.columns.order_id == order_id).values({'eff_odds' : odds, 'bet_settlement_date' : dt, 'winnings_local' : winnings_local, 'winnings_eur' : winnings_eur, 'commission' : 0, 'net_winnings_eur' : net_winnings_eur, 'net_winnings_local' : net_winnings_local, 'status' : status, 'update' : dt})
+            con.execute(clause) 
+        else :
+            clause = update(tbl_orderbook).where(tbl_orderbook.columns.order_id == order_id).values({'status' : 1, 'update' : dt})
+            con.execute(clause)
+            log.info("Bet not settled: Order ID " + str(order_id))            
+
+
+
+def settleAllBets():
+    stmt = select([tbl_orderbook.c.order_id]).where(tbl_orderbook.c.status == 1)
+    
+    order_ids = con.execute(stmt).fetchall()
+    
+    for id in order_ids:
+        settleBet(id[0])
+    

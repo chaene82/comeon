@@ -118,23 +118,23 @@ def placePinnacleBet(pin_event_id, pin_line_id, type_id,  way, backlay, odds, st
            
 
     
-def checkPinaccleUnsettledBet(pin_bet_id) :   
+def checkPinnacleUnsettledBet(pin_bet_id) :   
     response = api.betting.get_bets(betids = pin_bet_id)
     
     return response['betStatus'], response
 
 
-def checkBetBtcSettledBet(pin_bet_id) :
+def checkPinnacleSettledBet(pin_bet_id) :
     response =  api.betting.get_bets(betids = pin_bet_id)
     if not response['bets'] :
-        return 'not found', 0, response
-    
+        return 'not found', 0, 0, response
+    odds = response['bets'][0]['price']
     if response['bets'][0]['betStatus'] == 'WON' :
         winnings = response['bets'][0]['win']
     elif response['bets'][0]['betStatus'] == 'LOST':
         winnings = 0
     else:
-        return 'not settled', 0, response
-    return 'settled', winnings, response
+        return 'not settled', 0, 0, response
+    return 'settled', winnings, odds, response
         
  

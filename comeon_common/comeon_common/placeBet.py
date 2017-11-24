@@ -46,8 +46,8 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0) :
         
         stake = request_stake
         currency = 'EUR'
-        #status, message, resultset = placePinnacleBet(pinnalce_event_id, pin_line_id, bettyp_id, way, backlay, request_odds, request_stake)
-        status, message, resultset = 0, '', ''
+        betid, message, resultset = placePinnacleBet(pinnalce_event_id, pin_line_id, bettyp_id, way, backlay, request_odds, request_stake)
+        #betid, message, resultset = 0, '', ''
 
     elif bookie_id == 2 :
         #BetBTC
@@ -60,20 +60,26 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0) :
         currency = 'BTC'
          
         #still deactivated
-        #status, message, resultset = placeBetBtcBet(betbtc_event_id, player_name, backlay, request_odds, stake)
-        status, message, resultset = 0, '', ''    
+        print(betbtc_event_id)
+        print(player_name)
+        print(backlay)
+        print(request_odds)
+        print(float(stake))
+        
+        betid, message, resultset = placeBetBtcBet(betbtc_event_id, player_name, backlay, request_odds, stake)
+        #status, message, resultset = 0, '', ''    
     
     
     log.info("place Bet for [ID " + str(odds_id) + "] " + message )
     log.debug("Full resultset :  " + str(resultset))
     
-    if status == 0:
+    if betid > 0:
               
         
         clause = insert(tbl_orderbook).values(product_id=product_id, \
                                                odds_id = odds_id, \
                                                bookie_id= bookie_id, \
-                                               bookie_bet_id = 0, \
+                                               bookie_bet_id = betid, \
                                                backlay_id = backlay,\
                                                bettype_id=bettyp_id, \
                                                way=way, \

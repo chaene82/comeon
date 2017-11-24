@@ -91,16 +91,18 @@ def checkBetBtcSettledBet(betbtc_bet_id) :
                 winnings = 0
             else :
                 winnings = line['credit']
-            return 'settled', winnings, line
+                
+            odds = line['odd']
+            return 'settled', winnings, odds, line
         
     status, line = checkBetBtcOpenBet(betbtc_bet_id)
     
     if status == 1:
-        return 'unmatched', 0, line
+        return 'unmatched', 0, 0 ,line
     elif status == 2:
-        return 'matched', 0, line
+        return 'matched', 0, 0, line
     
-    return 'Not Found', 0, None
+    return 'Not Found', 0, 0, None
 
 def checkBetBtcOpenBet(betbtc_bet_id) :
     response =  requests.get("http://www.betbtc.co/api/bet/",headers=headers).json()
@@ -167,7 +169,7 @@ def placeBetBtcBet(betbtc_event_id, player_name, backlay, odds, stake) :
         else :
             return data[0]['id'], "problem by checking bet", data
     else :
-        return -1, "error placing bet, Errorcode " + response['errorCode'], response
+        return -1, "error placing bet, Errorcode", data
 
     
     
