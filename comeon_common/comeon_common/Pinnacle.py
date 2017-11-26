@@ -13,7 +13,7 @@ import datetime
 import os
 from sqlalchemy import create_engine, MetaData, select
 from pinnacle.apiclient import APIClient
-#from .tennis_config import *
+from .tennis_config import *
 
 dir = os.path.dirname(__file__)
 os.chdir(dir)
