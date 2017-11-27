@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Wed Nov  1 14:27:52 2017
 
@@ -12,7 +11,7 @@ import numpy as np
 import math
 from comeon_common import connect
 from comeon_common import startBetLogging
-from comeon_common import checkBetforPlace, placeBet
+from comeon_common import checkBetforPlace, placeBet, checkOffer, placeOffer
 
 log = startBetLogging("laybet")
 con, meta = connect()  
@@ -40,9 +39,9 @@ def calcLayOdds(back_odds=1.2, margin=0.1, invest=10) :
     calc_margin = win / invest
     
     if calc_margin > margin * 0.9 :
-        return True, odds_round, laybet_stakes
+        return True, odds_round, laybet_stakes, back_stake
     else:
-        return False, 0, 0
+        return False, 0, 0, 0
     
 
 def checkLayOdds(offerLayOdds, hedgeLayOdds, min_margin=0.05, invest=10) :
@@ -55,278 +54,157 @@ def checkLayOdds(offerLayOdds, hedgeLayOdds, min_margin=0.05, invest=10) :
         return False        
 
 
-calcLayOdds(1.735, 0.1, 10)
+calcLayOdds(5, 0.1, 20)
 checkLayOdds(1.63, 1.68, 0.05, 10)
 
 
-
-
-
-
-
-
-def placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake) :
+def placeLayBet(odds_id) :
+    laybot_bookie = 2
+    backbet_bookie = 1
     
-    # get add required information
-    
-    log.debug("odds id " + str(home_odds_id))
+    # Check if laybet already exist and give the odds
+    hedge_odds_result  = con.execute('SELECT odds, event_id, bettyp_id, bookie_id, way, backlay, odds_id FROM tbl_odds WHERE odds_id = ' + str(odds_id)).fetchone()
+    hedge_odds = hedge_odds_result[0]
+    event_id = hedge_odds_result[1]
+    bettyp_id = hedge_odds_result[2]
+    way = hedge_odds_result[3] 
+    backlay =  hedge_odds_result[4]
+    hedge_odds_id =  hedge_odds_result[5]
 
     
-    home_status = checkBetforPlace(home_odds_id, home_odds, home_stake)     
-    away_status = checkBetforPlace(away_odds_id, away_odds, away_stake)
+    place_odds_result = con.execute('SELECT odds_id, odds FROM tbl_odds WHERE event_id = ' + str(event_id) + 'and bettyp_id = ' + str(bettyp_id) + 'and way = ' + str(way) + 'and backlay = 2 and bookie_id = ' + str(laybot_bookie)).fetchone()
     
-    if (home_stake <= away_stake) :
+    place_odds_id = place_odds_result[0]
+    place_offer_odd = place_odds_result[1]
+    odds_status, offer_odds, offer_laybet_stakes, hedge_laybet_stakes = calcLayOdds(hedge_odds)
     
-        if home_status and away_status :
-            home_bet_status = placeBet(home_odds_id, home_odds, home_stake, product_id=surebet_typ, surebet_id=surebet_id) 
-            if home_bet_status :
-                away_bet_status = placeBet(away_odds_id, away_odds, away_stake, product_id=surebet_typ, surebet_id=surebet_id) 
-                if away_bet_status :
-                    return True
-    else :
-        if home_status and away_status :
-            away_bet_status = placeBet(away_odds_id, away_odds, away_stake, product_id=surebet_typ, surebet_id=surebet_id) 
-            if away_bet_status :
-                home_bet_status = placeBet(home_odds_id, home_odds, home_stake, product_id=surebet_typ, surebet_id=surebet_id) 
-                if home_bet_status :
-                    return True
-    return False
+    
+    if (offer_odds >= place_offer_odd or math.isnan(place_offer_odd))  :
+        log.info("add offer on event id " + str(event_id))
+        
+        placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_odds, offer_laybet_stakes, hedge_laybet_stakes)
+        
+        
+def updateLayBet(odds_id, offer_id) :
+    laybot_bookie = 2
+    backbet_bookie = 1
+    
+    # Check if laybet already exist and give the odds
+    hedge_odds_result  = con.execute('SELECT odds, event_id, bettyp_id, bookie_id, way, backlay, odds_id FROM tbl_odds WHERE odds_id = ' + str(odds_id)).fetchone()
+    hedge_odds = hedge_odds_result[0]
+    event_id = hedge_odds_result[1]
+    bettyp_id = hedge_odds_result[2]
+    way = hedge_odds_result[3] 
+    backlay =  hedge_odds_result[4]
+    hedge_odds_id =  hedge_odds_result[5]
 
-def searchSurebetEvent(event_id, tbl_surebet) :
+    
+    place_odds_result = con.execute('SELECT odds_id, odds FROM tbl_odds WHERE event_id = ' + str(event_id) + 'and bettyp_id = ' + str(bettyp_id) + 'and way = ' + str(way) + 'and backlay = 2 and bookie_id = ' + str(laybot_bookie)).fetchone()
+    
+    place_odds_id = place_odds_result[0]
+    place_offer_odd = place_odds_result[1]
+    odds_status, offer_odds, offer_laybet_stakes, hedge_laybet_stakes = calcLayOdds(hedge_odds)
+    
+    
+    if (offer_odds >= place_offer_odd or math.isnan(place_offer_odd))  :
+        log.info("update offer on event id " + str(event_id))
+        
+        status, bet_id = updateOffer(place_odds_id, offer_id, offer_odds, offer_laybet_stakes)
+        if status == 0 :
+                    clause = update(tbl_offer).where(tbl_offer.columns.offer_id == offer_id).values(status=1, odds=offer_odds, update=dt)
+                    con.execute(clause) 
+        else :
+            log.info("error offer on event id " + str(event_id))
+
+            
+        
+        
+def checkLayBet(offer_id) :
     dt = datetime.now()
-    con, meta = connect()    
-          
-    tbl_odds = meta.tables['tbl_odds']
+    invest = 10
+    product_id = 4
+    bettyp_id=1
+
+    laybot_bookie = 2
+    backbet_bookie = 1
     
+    # Check if laybet already exist and give the odds
+    offer  = con.execute('SELECT odds_id, hedge_odds_id, odds, hedge_odds, turnover_eur, turnover_local, currency, status, bookie_bet_id FROM tbl_offer WHERE offer_id = ' + str(offer_id)).fetchone()
+    odds_id = offer[0]
+    hedge_odds_id = offer[1]
+    hedge_odds = offer[4]
+    oods = offer[2]
+    stake_eur = offer[5] 
+    stake_local =  offer[6]
+    currency =  offer[7]
+    status =  offer[8]
+    bookie_bet_id = offer[9]
+
+    offer_bookie_status = checkOffer(offer_id)
     
-    #event_id = 362
-    surebet_numbers = 0
-    bettyps = [1]
-    stake_total = 20
-    margin = 0
+    if offer_bookie_status == 0 :
+        ## no bet exists
+        log.info("Offer no longer exists, close it")
+        clause = update(tbl_offer).where(tbl_offer.columns.offer_id == offer_id).values(status=2, update=dt)
+        con.execute(clause) 
+        
+    elif offer_bookie_status == 1 :
+        ## no unmatched 
+        log.info("Offer still unmatched, check hedge bet")
+        eff_hedge_odds = con.execute('SELECT odds FROM tbl_odds WHERE odds_id = ' + str(hedge_odds_id)).fetchone()[0]
+        if checkLayOdds(eff_odds, eff_hedge_odds, invest=float(stake_eur)) :
+            # Odd no longer okay, change it
+            log.info("update offer")
+            updateLayBet(odds_id, offer_id)
+
     
-    high_risk_margin = 0
-    betbtc_margin = 4
-    
-    
-    #ways = [1,2]
-    bookies = [1,2]
-    
-    # Searching for Back surebets
-    for bettyp in bettyps :
-        for bookie in bookies :
-    
-            h = select([tbl_odds.columns.odds, tbl_odds.columns.odds_id])\
-                      .where(tbl_odds.columns.event_id == event_id)\
-                      .where(tbl_odds.columns.bettyp_id == bettyp)\
-                      .where(tbl_odds.columns.bookie_id == bookie)\
-                      .where(tbl_odds.columns.backlay == 1)\
-                      .where(tbl_odds.columns.way == 1)            
-                      
-            h_odd = con.execute(h).fetchone()
+        
+    elif offer_bookie_status == 2 :
+        ##  matched     
+        log.info("Offer matched, hedge it")
+        hedge_bet_status = placeBet(hedge_odds_id, hedge_odds, invest, product_id=product_id, surebet_id=0, offer_id=odds_id) 
+
+                
+        clause = insert(tbl_orderbook).values(product_id=product_id, \
+                                               odds_id = odds_id, \
+                                               bookie_id= laybot_bookie, \
+                                               bookie_bet_id = bookie_bet_id, \
+                                               backlay_id = 2,\
+                                               bettype_id=bettyp_id, \
+                                               way=0, \
+                                               odds=oods,\
+                                               turnover_eur=stake_eur, \
+                                               turnover_local=stake_local, \
+                                               Currency=currency,\
+                                               betdate=dt,\
+                                               status=1,\
+                                               surebet_id=0, \
+                                               offer_id=offer_id,\
+                                               update=dt) 
             
-            if h_odd == None or np.isnan(h_odd[0]) :
-                continue
-            
-            for check_bookie in bookies :
-                   
-                a = select([tbl_odds.columns.odds, tbl_odds.columns.odds_id])\
-                          .where(tbl_odds.columns.event_id == event_id)\
-                          .where(tbl_odds.columns.bettyp_id == bettyp)\
-                          .where(tbl_odds.columns.bookie_id == check_bookie)\
-                          .where(tbl_odds.columns.backlay == 1)\
-                          .where(tbl_odds.columns.way == 2)            
-                      
-                a_odd = con.execute(a).fetchone()   
-               
-                if a_odd == None or np.isnan(a_odd[0]) :
-                    continue
-                
-                home_odds = h_odd[0]
-                away_odds = a_odd[0]
-                
-                home_odds_id = h_odd[1]
-                away_odds_id = a_odd[1]
-                
-                if not isinstance(home_odds, float) : home_odds = np.nan
-                if not isinstance(away_odds, float) : away_odds = np.nan
-                
-                surebet = (1 / home_odds) +  (1 / away_odds)
-                               
-                if surebet < 1 :
-                    log.info("surebet on event" + str(event_id))
-                    log.info("home odds " + str(h_odd[0]) + " " + str(bookie) )
-                    log.info("away odds " + str(a_odd[0]) + " " + str(check_bookie))    
-                    
-                    log.info("sure bet" + str((1 - surebet) * 100))
-                    
-                    if ((1 - surebet) * 100) > margin :
-                    
-                        home_prob = (1/surebet) / home_odds
-                        away_prob = (1/surebet) / away_odds
-                        
-                                    
-                        
-                        home_stake = round(stake_total * home_prob,1)
-                        away_stake = round(stake_total * away_prob,1)
-                        
-                        home_return = home_stake * home_odds
-                        away_return = away_stake * away_odds
-                        
-                        log.info("home stake " + str(home_stake))
-                        log.info("away stake " + str(away_stake))   
-                        log.info("home return " + str(home_return))
-                        log.info("away return " + str(away_return))  
-                        log.info("home prop " + str(home_prob))
-                        log.info("away prop " + str(away_prob))         
-                        log.info("Home Odds " + str(home_odds_id))
-                        log.info("Away Odds " + str(away_odds_id))                            
+        con.execute(clause) 
+        
+        clause = update(tbl_offer).where(tbl_offer.columns.offer_id == offer_id).values(status=3, update=dt)
+        con.execute(clause)         
 
-                        if bookie == 2 :
-                            home_return = (home_return - home_stake) * (1 - (betbtc_margin/100)) + home_stake
-                        if check_bookie == 2 :
-                            away_return = (away_return - away_stake) * (1 - (betbtc_margin/100)) + away_stake
-                            
-                        theoretical_winnings = (home_return * home_prob) + (away_return * away_prob)
-                            
-                        log.info("Theoretical Winnings " + str(theoretical_winnings))
-                            
-                        if min(home_return, away_return) - (stake_total) > 0 :
+    return True
 
-                            log.info("min profit " + str(min(home_return, away_return) - (stake_total) ))
-                            log.info("max profit " + str(max(home_return, away_return) - (stake_total) ))
-                            
-                        
-                            
-                            surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 1)
-                            db_surebet_id = con.execute(surebet_sql).fetchone() 
-                            surebet_typ=1
-                            
-                            if db_surebet_id == None :
-                            
-                                clause = insert(tbl_surebet).returning(tbl_surebet.columns.surebet_id).values(event_id=event_id, \
-                                                   home_bookie_id=bookie, \
-                                                   away_bookie_id=check_bookie, \
-                                                   home_odds=home_odds, \
-                                                   away_odds=away_odds, \
-                                                   min_profit=round((min(home_return, away_return) - (stake_total) ),2), \
-                                                   max_profit=round((max(home_return, away_return) - (stake_total) ),2), \
-                                                   status=1,\
-                                                   theoretical_winnings=theoretical_winnings,\
-                                                   surebet_typ=surebet_typ,\
-                                                   update=dt)
-                                log.info("store to database")                                 
-                                result = con.execute(clause)  
-                                
-                                for id in result :
-                                    surebet_id = id[0]
-                                
-                                log.info("Surebet ID " + str(surebet_id))  
-                                
-                                surebetStatus = placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake)
-                                
-                                log.info("SureBet place? " + str(surebetStatus))  
-                                
-                                if surebetStatus :
-                                    clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=2)
-                                    con.execute(clause) 
-                                else :
-                                    clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=6)                              
-                                    con.execute(clause) 
-                                
-
-                            else :
-                               log.info("already exists in the database")
-                                
-                        elif (theoretical_winnings - (stake_total)) / (stake_total) * 100 > high_risk_margin :   
-                            
-                            log.info("high risk surebet found " + str(theoretical_winnings))
-                            log.info("min profit " + str(min(home_return, away_return) - (stake_total) ))
-                            log.info("max profit " + str(max(home_return, away_return) - (stake_total) ))                             
-
-                            surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 1).where(tbl_surebet.columns.surebet_typ == 2)
-                            db_surebet_id = con.execute(surebet_sql).fetchone() 
-                            surebet_typ=2                            
-                            
-                            if db_surebet_id == None :
-                            
-                                clause = insert(tbl_surebet).returning(tbl_surebet.columns.surebet_id).values(event_id=event_id, \
-                                                   home_bookie_id=bookie, \
-                                                   away_bookie_id=check_bookie, \
-                                                   home_odds=home_odds, \
-                                                   away_odds=away_odds, \
-                                                   min_profit=round((min(home_return, away_return) - (stake_total) ),2), \
-                                                   max_profit=round((max(home_return, away_return) - (stake_total) ),2), \
-                                                   status=1,\
-                                                   theoretical_winnings=theoretical_winnings,\
-                                                   surebet_typ=surebet_typ,\
-                                                   update=dt)
-                                
-                                
-                                log.info("store to database")                                 
-                                result = con.execute(clause)  
-                                
-                                for id in result :
-                                    surebet_id = id[0]
-                                
-                                log.info("Surebet ID " + str(surebet_id))  
-                                
-                                surebetStatus = placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake)
-                                
-                                log.info("SureBet place? " + str(surebetStatus))  
-                                
-                                if surebetStatus :
-                                    clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=2)
-                                    con.execute(clause) 
-                                else :
-                                    clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=6)                              
-                                    con.execute(clause) 
-                                    
-                            else :
-                                log.info("already exists in the database")                            
-                        
-                        else :
-                            
-                            surebet_sql = select([tbl_surebet.c.event_id]).where(tbl_surebet.columns.event_id == event_id).where(tbl_surebet.columns.status == 5)
-                            db_surebet_id = con.execute(surebet_sql).fetchone() 
-                            log.info("No winnings after commissions !")
-                            if db_surebet_id == None :
-                            
-                                clause = insert(tbl_surebet).values(event_id=event_id, \
-                                                   home_bookie_id=bookie, \
-                                                   away_bookie_id=check_bookie, \
-                                                   home_odds=home_odds, \
-                                                   away_odds=away_odds, \
-                                                   min_profit=round((min(home_return, away_return) - (stake_total) ),2), \
-                                                   max_profit=round((max(home_return, away_return) - (stake_total) ),2), \
-                                                   status=5,\
-                                                   theoretical_winnings=theoretical_winnings,update=dt)
-                                
-                                
-                                con.execute(clause) 
-                                log.info("store to database")
-                            else :
-                                log.info("already exists in the database")    
-
-                            
-                        
-                        surebet_numbers = surebet_numbers + 1
-                    else :
-                        log.info("sure bet to small !")
-         
-                    
-
-    
-    if surebet_numbers == 0 :
-        log.info("no surebet found for event " + str(event_id))
-
-
-
-def searchSurebet() :
+        
+def searchLayBetOffer() :
+    concurrent_open_bets = 5
     con, meta = connect()  
-    tbl_surebet = meta.tables['tbl_surebet']
-    events = con.execute('Select event_id from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
-    for event in events :
-        log.debug(event[0])
-        searchSurebetEvent(event[0], tbl_surebet)
-    
+    #tbl_surebet = meta.tables['tbl_surebet']
+    open_offers = con.execute('SELECT count (offer_id) FROM tbl_offer WHERE status = 1').fetchone()
+    if open_offers[0] < concurrent_open_bets :
+        odds = con.execute('Select odds_id from tbl_odds o INNER JOIN tbl_events e using(event_id) WHERE e.pinnacle_event_id is not null and e.betbtc_event_id is not null and e."StartDateTime" >= now() and o.bookie_id = 1 and odds_id not in (select hedge_odds_id from tbl_offer)' )
+        for odds_id in odds :
+            log.info(odds_id[0])
+            placeLayBet(odds_id[0])
+
+            
+def checkOffers():
+    open_offer_ids = con.execute('SELECT offer_id FROM tbl_offer WHERE status = 1').fetchall()
+    for offer_id in open_offer_ids :
+        offer_id = offer_id[0]
+        log.info("Check Offer with offer ID " + str(offer_id))
+        checkLayBet(offer_id)
