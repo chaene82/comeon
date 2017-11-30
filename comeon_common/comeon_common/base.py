@@ -8,6 +8,7 @@ Created on Mon Nov 13 17:08:55 2017
 from sqlalchemy import create_engine, MetaData, select
 from sqlalchemy.dialects.postgresql import insert
 import logging
+from slacker_log_handler import SlackerLogHandler, NoStacktraceFormatter
 from .tennis_config import *
 
 ## Internal functions
@@ -32,8 +33,15 @@ def startBetLogging(application) :
     logger = logging.getLogger(application)
     logger.setLevel(logging.DEBUG)
     
+    SLACK_API_TOKEN = "xoxb-280090289303-njD9i7HXqkuBUanGiT7LetuH"
+    SLACK_CHANNEL = "#surebot"
+    
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
+    
+    sh = SlackerLogHandler(SLACK_API_TOKEN, SLACK_CHANNEL, stack_trace=True)
+    sh.setLevel(logging.ERROR)
+    
     # No File Handler (Logging over Rundeck)
     #fh = logging.FileHandler(application + 'debug.log')
     #fh.setLevel(logging.DEBUG)
@@ -44,6 +52,8 @@ def startBetLogging(application) :
     
     #logger.addHandler(fh)
     logger.addHandler(ch)
+    logger.addHandler(sh)
+
     
     return logger# -*- coding: utf-8 -*-
 
