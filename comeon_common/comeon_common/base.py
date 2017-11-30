@@ -99,7 +99,7 @@ def example() :
     """
 
 
-def connect(db=pg_db, user=pg_user, password=pg_pwd, host=pg_host, port=pq_port):
+def connect(db=cfg['database']['db'], user=cfg['database']['user'], password=cfg['database']['pwd'], host=cfg['database']['host'], port=cfg['database']['port']):
     """
     Returns a connection and a metadata object from the postgres DB
     
@@ -162,24 +162,19 @@ def startBetLogging(application) :
     logger = logging.getLogger(application)
     logger.setLevel(logging.DEBUG)
     
-    SLACK_API_TOKEN = "xoxb-280090289303-njD9i7HXqkuBUanGiT7LetuH"
-    SLACK_CHANNEL = "#surebot"
+    SLACK_API_TOKEN = cfg['log']['slack']['api_key']
+    SLACK_CHANNEL = cfg['log']['slack']['channel']
     
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
     
     sh = SlackerLogHandler(SLACK_API_TOKEN, SLACK_CHANNEL, stack_trace=True)
-    sh.setLevel(logging.ERROR)
+    sh.setLevel(logging.WARN)
     
-    # No File Handler (Logging over Rundeck)
-    #fh = logging.FileHandler(application + 'debug.log')
-    #fh.setLevel(logging.DEBUG)
     
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     ch.setFormatter(formatter)
-    #fh.setFormatter(formatter)
     
-    #logger.addHandler(fh)
     logger.addHandler(ch)
     logger.addHandler(sh)
 
