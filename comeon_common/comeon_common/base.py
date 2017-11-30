@@ -42,7 +42,10 @@ from sqlalchemy import create_engine, MetaData, select
 from sqlalchemy.dialects.postgresql import insert
 import logging
 from slacker_log_handler import SlackerLogHandler, NoStacktraceFormatter
-from .tennis_config import *
+#from .tennis_config import *
+import yaml
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
 
 def example() :
     """
@@ -128,6 +131,33 @@ def connect(db=pg_db, user=pg_user, password=pg_pwd, host=pg_host, port=pq_port)
 
 
 def startBetLogging(application) :
+    """
+    Initial the main logging function for comeon. 
+    
+    Normal message level is Info
+    = Debug --> not show
+    = Info --> Console (Rundeck)
+    > Warn --> Console (Rundeck) & Slack
+    
+    Please use the following loglevels for messages:
+        
+        Debug : Application internal messages (just for debugging)
+        Info  : Status information and some stuff to show on the console
+        Warn  : Messages to the customer (no action required)
+        Error : Messages to the customer (action required)
+        Critical : not defined yet
+        
+    
+    Args:
+        applicatoin (str): Name of the applicaton 
+        
+    Returns:
+        logger: the logger object
+        
+    Todo:
+    * Send all Debug messaged to Kafka
+        
+    """    
     
     logger = logging.getLogger(application)
     logger.setLevel(logging.DEBUG)
@@ -154,5 +184,5 @@ def startBetLogging(application) :
     logger.addHandler(sh)
 
     
-    return logger# -*- coding: utf-8 -*-
+    return logger
 
