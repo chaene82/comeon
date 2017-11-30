@@ -19,7 +19,7 @@ def createRanking() :
    
     log.info("Load ranking form Swisstennis")  
     sql = """
-        select a."Player", a."FromDate", a."ToDate", a."SW1YH",  b."SW3MALL", c."SW1MALL" d."SW1YG", e."SW1YH",  f."SW1YC"
+        select a."Player", a."FromDate", a."ToDate", a."SW1YALL",  b."SW3MALL", c."SW1MALL", d."SW1YG", e."SW1YH",  f."SW1YC"
         from "temp_ranking_SW1YALL" a
         inner join "temp_ranking_SW3MALL" b using ("Player", "FromDate", "ToDate")
         inner join "temp_ranking_SW1MALL" c using ("Player", "FromDate", "ToDate")        

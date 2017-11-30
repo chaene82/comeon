@@ -24,7 +24,7 @@ SET search_path = public, pg_catalog;
 
 CREATE TABLE public.tbl_offer
 (
-    offer_id bigint NOT NULL default nextval('tbl_odds_odds_id_seq'::regclass),
+    offer_id bigint NOT NULL default nextval('tbl_offer_offer_id_seq'::regclass),
     odds_id bigint,
     hedge_odds_id bigint,
     order_id bigint,

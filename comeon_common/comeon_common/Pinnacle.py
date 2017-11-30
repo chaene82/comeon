@@ -93,7 +93,6 @@ def checkPinnacleBetForPlace(pin_event_id, pin_league_id, type_id, way, backlay,
 
 def placePinnacleBet(pin_event_id, pin_line_id, type_id,  way, backlay, odds, stake) :
     sports_id = 33
-    stake = 10
     
     if type_id == 1 :
         period_number = 0
@@ -131,7 +130,7 @@ def checkPinnacleSettledBet(pin_bet_id) :
     odds = response['bets'][0]['price']
     if response['bets'][0]['betStatus'] == 'WON' :
         winnings = response['bets'][0]['win']
-    elif response['bets'][0]['betStatus'] == 'LOST':
+    elif response['bets'][0]['betStatus'] == 'LOSE':
         winnings = 0
     else:
         return 'not settled', 0, 0, response
