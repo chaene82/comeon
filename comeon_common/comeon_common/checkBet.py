@@ -73,3 +73,11 @@ def checkBetforPlace(odds_id, request_odds, request_stake) :
     else :
         return False
 
+
+def checkOffer(offer_id) :
+    
+    betbtc_bet_id = con.execute("SELECT bookie_bet_id FROM public.tbl_offer where offer_id =" + str(offer_id) + ";").fetchone()[0]
+    
+    status, line = checkBetBtcOpenBet(betbtc_bet_id)    
+
+    return status, line    

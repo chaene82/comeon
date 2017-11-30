@@ -165,9 +165,28 @@ def placeBetBtcBet(betbtc_event_id, player_name, backlay, odds, stake) :
         if status == 2 :
             return data[0]['id'], "bet placed and matched", data
         if status == 1 :
+            closeBetBtcBet(betbtc_event_id)
             return data[0]['id'], "bet placed and unmatched", data
         else :
             return data[0]['id'], "problem by checking bet", data
+    else :
+        return -1, "error placing bet, Errorcode", data
+        
+        
+def placeBetBtcOffer(betbtc_event_id, player_name, backlay, odds, stake) :
+    if backlay == 1 :
+        bettyp = 'back'
+    elif backlay == 2 :
+        bettyp = 'lay'
+    
+    parameters = {'market_id' : str(betbtc_event_id), 'selection' : player_name, 'odd' : str(odds), 'stake' : str(stake), 'bet_type' : bettyp}
+
+    url = add_url_params("https://www.betbtc.co/api/bet/", parameters)
+
+    response = requests.post(url, headers=headers)    
+    data = response.json()
+    if data[0]['status'] == 'OK' :
+        return data[0]['id'], "offer placed", data
     else :
         return -1, "error placing bet, Errorcode", data
 
@@ -181,6 +200,31 @@ def closeBetBtcBet(betbtc_event_id) :
     response =  requests.delete(url ,headers=headers).json()
     return response    
     
+    
+def updateBetBtcBet(betbtc_bet_id, odds) :
+
+    response =  requests.get("http://www.betbtc.co/api/bet/",headers=headers).json()
+    for line in response :
+        if betbtc_bet_id == line[0] :
+            print(line)
+            event_id = line[3]
+                      
+   
+    url = "https://www.betbtc.co/api/bet/"+str(betbtc_bet_id)+"?odd="+str(odds)
+    response_odds =  requests.put(url ,headers=headers).json()
+    print(response_odds)
+    time.sleep(5)
+
+    response =  requests.get("http://www.betbtc.co/api/bet/",headers=headers).json()
+    for line in response :
+        if event_id == line[3] :
+            if "lay" == line[7] and "Unmatched" in line[2] :
+                print(line)
+                betbtc_bet_id = line[0]    
+    
+    
+    
+    return 0, betbtc_bet_id 
     
 #def placePinnacleBet(event_id, type_id, way, backlay, odds, stake) :
 
