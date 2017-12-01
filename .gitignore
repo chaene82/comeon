@@ -8,6 +8,7 @@ data/*
 # Configs
 *tennis_config.py
 comeon_common/comeon_common/tennis_config.py
+*yml
 
 # C extensions
 *.so
