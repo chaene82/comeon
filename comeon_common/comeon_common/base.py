@@ -163,7 +163,9 @@ def startBetLogging(application) :
     logger.setLevel(logging.DEBUG)
     
     SLACK_API_TOKEN = cfg['log']['slack']['api_key']
-    SLACK_CHANNEL = cfg['log']['slack']['channel']
+    
+    if application == 'surebot' :
+        SLACK_CHANNEL = cfg['log']['slack']['surebot']['channel']
     
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
