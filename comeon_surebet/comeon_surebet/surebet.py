@@ -21,7 +21,7 @@ tbl_events = meta.tables['tbl_events']
 
 
 
-def placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake) :
+def placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake, home_bookie=0, away_bookie=0) :
     
     # get add required information
     
@@ -31,7 +31,23 @@ def placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, hom
     home_status = checkBetforPlace(home_odds_id, home_odds, home_stake)     
     away_status = checkBetforPlace(away_odds_id, away_odds, away_stake)
     
-    if (home_stake <= away_stake) :
+    if home_bookie >= 2 :
+        if home_status and away_status :
+            home_bet_status = placeBet(home_odds_id, home_odds, home_stake, product_id=surebet_typ, surebet_id=surebet_id) 
+            if home_bet_status :
+                away_bet_status = placeBet(away_odds_id, away_odds, away_stake, product_id=surebet_typ, surebet_id=surebet_id) 
+                if away_bet_status :
+                    return True
+                
+    elif away_bookie >= 2 :
+        if home_status and away_status :
+            away_bet_status = placeBet(away_odds_id, away_odds, away_stake, product_id=surebet_typ, surebet_id=surebet_id) 
+            if away_bet_status :
+                home_bet_status = placeBet(home_odds_id, home_odds, home_stake, product_id=surebet_typ, surebet_id=surebet_id) 
+                if home_bet_status :
+                    return True
+                
+    elif (home_stake <= away_stake) :
     
         if home_status and away_status :
             home_bet_status = placeBet(home_odds_id, home_odds, home_stake, product_id=surebet_typ, surebet_id=surebet_id) 
@@ -179,7 +195,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 
                                 log.info("Surebet ID " + str(surebet_id))  
                                 
-                                surebetStatus = placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake)
+                                surebetStatus = placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake, bookie, check_bookie)
                                 
                                 log.info("SureBet place? " + str(surebetStatus))  
                                 
@@ -227,7 +243,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 
                                 log.info("Surebet ID " + str(surebet_id))  
                                 
-                                surebetStatus = placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake)
+                                surebetStatus = placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake, bookie, check_bookie)
                                 
                                 log.info("SureBet place? " + str(surebetStatus))  
                                 

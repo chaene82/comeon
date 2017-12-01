@@ -195,7 +195,7 @@ def placeBetBtcOffer(betbtc_event_id, player_name, backlay, odds, stake) :
 def closeBetBtcBet(betbtc_event_id) :
 
     
-    url = "https://www.betbtc.co/api/bet/"+betbtc_event_id+"?selection=all"
+    url = "https://www.betbtc.co/api/bet/"+str(betbtc_event_id)+"?selection=all"
     
     response =  requests.delete(url ,headers=headers).json()
     return response    
