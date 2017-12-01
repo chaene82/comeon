@@ -7,4 +7,4 @@ from .placeBet import placeBet, placeOffer
 from .checkBet import checkBetforPlace, checkOffer
 from .settleBet import settleAllBets
 from .base import connect
-from .base import startBetLogging, stopBetLogging
+from .base import startBetLogging
