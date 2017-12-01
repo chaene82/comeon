@@ -164,8 +164,16 @@ def startBetLogging(application) :
     
     SLACK_API_TOKEN = cfg['log']['slack']['api_key']
     
-    if application == 'surebot' :
-        SLACK_CHANNEL = cfg['log']['slack']['surebot']['channel']
+    if application == 'surebet' :
+        SLACK_CHANNEL = cfg['log']['slack']['surebet']['channel']
+    elif application == 'laybet' :
+        SLACK_CHANNEL = cfg['log']['slack']['klaybet']['channel']
+    elif application == 'balance' :
+        SLACK_CHANNEL = cfg['log']['slack']['balance']['channel'] 
+    elif application == 'etl' :
+        SLACK_CHANNEL = cfg['log']['slack']['etl']['channel']     
+    else :
+        SLACK_CHANNEL = cfg['log']['slack']['common']['channel']        
     
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
