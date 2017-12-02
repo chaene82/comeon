@@ -1,26 +1,37 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Nov  7 17:43:20 2017
+Scripts for handling all stuff checking Balances on the Bookma
 
 @author: haenec
 """
 
-import json
-from sqlalchemy import create_engine, MetaData, select
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
-import numpy as np
 from .betbtc import checkBetBtcBalance
 from .Pinnacle import checkPinnacleBalance
-from .tennis_config import *
 from .getPrice import getBtcEurPrice
-from .base import connect
+from .base import connect, startBetLogging
 
 
 
 def getBalance() :
+    """
+    Check the balance on all bookies (all accounts) and look for each bookie on the database, if the 
+    Balance is in the range between min and max. If it is okay, do nothing, print a Info message,
+    if not, print a Error message (including message to Slack)
+    
+    Args:
+        None Parameter
+        Get some information form the database
+        
+    Returns:
+        -
+        
+    """
     dt = datetime.now()
-    con, meta = connect(pg_db, pg_user, pg_pwd, pg_host, pq_port)    
+    con, meta = connect()   
+    log = startBetLogging()
     
     
     tbl_balance = meta.tables['tbl_balance']
@@ -55,14 +66,22 @@ def getBalance() :
     bookie = con.execute(balance_sql).fetchone() 
     
     if pin_total < bookie[8] :
-        print("Pinnacle Balance to small, please deposit ", pin_total)
+        log.error("Pinnacle Balance to small, please deposit " +str(pin_total))
     elif pin_total > bookie[9] :
-        print("Pinnacle Balance to high, please withdraw ", pin_total)
+        log.error("Pinnacle Balance to high, please withdraw " + str(pin_total))
+    else:
+        log.info("Pinnacle Balance okay by " + str(pin_total))
         
     balance_sql = select([tbl_bookie]).where(tbl_bookie.columns.bookie_id == 2)
     bookie = con.execute(balance_sql).fetchone() 
     
     if betbtc_total < bookie[8] :
-        print("BetBtc Balance to small, please deposit ", betbtc_total)
+        log.error("BetBtc Balance to small, please deposit " + str(betbtc_total))
     elif betbtc_total > bookie[9] :
-        print("BetBtc Balance to high, please withdraw ", betbtc_total)        
+        log.error("BetBtc Balance to high, please withdraw "+ str(betbtc_total))
+    else :
+        log.info("BetBtc Balance okay by " + str(betbtc_total))
+
+    total_balance = pin_total + (betbtc_total_eur)
+    
+    log.info("Total Balance on the system " + str(total_balance) + " EUR")

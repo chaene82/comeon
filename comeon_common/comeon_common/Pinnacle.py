@@ -6,49 +6,56 @@ Created on Sun Sep 10 16:19:16 2017
 @author: chrhae
 """
 
-import pinnacle
-import pandas as pd
-import json
-import datetime
-import os
-from sqlalchemy import create_engine, MetaData, select
+
 from pinnacle.apiclient import APIClient
-from .tennis_config import *
+from .base import startBetLogging
 
-dir = os.path.dirname(__file__)
-os.chdir(dir)
+import yaml
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
+    
 
-import urllib.request
+
+log = startBetLogging("pinnacle")
 
 
 
-def connect(db, user, password, host='localhost', port=5433):
-    '''Returns a connection and a metadata object'''
-    # We connect with the help of the PostgreSQL URL
-    # postgresql://federer:grandestslam@localhost:5432/tennis
-    url = 'postgresql://{}:{}@{}:{}/{}'
-    url = url.format(user, password, host, port, db)
 
-    # The return value of create_engine() is our connection object
-    con = create_engine(url, client_encoding='utf8')
-
-    # We then bind the connection to MetaData()
-    meta = MetaData()
-    meta.reflect(con)
-
-    return con, meta
-
-con, meta = connect(pg_db, pg_user, pg_pwd, pg_host, pq_port)
-api = APIClient('CH983245', 'Skoda1$$')
-sport_ids = api.reference_data.get_sports()
+api = APIClient(cfg['pinnacle']['api']['username'] , cfg['pinnacle']['api']['password'] )
 
 def getPinnacleEventData():
+    """
+    Get all open events on pinnacle
+    
+    Args:
+        
+    Returns:
+        json : the list of the events
+    """
     return api.market_data.get_fixtures(33)
 
 def getPinnacleEventOdds():
+    """
+    Get all open odds on pinnacle
+    
+    Args:
+        
+    Returns:
+        json : the list of the odds
+    """  
     return api.market_data.get_odds(33)
     
 def checkPinnacleBalance() :
+    """
+    CCheck the balance on pinnacle
+    
+    Args:
+        
+    Returns:
+        total_balance : total balance (including placed open bets)
+        availiable : availiable balance for betting
+        blocked : placed balance
+    """
     account = api.account.get_account()
     availiable = account['availableBalance']
     blocked = account['outstandingTransactions']
@@ -56,6 +63,28 @@ def checkPinnacleBalance() :
 
 
 def checkPinnacleBetForPlace(pin_event_id, pin_league_id, type_id, way, backlay, odds, stake) :
+    """
+    Check if a odd still okay for place a bet
+    
+    Args:
+        pin_event_id : pinnacle id of the bet   
+        pin_league_id : pinnacle league id
+        type_id: bettyp id
+        way : home or away
+        backlay : type of the bet
+        odds : the requested odds
+        stake : the requested stakes
+    Returns:
+        status : 0 = bet check successful
+                 -1 = bet not found
+                 -3 = Stake bigger then maxRiskStake
+                 -4 = odds smaller then requested
+                 -11 = not enough balance
+                 -99 = way not correct
+        message : the message (look above)
+
+        
+    """  
     sports_id = 33
 #    pin_league_id = 10240
 #    pin_event_id = 783630159
@@ -92,6 +121,25 @@ def checkPinnacleBetForPlace(pin_event_id, pin_league_id, type_id, way, backlay,
     return 0, "okay"
 
 def placePinnacleBet(pin_event_id, pin_line_id, type_id,  way, backlay, odds, stake) :
+    """
+    Place a bet on pinnalce
+    
+    Args:
+        pin_event_id : pinnacle id of the bet   
+        pin_league_id : pinnacle league id
+        type_id: bettyp id
+        way : home or away
+        backlay : type of the bet
+        odds : the requested odds
+        stake : the requested stakes
+    Returns:
+        status : True = bet successful placed
+                 False = error bet placing bet
+        message : the message (look above)
+        response : response for the bookie
+
+        
+    """  
     sports_id = 33
     
     if type_id == 1 :
@@ -109,21 +157,42 @@ def placePinnacleBet(pin_event_id, pin_line_id, type_id,  way, backlay, odds, st
     
     response = api.betting.place_bet(sports_id, pin_event_id, pin_line_id, period_number, bettype, stake, team=team, accept_better_line=True)
     if response['status'] == 'ACCEPTED' :
-        print("bet places on event" , pin_event_id)        
+        log.info("bet places on event " + str(pin_event_id))        
         return response['betId'], "bet placed", response
     else :
-        print("bet was not place")
+        log.info("bet was not place")
         return -1, "error placing bet, Errorcode " + response['errorCode'], response
            
 
     
 def checkPinnacleUnsettledBet(pin_bet_id) :   
+    """
+    Checking the status of a unsettled bet
+    
+    Args:
+        pin_bet_id : Bet id
+    Returns:
+        status : the status of the bet
+        response : the complete response for the bookie
+    """
+    
     response = api.betting.get_bets(betids = pin_bet_id)
     
     return response['betStatus'], response
 
 
 def checkPinnacleSettledBet(pin_bet_id) :
+    """
+    check unsettled bests   
+    Args:
+        betbtc_bet_id (int) : the Number of the betbtc bet
+    Returns:
+        status : unmatched, matched oder not found
+        winnings (float): the winnings on the bet
+        odds (float) : the odds on the bet
+        line (dict) : additional information about the bet
+        
+    """  
     response =  api.betting.get_bets(betids = pin_bet_id)
     if not response['bets'] :
         return 'not found', 0, 0, response

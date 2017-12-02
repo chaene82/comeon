@@ -9,5 +9,24 @@ database:
 log:
     slack:
         api_key: xoxb-280090289303-njD9i7HXqkuBUanGiT7LetuH
-        channel: '#surebot'
-    
+        surebet:
+            channel: '#surebot'
+        laybet:
+            channel: '#laybet'
+        balance:
+            channel: '#balance'
+        etl:
+            channel: '#etl'            
+        common:
+            channel: '#common'
+            
+# Configuration for the Bookmaker API's
+
+pinnacle:
+    api:
+        username : 'CH983245'
+        password : 'Skoda1$$'
+
+betbtc:
+    api:
+        token: 4bb29bd1d3a647859fbf1f920814bf56

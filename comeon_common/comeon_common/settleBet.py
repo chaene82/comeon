@@ -5,10 +5,9 @@ Created on Thu Nov 16 12:31:14 2017
 @author: haenec
 """
 
-from .betbtc import placeBetBtcBet, checkBetBtcSettledBet
-from .Pinnacle import placePinnacleBet, checkPinnacleSettledBet
+from .betbtc import checkBetBtcSettledBet
+from .Pinnacle import checkPinnacleSettledBet
 from sqlalchemy import select, update
-from sqlalchemy.dialects.postgresql import insert
 from .base import startBetLogging
 from .getPrice import getBtcEurPrice
 from .base import connect
@@ -25,6 +24,15 @@ tbl_orderbook = meta.tables['tbl_orderbook']
 
 
 def settleBet(order_id) :
+    """
+    Check for open bets in the orderbook and settle it if there are finish    
+    Args:
+        order_id (int) : the internal id in the orderbook
+        
+    Returns:
+        store to the database
+        
+    """  
     dt = datetime.now()
     
     log.info("Checking for Order ID " + str(order_id))
@@ -64,10 +72,10 @@ def settleBet(order_id) :
         if bet_status == 'settled' :
             if winnings > 0 :
                 status = 2
-                log.info("Bet won: Order ID " + str(order_id))
+                log.warning("Bet won: Order ID " + str(order_id))
             else :
                 status = 3
-                log.info("Bet lost: Order ID " + str(order_id))
+                log.warning("Bet lost: Order ID " + str(order_id))
                 
             clause = update(tbl_orderbook).where(tbl_orderbook.columns.order_id == order_id).values({'eff_odds' : odds, 'bet_settlement_date' : dt, 'winnings_local' : winnings_local, 'winnings_eur' : winnings_eur, 'commission' : 0, 'net_winnings_eur' : net_winnings_eur, 'net_winnings_local' : net_winnings_local, 'status' : status, 'update' : dt})
             con.execute(clause) 
@@ -79,6 +87,14 @@ def settleBet(order_id) :
 
 
 def settleAllBets():
+    """
+    Loog for open bets and run a "settleBet" function for open bets    
+    Args:
+        -
+
+    Returns:
+        -
+    """  
     stmt = select([tbl_orderbook.c.order_id]).where(tbl_orderbook.c.status == 1)
     
     order_ids = con.execute(stmt).fetchall()

@@ -1,38 +1,46 @@
 #!/usr/bin/env py/thon3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Oct 12 17:53:37 2017
+Script for look for events (an event is a Tennis Match)
 
 @author: chrhae
 """
 
-import json
-from sqlalchemy import create_engine, MetaData, select
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
-import numpy as np
 from .betbtc import getBetBtcEventData, getBetBtcMaketOdds
 from .Pinnacle import getPinnacleEventData, getPinnacleEventOdds
-from .tennis_config import *
-from .base import connect
+from .base import connect, startBetLogging, removeTime
 
 
-    
-def removeTime (datetime) :
-    return datetime[:10]
+log = startBetLogging("Events")
+
 
 
 
 def setBetBtcEvents(betbtc_event, tbl_events, con) :
     """
-    add all new events to the table
-    update existing events
+    Look from the output of the betbet event json, read events and store it to 
+    the database
+    
+    Args:
+        betbtc_event (json): The list of all events from betbtc
+        tbl_events (:obj:`table`): The table object.
+        con: the database connection
+
+    Returns:
+
+
+    ToDo:
+        Change to a better wrapper funtion
+    
+    
     """
     dt = datetime.now()
     for event in betbtc_event :
         # looking for Match Odds
         if event[7] == "Match Odds" :
-            print("betbtc_event_id" ,(event[0]))
+            log.info("betbtc_event_id"  + str(event[0]))
             #print("betfair_event_id", (event[5]))
             #print("StartDate", (event[3]))
             #print("home_player_name", (event[6][0]['name']))
@@ -54,12 +62,29 @@ def setBetBtcEvents(betbtc_event, tbl_events, con) :
             con.execute(clause)
 
 def setPinnacleEvents(pinnacle_event, tbl_events, con) :
+    """
+    Look from the output of the pinnacle event json, read events and store it to 
+    the database
+    
+    Args:
+        pinnacle_event (json): The list of all events from pinnacle
+        tbl_events (:obj:`table`): The table object.
+        con: the database connection
+
+    Returns:
+
+
+    ToDo:
+        Change to a better wrapper funtion
+    
+    
+    """
     dt = datetime.now()
     for league in pinnacle_event['league'] :
         league_id = league['id']
         for event in league['events'] :
             if not "Set" in (event['home']) or not "Set" in (event['away']) : 
-                print("pinnacle_event_id", event['id'])
+                log.info("pinnacle_event_id" + str(event['id']))
                 #print("StartDate", (event['starts']))
                 #print("home_player_name", (event['home']))
                 #print("away_player_name", (event['away']))
@@ -85,8 +110,22 @@ def setPinnacleEvents(pinnacle_event, tbl_events, con) :
 
 
 def getEvents() :
+    """
+    A function to get all open events from the bookie
+    
+    Args:
+        
+
+    Returns:
+
+
+    ToDo:
+        Change to a better wrapper funtion
+    
+    
+    """
            
-    con, meta = connect(pg_db, pg_user, pg_pwd, pg_host, pq_port)    
+    con, meta = connect()    
     
     
     tbl_events = meta.tables['tbl_events']
