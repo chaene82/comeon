@@ -31,7 +31,7 @@ def getBalance() :
     """
     dt = datetime.now()
     con, meta = connect()   
-    log = startBetLogging()
+    log = startBetLogging("balance")
     
     
     tbl_balance = meta.tables['tbl_balance']
