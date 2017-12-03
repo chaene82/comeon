@@ -14,7 +14,7 @@ from .base import connect
 from datetime import datetime
 
 
-log = startBetLogging("checkBet")
+log = startBetLogging("placeBet")
 
 con, meta = connect()  
 tbl_orderbook = meta.tables['tbl_orderbook']
@@ -25,6 +25,21 @@ tbl_offer = meta.tables['tbl_offer']
 
 
 def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, offer_id=0) :
+    """
+    Place a bet based on a odds ID and store it on the orderbook
+    
+    Args:
+        odds_id (int) : the odds ID 
+        request_odds (float) : The requested odds
+        request_stake (float) : The requested stakes
+        product_id (int) : the Number of the product for which the bet is placed
+        surebet_id (int) : the surebet nummer (if exists)
+        offer_id (int) : the number ot the offer (if exists)
+
+    Returns:
+       True: The placement was successful
+       False: there was a problem placing the bet
+    """  
     dt = datetime.now()
     data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, home_player_name, away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id, pin_line_id FROM public.tbl_odds o inner join public.tbl_events e using(event_id) where odds_id =" + str(odds_id) + ";").fetchone()
     
@@ -43,7 +58,6 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
     
     if bookie_id == 1 :
         #Pinnacle
-        # still deactivted
         
         stake = request_stake
         currency = 'EUR'
@@ -60,15 +74,9 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
         stake = request_stake / getBtcEurPrice()
         currency = 'BTC'
          
-        #still deactivated
-        print(betbtc_event_id)
-        print(player_name)
-        print(backlay)
-        print(request_odds)
-        print(float(stake))
+
         
         betid, message, resultset = placeBetBtcBet(betbtc_event_id, player_name, backlay, request_odds, stake)
-        #status, message, resultset = 0, '', ''    
     
     
     log.info("place Bet for [ID " + str(odds_id) + "] " + message )
@@ -104,7 +112,23 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
 
 
         
-def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybet_stakes, hedge_laybet_stakes) :
+def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybet_stakes, hedge_stakes) :
+    """
+    Place a bet offer based on a odds ID and store it on the orderbook
+    
+    Args:
+        place_odds_id (int) : the odds ID 
+        hedge_odds_id (int) : id of the hedge odd
+        offer_odds (float) : odds for the offer
+        hedge_oods (float) : odds for the hedge offer
+        offer_laybet_stakes (float) : Stakes for the offer
+        hedge_stakes (float) : Stakes for the hedge bet
+
+    Returns:
+       True: The placement was successful
+       False: there was a problem placing the bet
+    """  
+    
     dt = datetime.now()
 
     turnover_local = turnover_eur / getBtcEurPrice()
@@ -147,7 +171,7 @@ def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybe
                                                currency=currency, \
                                                betdate=dt,\
                                                status=1, \
-                                               hedge_stakes=hedge_laybet_stakes,\
+                                               hedge_stakes=hedge_stakes,\
                                                update=dt)     
         resultset = con.execute(clause) 
 
@@ -158,6 +182,12 @@ def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybe
         
         
 def updateOffer(offer_id, offer_odds) :
+    """
+    ToDo:
+        Rewrite this new (not a part of 0.0.1)
+    
+    """
+    
     dt = datetime.now()
 
 

@@ -5,7 +5,7 @@ Created on Wed Nov  1 14:27:52 2017
 @author: haenec
 """
 
-from sqlalchemy import create_engine, MetaData, select, update
+from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
 import numpy as np
@@ -22,7 +22,27 @@ tbl_events = meta.tables['tbl_events']
 
 
 def placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake, home_bookie=0, away_bookie=0) :
-    
+    """
+    Place a surebet on the selected bookies
+     
+    Args:
+        surebet_typ (int): The type of the surebet  
+        event_id (int): The event, on which the surebet is placed    
+        surebet_id (int): ID of the surebet.    
+        home_odds_id (int): home bet odds id
+        away_odds_id (int): away bet odds id
+        home_odds (float): home odds
+        away_odds (float): away odds
+        home_stake (float): home stakes
+        away_stake (float): away away stakes       
+        home_bookie (int): home booke id
+        away_bookie (id): away bookie id
+        
+    Returns:
+        True: if successful
+        False: if there was an error
+        
+    """    
     # get add required information
     
     log.debug("odds id " + str(home_odds_id))
@@ -65,6 +85,20 @@ def placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, hom
     return False
 
 def searchSurebetEvent(event_id, tbl_surebet) :
+    """
+    Search for a surebet event and if found, place it
+     
+    Args:
+        event_id (int): The event, on which the surebet is placed    
+        tbl_surebet (table): the table object for the tbl_surebet   
+
+        
+    Returns:
+        True: if successful
+        False: if there was an error
+        
+    """        
+    
     dt = datetime.now()
     con, meta = connect()    
           
@@ -202,6 +236,8 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 if surebetStatus :
                                     clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=2)
                                     con.execute(clause) 
+                                    log.warning("SureBet place in the event " + str(event_id))  
+
                                 else :
                                     clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=6)                              
                                     con.execute(clause) 
@@ -250,6 +286,8 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 if surebetStatus :
                                     clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=2)
                                     con.execute(clause) 
+                                    log.warning("SureBet place in the event " + str(event_id))  
+
                                 else :
                                     clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=6)                              
                                     con.execute(clause) 
@@ -295,6 +333,16 @@ def searchSurebetEvent(event_id, tbl_surebet) :
 
 
 def searchSurebet() :
+    """
+    Search for open events with more then one matching bookie
+     
+    Args:
+        -
+        
+    Returns:
+        -
+        
+    """  
     con, meta = connect()  
     tbl_surebet = meta.tables['tbl_surebet']
     events = con.execute('Select event_id from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )

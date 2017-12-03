@@ -1,6 +1,9 @@
 """
 Created on Wed Nov  1 14:27:52 2017
 
+ToDo:
+    Finish it for Version 0.0.5
+
 @author: haenec
 """
 

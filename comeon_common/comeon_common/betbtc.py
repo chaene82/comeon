@@ -1,21 +1,27 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Oct 11 17:10:07 2017
+This is a first version of a wrapper for Bet Btc
 
+ToDo:
+    Rewrite is as a class
 @author: haenec
 """
 
 import requests
-import pandas as pd
-import json
 from json import dumps
 import time
 from urllib.parse import (
     urlencode, unquote, urlparse, parse_qsl, ParseResult
 )
 
+import yaml
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
+    
+cfg['betbtc']['api']['token']
+    
 ## to do: move that to the database
-headers = {"Authorization":"Token token=4bb29bd1d3a647859fbf1f920814bf56"}
+headers = {"Authorization":"Token token=" + cfg['betbtc']['api']['token']}
 
 #leagues = requests.get("http://www.betbtc.co/api/sportsleagues/leagues?id=3",headers=headers).json()
 
@@ -64,11 +70,27 @@ def add_url_params(url, params):
 
 
 def getBetBtcEventData():
+    """
+    get Open Events form BetBTC    
+    Args:
+        -        
+    Returns:
+        json : A list of events
+        
+    """  
     return requests.get("http://www.betbtc.co/api/event?sport=3",headers=headers).json()
 
 
 
 def getBetBtcMaketOdds(event_id):
+    """
+    get Open Odds form BetBTC    
+    Args:
+        event_id : event id        
+    Returns:
+        json : A list of odds
+        
+    """      
     data = requests.get("http://www.betbtc.co/api/market?id=" + str(event_id),headers=headers)
     time.sleep(0.5)
     return data.json()
@@ -78,12 +100,33 @@ def getBetBtcMaketOdds(event_id):
 #   return requests.get("http://www.betbtc.co/api/bet?id=" + str(event_id),headers=headers).json()
     
 def checkBetBtcBalance() :
+    """
+    Check the Balance on the account  
+    Args:
+        -        
+    Returns:
+        total_balance : total balance (including placed open bets)
+        availiable : availiable balance for betting
+        blocked : placed balance
+        
+    """  
     balance = requests.get("http://www.betbtc.co/api/user/balance",headers=headers).json()
     availiable = balance[0]['Balance']
     blocked = balance[0]['Blocked']
     return float(availiable) + float(blocked), availiable, blocked
 
 def checkBetBtcSettledBet(betbtc_bet_id) :
+    """
+    check unsettled bests   
+    Args:
+        betbtc_bet_id (int) : the Number of the betbtc bet
+    Returns:
+        status : unmatched, matched oder not found
+        winnings (float): the winnings on the bet
+        odds (float) : the odds on the bet
+        line (dict) : additional information about the bet
+        
+    """  
     response =  requests.get("http://www.betbtc.co/api/user/statement",headers=headers).json()
     for line in response :
         if str(betbtc_bet_id) in line['description'] :
@@ -105,6 +148,16 @@ def checkBetBtcSettledBet(betbtc_bet_id) :
     return 'Not Found', 0, 0, None
 
 def checkBetBtcOpenBet(betbtc_bet_id) :
+    """
+    Check for open bet (matched and unmatched)
+    Args:
+        betbtc_bet_id : betbtc id of the bet   
+    Returns:
+        status : 1 = matched
+                 2 = unmatched
+        lien : additional information about the bet
+        
+    """  
     response =  requests.get("http://www.betbtc.co/api/bet/",headers=headers).json()
     for line in response :
         if betbtc_bet_id == line[0] :
@@ -118,6 +171,24 @@ def checkBetBtcOpenBet(betbtc_bet_id) :
     
     
 def checkBetBtcBetForPlace(betbtc_event_id, player_name, backlay, odds, stake) :   
+    """
+    Check if a odd still okay for place a bet
+    
+    Args:
+        betbtc_bet_id : betbtc id of the bet   
+        player_name : name of the player
+        backlay : type of the bet
+        odds : the requested odds
+        stake : the requested stakes
+    Returns:
+        status : 0 = bet check successful
+                 -1 = bet not found
+                 -3 = Stake bigger then maxRiskStake
+                 -4 = odds smaller then requested
+        message : the message (look above)
+
+        
+    """  
 
     data = getBetBtcMaketOdds(betbtc_event_id)
     
@@ -149,6 +220,22 @@ def checkBetBtcBetForPlace(betbtc_event_id, player_name, backlay, odds, stake) :
                             
             
 def placeBetBtcBet(betbtc_event_id, player_name, backlay, odds, stake) :
+    """
+    Place a bet on betbtc
+    
+    Args:
+        betbtc_bet_id : betbtc id of the bet   
+        player_name : name of the player
+        backlay : type of the bet
+        odds : the requested odds
+        stake : the requested stakes
+    Returns:
+        betid : betbtc bet id (if successful)
+                -1 = error placing bet
+        message : the message (look above)
+        data : additional data
+        
+    """  
     if backlay == 1 :
         bettyp = 'back'
     elif backlay == 2 :
@@ -174,6 +261,22 @@ def placeBetBtcBet(betbtc_event_id, player_name, backlay, odds, stake) :
         
         
 def placeBetBtcOffer(betbtc_event_id, player_name, backlay, odds, stake) :
+    """
+    Place a bet offer on betbtc
+    
+    Args:
+        betbtc_bet_id : betbtc id of the bet   
+        player_name : name of the player
+        backlay : type of the bet
+        odds : the requested odds
+        stake : the requested stakes
+    Returns:
+        betid : betbtc bet id (if successful)
+                -1 = error placing bet
+        message : the message (look above)
+        data : additional data
+        
+    """  
     if backlay == 1 :
         bettyp = 'back'
     elif backlay == 2 :
@@ -193,6 +296,15 @@ def placeBetBtcOffer(betbtc_event_id, player_name, backlay, odds, stake) :
     
     
 def closeBetBtcBet(betbtc_event_id) :
+    """
+    Close all bets on a event
+    
+    Args:
+        betbtc_event_id : id of the event
+        
+    Returns:
+        response : the response from the market
+    """
 
     
     url = "https://www.betbtc.co/api/bet/"+str(betbtc_event_id)+"?selection=all"
@@ -202,6 +314,17 @@ def closeBetBtcBet(betbtc_event_id) :
     
     
 def updateBetBtcBet(betbtc_bet_id, odds) :
+    """
+    Update an existing bet with a odd
+    
+    Args:
+        betbtc_event_id : id of the event
+        odds : new odds
+        
+    Returns:
+        status : 0 = successfull
+        betid: the new bet ID
+    """
 
     response =  requests.get("http://www.betbtc.co/api/bet/",headers=headers).json()
     for line in response :

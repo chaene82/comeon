@@ -6,27 +6,38 @@ Created on Thu Oct 12 17:53:37 2017
 @author: chrhae
 """
 
-import json
-from sqlalchemy import create_engine, MetaData, select
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
 import numpy as np
-from .betbtc import getBetBtcEventData, getBetBtcMaketOdds
-from .Pinnacle import getPinnacleEventData, getPinnacleEventOdds
-from .tennis_config import *
-from .base import connect
+from .betbtc import getBetBtcMaketOdds
+from .Pinnacle import getPinnacleEventOdds
+from .base import connect, startBetLogging
 
 
-
-    
-def removeTime (datetime) :
-    return datetime[:10]
-
-
+log = startBetLogging("getOdds")
 
   
             
 def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds, con) :
+    """
+    Look from the output of the betbet odds json, read odds and store it to 
+    the database
+    
+    Args:
+        pinnacle_odds (json): A list of odds
+        betbtc_event (json): The list of all events from betbtc
+        event_id (int): the intenal event ID
+        tbl_odds (:obj:`table`): The table object.
+        con: the database connection
+
+    Returns:
+
+
+    ToDo:
+        Change to a better wrapper funtion
+    
+    
+    """
     dt = datetime.now()
 
     for league in pinnacle_odds['leagues']:
@@ -79,8 +90,33 @@ def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds, c
                         con.execute(clause)           
                     i = i +1
                 
+                    
+                    
+
 
 def setBetBecEventOdds(betbtc_event_id, event_id, home_name, away_name, tbl_odds, con) :
+    """
+    Look from the output of the betbet odds json, read odds and store it to 
+    the database
+    
+    Args:
+        betbtc_event_id (json): A list of odds
+        event_id (int): the intenal event ID
+        home_name (str): The name of the home player
+        away_name (str): The name of the away player
+        tbl_odds (:obj:`table`): The table object.
+        con: the database connection
+
+    Returns:
+
+
+    ToDo:
+        Change to a better wrapper funtion
+    
+    
+    """
+
+
     dt = datetime.now()
     
     
@@ -174,8 +210,21 @@ def setBetBecEventOdds(betbtc_event_id, event_id, home_name, away_name, tbl_odds
 
 
 def getOdds() :
+    """
+    Look for open odds
+    
+    Args:
+
+    Returns:
+
+
+    ToDo:
+        Change to a better wrapper funtion
+    
+    
+    """    
            
-    con, meta = connect(pg_db, pg_user, pg_pwd, pg_host, pq_port)    
+    con, meta = connect()    
     
     
     
@@ -183,16 +232,15 @@ def getOdds() :
 
     pinnacle_odds = getPinnacleEventOdds()
     
-    dt = datetime.now()
 
     events = con.execute('Select pinnacle_event_id, event_id from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
     for event in events :
-        print(event[0])
+        log.info("Looking for odds on the event " + str(event[0]))
         setPinnacleEventOdds(pinnacle_odds, event[0], event[1], tbl_odds, con)
     
     events = con.execute('Select betbtc_event_id, event_id, home_player_name, away_player_name from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
     for event in events :
-        print(event[0])
+        log.info("Looking for odds on the event " + str(event[0]))
         setBetBecEventOdds(event[0], event[1], event[2], event[3], tbl_odds, con)
               
         
