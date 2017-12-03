@@ -139,4 +139,4 @@ def playersAttributes(days_between_run=7, look_back_weeks=52, StartDate="01/01/0
     #all_ranking.to_csv("ranking_"+ ModelName +".csv")
     
 # testing
-playersAttributes(days_between_run=7, look_back_weeks=52, StartDate="01/01/10")
+#playersAttributes(days_between_run=7, look_back_weeks=52, StartDate="01/01/10")
