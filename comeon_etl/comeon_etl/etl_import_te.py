@@ -100,6 +100,6 @@ def etl_import_te_ranking(conn_sqllite3, con_postgres, days = 10000) :
 def etl_import_te(days=100) :
 
     ## Testing
-    etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
-    etl_import_te_player(conn_sqllite3, con_postgres, days=days)
+#    etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
+#    etl_import_te_player(conn_sqllite3, con_postgres, days=days)
     etl_import_te_ranking(conn_sqllite3, con_postgres, days=days)
