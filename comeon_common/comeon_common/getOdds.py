@@ -242,6 +242,8 @@ def getOdds() :
     for event in events :
         log.info("Looking for odds on the event " + str(event[0]))
         setBetBecEventOdds(event[0], event[1], event[2], event[3], tbl_odds, con)
+        
+    log.info("no more events")
               
         
 #getOdds()        

@@ -349,4 +349,6 @@ def searchSurebet() :
     for event in events :
         log.debug(event[0])
         searchSurebetEvent(event[0], tbl_surebet)
+        
+    log.info("no more events for a surebet")
     
