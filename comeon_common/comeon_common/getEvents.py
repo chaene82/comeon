@@ -40,7 +40,7 @@ def setBetBtcEvents(betbtc_event, tbl_events, con) :
     for event in betbtc_event :
         # looking for Match Odds
         if event[7] == "Match Odds" :
-            log.info("betbtc_event_id"  + str(event[0]))
+            log.info("betbtc_event_id "  + str(event[0]))
             #print("betfair_event_id", (event[5]))
             #print("StartDate", (event[3]))
             #print("home_player_name", (event[6][0]['name']))
@@ -84,7 +84,7 @@ def setPinnacleEvents(pinnacle_event, tbl_events, con) :
         league_id = league['id']
         for event in league['events'] :
             if not "Set" in (event['home']) or not "Set" in (event['away']) : 
-                log.info("pinnacle_event_id" + str(event['id']))
+                log.info("pinnacle_event_id " + str(event['id']))
                 #print("StartDate", (event['starts']))
                 #print("home_player_name", (event['home']))
                 #print("away_player_name", (event['away']))
