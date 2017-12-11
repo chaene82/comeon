@@ -50,8 +50,8 @@ def settleBet(order_id) :
             #pinnacle bet 
             bet_status, winnings, odds, response = checkPinnacleSettledBet(bet_id)
             winnings = float(winnings) 
-            winnings_local = winnings
-            winnings_eur = winnings
+            winnings_local = winnings + float(stakes)
+            winnings_eur = winnings + float(stakes)
             net_winnings_local = winnings
             net_winnings_eur = winnings            
         elif bookie_id == 2 :
