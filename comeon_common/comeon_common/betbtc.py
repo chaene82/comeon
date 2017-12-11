@@ -10,11 +10,27 @@ ToDo:
 import requests
 from json import dumps
 import time
+import yaml
 from urllib.parse import (
     urlencode, unquote, urlparse, parse_qsl, ParseResult
 )
 
-import yaml
+
+class betbtc:
+    
+        
+
+    
+    def __init__(self):
+        with open("config.yml", 'r') as ymlfile:
+            self.cfg = yaml.load(ymlfile)
+
+x = betbtc()
+
+
+
+
+
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
     
