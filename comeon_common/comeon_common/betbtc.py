@@ -24,8 +24,28 @@ class betbtc:
     def __init__(self):
         with open("config.yml", 'r') as ymlfile:
             self.cfg = yaml.load(ymlfile)
+            
+    
+    def checkBalance(self) :
+        """
+        Check the Balance on the account  
+        Args:
+            -        
+        Returns:
+            total_balance : total balance (including placed open bets)
+            availiable : availiable balance for betting
+        blocked : placed balance
+        
+        """  
+        balance = requests.get("http://www.betbtc.co/api/user/balance",headers=headers).json()
+        availiable = balance[0]['Balance']
+        blocked = balance[0]['Blocked']
+        return float(availiable) + float(blocked), availiable, blocked        
+    
 
 x = betbtc()
+
+x.checkBalance()
 
 
 
