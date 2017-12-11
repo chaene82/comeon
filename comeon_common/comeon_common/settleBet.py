@@ -56,12 +56,12 @@ def settleBet(order_id) :
             net_winnings_eur = winnings            
         elif bookie_id == 2 :
             bet_status, winnings, odds, response = checkBetBtcSettledBet(bet_id)
-            winnings = float(winnings) + float(stakes)
+            win = float(winnings) + float(stakes)
             odds = float(odds) 
 
 
-            winnings_eur = round(winnings * getBtcEurPrice(), 2)
-            winnings_local = winnings
+            winnings_eur = round(win * getBtcEurPrice(), 2)
+            winnings_local = win
             net_winnings_eur = winnings_eur
             net_winnings_local = winnings_local   
         else :
