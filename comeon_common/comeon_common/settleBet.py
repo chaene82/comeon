@@ -76,6 +76,10 @@ def settleBet(order_id) :
             else :
                 status = 3
                 log.warning("Bet lost: Order ID " + str(order_id))
+                winnings_local = 0
+                winnings_eur = 0
+                net_winnings_local = 0
+                net_winnings_eur = 0                    
                 
             clause = update(tbl_orderbook).where(tbl_orderbook.columns.order_id == order_id).values({'eff_odds' : odds, 'bet_settlement_date' : dt, 'winnings_local' : winnings_local, 'winnings_eur' : winnings_eur, 'commission' : 0, 'net_winnings_eur' : net_winnings_eur, 'net_winnings_local' : net_winnings_local, 'status' : status, 'update' : dt})
             con.execute(clause) 
