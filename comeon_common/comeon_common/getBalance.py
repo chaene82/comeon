@@ -8,8 +8,8 @@ Scripts for handling all stuff checking Balances on the Bookma
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
-from .betbtc import checkBetBtcBalance
-from .Pinnacle import checkPinnacleBalance
+from .betbtc import betbtc
+from .Pinnacle import pinnacle
 from .getPrice import getBtcEurPrice
 from .base import connect, startBetLogging
 
@@ -38,8 +38,8 @@ def getBalance() :
     tbl_bookie = meta.tables['tbl_bookie']
     
     
-    betbtc_total, btbtc_availiable, betbtc_blocked = checkBetBtcBalance()
-    pin_total, pin_availiable, pin_blocked = checkPinnacleBalance()    
+    betbtc_total, btbtc_availiable, betbtc_blocked = betbtc('back').checkBalance()
+    pin_total, pin_availiable, pin_blocked = pinnacle().checkBalance()    
     
     btceur = getBtcEurPrice()
     betbtc_total_eur = float(betbtc_total) * float(btceur)

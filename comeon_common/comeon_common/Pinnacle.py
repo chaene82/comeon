@@ -6,60 +6,153 @@ Created on Sun Sep 10 16:19:16 2017
 @author: chrhae
 """
 
-
+import pandas as pd
 from pinnacle.apiclient import APIClient
-from .base import startBetLogging
-
+import collections
+from .base import startBetLogging, removeTime
 import yaml
-with open("config.yml", 'r') as ymlfile:
-    cfg = yaml.load(ymlfile)
+
+
+
+log = startBetLogging("pinnacle Wrapper")
+
+
+
+## Class for as Wrapper
+
+
+class pinnacle:
     
-
-
-log = startBetLogging("pinnacle")
-
-
-
-
-api = APIClient(cfg['pinnacle']['api']['username'] , cfg['pinnacle']['api']['password'] )
-
-def getPinnacleEventData():
-    """
-    Get all open events on pinnacle
+    sports_id = 33
+    api = ''
+    odds = None
     
-    Args:
+    def __init__(self):
+        with open("config.yml", 'r') as ymlfile:
+            self.cfg = yaml.load(ymlfile)          
+            self.api = APIClient(self.cfg['pinnacle']['api']['username'] , self.cfg['pinnacle']['api']['password'] )
+                  
+    
+    def checkBalance(self) :
+        """
+        CCheck the balance on pinnacle
         
-    Returns:
-        json : the list of the events
-    """
-    return api.market_data.get_fixtures(33)
+        Args:
+            
+        Returns:
+            total_balance : total balance (including placed open bets)
+            availiable : availiable balance for betting
+            blocked : placed balance
+        """ 
+        account = self.api.account.get_account()
+        availiable = account['availableBalance']
+        blocked = account['outstandingTransactions']
+        
+        return availiable + blocked, availiable, blocked
 
-def getPinnacleEventOdds():
-    """
-    Get all open odds on pinnacle
-    
-    Args:
+
+    def getEvents(self) :
+        """
+        Get all open events on pinnacle
         
-    Returns:
-        json : the list of the odds
-    """  
-    return api.market_data.get_odds(33)
-    
-def checkPinnacleBalance() :
-    """
-    CCheck the balance on pinnacle
-    
-    Args:
+        Args:
+            
+        Returns:
+            json : the list of the events
+        """        
+        result = pd.DataFrame()
         
-    Returns:
-        total_balance : total balance (including placed open bets)
-        availiable : availiable balance for betting
-        blocked : placed balance
-    """
-    account = api.account.get_account()
-    availiable = account['availableBalance']
-    blocked = account['outstandingTransactions']
-    return availiable + blocked, availiable, blocked
+        events =  self.api.market_data.get_fixtures(self.sports_id)
+        for league in events['league'] :
+            league_id = league['id']
+            for event in league['events'] :
+                if not "Set" in (event['home']) or not "Set" in (event['away']) : 
+                    log.info("pinnacle_event_id " + str(event['id']))
+                    bookie_event_id = event['id']
+                    
+                    StartDate        = removeTime(event['starts'])
+                    StartDateTime    = event['starts']
+                    home_player_name = ((event['home']))
+                    away_player_name = ((event['away']))
+                    live             = (event['liveStatus'])
+                    pinnacle_league_id= league_id
+    
+                    
+                    dict = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'StartDate' : StartDate, 'StartDateTime' : StartDateTime,
+                                                    'home_player_name' : home_player_name, 'away_player_name': away_player_name, 
+                                                    'live' : live, 'pinnacle_league_id' : pinnacle_league_id})
+                    
+                    result = result.append(pd.DataFrame([dict]))
+                
+        return result
+    
+    
+    
+    def getOdds(self, bookie_event_id, home_name = None, away_name = None) :
+        """
+        Get all open odds on pinnacle
+        
+        Args:      
+        """
+        if self.odds == None :
+            self.odds = self.api.market_data.get_odds(self.sports_id)
+            
+            
+        result = pd.DataFrame()
+        
+        for league in self.odds['leagues']:
+            for event in league['events']:
+                if event['id'] == bookie_event_id:
+                    print(bookie_event_id)
+                    
+                    event_odds = event
+                    i = 0
+                    for line in event_odds['periods'] :
+                        if 'moneyline' in event_odds['periods'][i] and line['number'] == 0 :
+                            #print(line)
+                            
+                            home_ml = line['moneyline']['home']
+                            away_ml = line['moneyline']['away']
+                            
+                            line_id = line['lineId']
+                            
+                            home_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 1,
+                                             'odds' : home_ml, 'minStake': 0, 'maxStake' : 0, 'pin_line_id' : line_id})                            
+ 
+
+                            away_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 2,
+                                             'odds' : away_ml, 'minStake': 0, 'maxStake' : 0, 'pin_line_id' : line_id})
+           
+                            result = result.append([home_back])
+                            result = result.append([away_back])
+         
+                        i = i +1
+                        
+                    
+
+                        
+        return result
+            
+        
+        
+        
+
+
+
+
+## Testing
+
+x = pinnacle()
+
+x.getEvents()
+x.getOdds(795379718)
+
+x.odds
+
+
+            
+            
+
 
 
 def checkPinnacleBetForPlace(pin_event_id, pin_league_id, type_id, way, backlay, odds, stake) :

@@ -9,57 +9,17 @@ ToDo:
 
 import requests
 from json import dumps
+import pandas as pd
 import time
 import yaml
+import collections
+import numpy as np
+from .base import startBetLogging, removeTime
 from urllib.parse import (
     urlencode, unquote, urlparse, parse_qsl, ParseResult
 )
 
-
-class betbtc:
-    
-        
-
-    
-    def __init__(self):
-        with open("config.yml", 'r') as ymlfile:
-            self.cfg = yaml.load(ymlfile)
-            
-    
-    def checkBalance(self) :
-        """
-        Check the Balance on the account  
-        Args:
-            -        
-        Returns:
-            total_balance : total balance (including placed open bets)
-            availiable : availiable balance for betting
-        blocked : placed balance
-        
-        """  
-        balance = requests.get("http://www.betbtc.co/api/user/balance",headers=headers).json()
-        availiable = balance[0]['Balance']
-        blocked = balance[0]['Blocked']
-        return float(availiable) + float(blocked), availiable, blocked        
-    
-
-x = betbtc()
-
-x.checkBalance()
-
-
-
-
-
-with open("config.yml", 'r') as ymlfile:
-    cfg = yaml.load(ymlfile)
-    
-cfg['betbtc']['api']['token']
-    
-## to do: move that to the database
-headers = {"Authorization":"Token token=" + cfg['betbtc']['api']['token']}
-
-#leagues = requests.get("http://www.betbtc.co/api/sportsleagues/leagues?id=3",headers=headers).json()
+log = startBetLogging("BET BTC Wrapper")
 
 
 
@@ -103,6 +63,168 @@ def add_url_params(url, params):
     ).geturl()
 
     return new_url
+
+
+
+## Class for as Wrapper
+
+
+class betbtc:
+    
+    account = ''
+    header = ''
+    sports = ''
+    
+    def __init__(self, account):
+        with open("config.yml", 'r') as ymlfile:
+            self.account = account
+            self.cfg = yaml.load(ymlfile)
+            self.header=  {"Authorization":"Token token=" + self.cfg['betbtc']['api'][self.account]['token']}
+            self.sports = self.cfg['betbtc']['api']['tennis']
+ 
+
+                   
+    
+    def checkBalance(self) :
+        """
+        Check the Balance on the account  
+        Args:
+            -        
+        Returns:
+            total_balance : total balance (including placed open bets)
+            availiable : availiable balance for betting
+        blocked : placed balance
+        
+        """  
+        balance = requests.get("http://www.betbtc.co/api/user/balance",headers=self.header).json()
+        availiable = balance[0]['Balance']
+        blocked = balance[0]['Blocked']
+        return float(availiable) + float(blocked), availiable, blocked
+
+
+
+    def getEvents(self):
+        """
+        get Open Events form BetBTC    
+        Args:
+            -        
+        Returns:
+            json : A list of events
+            
+        """  
+        events = requests.get("http://www.betbtc.co/api/event?sport=" + str(self.sports), headers=self.header).json()    
+        
+        result = pd.DataFrame()
+        for event in events :
+        # looking for Match Odds
+            if event[7] == "Match Odds" :
+                log.info("betbtc_event_id "  + str(event[0]))
+                bookie_event_id = event[0]
+                StartDate        = removeTime(event[3])
+                StartDateTime    = event[3]
+                home_player_name = (event[6][0]['name'])
+                away_player_name = (event[6][1]['name'])
+                betfair_event_id = (event[5])
+                
+                dict = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'StartDate' : StartDate, 'StartDateTime' : StartDateTime,
+                                                'home_player_name' : home_player_name, 'away_player_name': away_player_name, 
+                                                'betfair_event_id' : betfair_event_id})
+                
+                result = result.append(pd.DataFrame([dict]))
+                
+        return result
+
+    
+    def getOdds(self, bookie_event_id, home_name = None, away_name = None) :
+        """
+        get Open Odds form BetBTC    
+        Args:
+            event_id : event id        
+        Returns:
+            json : A list of odds
+            
+        """              
+        odds = requests.get("http://www.betbtc.co/api/market?id=" + str(bookie_event_id),headers=self.header).json()
+        
+        if len(odds) != 2:
+            home_back = np.nan
+            home_lay = np.nan
+            away_back = np.nan
+            away_lay = np.nan
+        else :      
+            
+            if home_name in odds[0] :
+                home_odd = list(odds[0].values())[0]
+                home_back = home_odd['Back'][0][0]
+                home_lay = home_odd['Lay'][0][0]
+            elif home_name in odds[1] :
+                home_odd = list(odds[1].values())[0]
+                home_back = home_odd['Back'][0][0]
+                home_lay = home_odd['Lay'][0][0]
+            
+            if away_name in odds[0] :
+                away_odd = list(odds[0].values())[0]
+                away_back = away_odd['Back'][0][0]
+                away_lay = away_odd['Lay'][0][0]
+            elif away_name in odds[1] : 
+                away_odd = list(odds[1].values())[0]
+                away_back = away_odd['Back'][0][0]
+                away_lay = away_odd['Lay'][0][0]
+
+        if not isinstance(home_back, float) : home_back = np.nan
+        if not isinstance(home_lay, float)  : home_lay = np.nan
+        if not isinstance(away_back, float) : away_back = np.nan
+        if not isinstance(away_lay, float)  : away_lay = np.nan
+        
+                        
+        home_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 1,
+                             'odds' : home_back, 'minStake': 0, 'maxStake' : 0, 'pin_line_id' : 0})
+
+        home_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 1,
+                             'odds' : home_lay, 'minStake': 0, 'maxStake' : 0, 'pin_line_id' : 0})                         
+
+        away_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 2,
+                             'odds' : away_back, 'minStake': 0, 'maxStake' : 0, 'pin_line_id' : 0})
+
+        away_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 2,
+                             'odds' : away_lay, 'minStake': 0, 'maxStake' : 0, 'pin_line_id' : 0})                          
+        
+        result = pd.DataFrame()
+        
+        result = result.append([home_back])
+        result = result.append([home_lay])                 
+        result = result.append([away_back])
+        result = result.append([away_lay])    
+        
+        return result
+        
+    
+
+
+### Testing
+
+x = betbtc('back')
+
+x.header
+
+x.checkBalance()
+odds = x.getOdds(511372, 'S Cakarevic', 'L Maetschke')
+
+
+
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
+    
+cfg['betbtc']['api']['token']
+    
+## to do: move that to the database
+headers = {"Authorization":"Token token=" + cfg['betbtc']['api']['token']}
+
+#leagues = requests.get("http://www.betbtc.co/api/sportsleagues/leagues?id=3",headers=headers).json()
+
+
+
+
 
 
 def getBetBtcEventData():

@@ -8,205 +8,39 @@ Created on Thu Oct 12 17:53:37 2017
 
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
+import pandas as pd
 import numpy as np
-from .betbtc import getBetBtcMaketOdds
-from .Pinnacle import getPinnacleEventOdds
+from .betbtc import betbtc
+from .Pinnacle import pinnacle
 from .base import connect, startBetLogging
 
 
 log = startBetLogging("getOdds")
-
+dt = datetime.now()
   
-            
-def setPinnacleEventOdds(pinnacle_odds, pinnacle_event_id, event_id, tbl_odds, con) :
-    """
-    Look from the output of the betbet odds json, read odds and store it to 
-    the database
+
+
+def updateOdds(row, tbl_odds, conn):
+
+    clause = insert(tbl_odds).values(event_id=row['event_id'], \
+                                   bettyp_id = row['bettype'], \
+                                   way = row['way'], \
+                                   bookie_id = row['bookie_id'], \
+                                   backlay = row['backlay'],\
+                                   odds= row['odds'], \
+                                   pin_line_id= row['pin_line_id'], \
+                                   betbtc_max_stake= row['maxStake'], \
+                                   odds_update=dt) 
+
+    clause = clause.on_conflict_do_update(
+    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
+    set_=dict(odds=row['odds'],pin_line_id=row['pin_line_id'],odds_update=dt)
+    )
     
-    Args:
-        pinnacle_odds (json): A list of odds
-        betbtc_event (json): The list of all events from betbtc
-        event_id (int): the intenal event ID
-        tbl_odds (:obj:`table`): The table object.
-        con: the database connection
+    conn.execute(clause)  
 
-    Returns:
-
-
-    ToDo:
-        Change to a better wrapper funtion
-    
-    
-    """
-    dt = datetime.now()
-
-    for league in pinnacle_odds['leagues']:
-        #print(league)
-        for event in league['events']:
-            if event['id'] == pinnacle_event_id:
-                
-                event_odds = event
-                i = 0
-                for line in event_odds['periods'] :
-                    if 'moneyline' in event_odds['periods'][i] and line['number'] == 0 :
-                        #print(line)
-                        
-                        home_ml = line['moneyline']['home']
-                        away_ml = line['moneyline']['away']
-                        
-                        line_id = line['lineId']
-        
-                        
-                        clause = insert(tbl_odds).values(event_id=event_id, \
-                                                       bettyp_id = 1, \
-                                                       way = 1, \
-                                                       bookie_id = 1, \
-                                                       backlay = 1,\
-                                                       odds=home_ml, \
-                                                       pin_line_id=line_id, \
-                                                       odds_update=dt) 
-        
-                        clause = clause.on_conflict_do_update(
-                        index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
-                        set_=dict(odds=home_ml,pin_line_id=line_id,odds_update=dt)
-                        )
-                        
-                        con.execute(clause)  
-                        
-                        clause = insert(tbl_odds).values(event_id=event_id, \
-                                                       bettyp_id = 1, \
-                                                       way = 2, \
-                                                       bookie_id = 1, \
-                                                       backlay = 1,\
-                                                       odds=away_ml, \
-                                                       pin_line_id=line_id, \
-                                                       odds_update=dt) 
-        
-                        clause = clause.on_conflict_do_update(
-                        index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
-                        set_=dict(odds=away_ml,pin_line_id=line_id,odds_update=dt)
-                        )
-                        
-                        con.execute(clause)           
-                    i = i +1
                 
                     
-                    
-
-
-def setBetBecEventOdds(betbtc_event_id, event_id, home_name, away_name, tbl_odds, con) :
-    """
-    Look from the output of the betbet odds json, read odds and store it to 
-    the database
-    
-    Args:
-        betbtc_event_id (json): A list of odds
-        event_id (int): the intenal event ID
-        home_name (str): The name of the home player
-        away_name (str): The name of the away player
-        tbl_odds (:obj:`table`): The table object.
-        con: the database connection
-
-    Returns:
-
-
-    ToDo:
-        Change to a better wrapper funtion
-    
-    
-    """
-
-
-    dt = datetime.now()
-    
-    
-    
-    odds = getBetBtcMaketOdds(betbtc_event_id)
- 
-    
-    if len(odds) != 2:
-        home_back = np.nan
-        home_lay = np.nan
-        away_back = np.nan
-        away_lay = np.nan
-    else :      
-        if home_name in odds[0] :
-            home_odd = list(odds[0].values())[0]
-            home_back = home_odd['Back'][0][0]
-            home_lay = home_odd['Lay'][0][0]
-        elif home_name in odds[1] :
-            home_odd = list(odds[1].values())[0]
-            home_back = home_odd['Back'][0][0]
-            home_lay = home_odd['Lay'][0][0]
-        
-        if away_name in odds[0] :
-            away_odd = list(odds[0].values())[0]
-            away_back = away_odd['Back'][0][0]
-            away_lay = away_odd['Lay'][0][0]
-        elif away_name in odds[1] : 
-            away_odd = list(odds[1].values())[0]
-            away_back = away_odd['Back'][0][0]
-            away_lay = away_odd['Lay'][0][0]
-
-    if not isinstance(home_back, float) : home_back = np.nan
-    if not isinstance(home_lay, float)  : home_lay = np.nan
-    if not isinstance(away_back, float) : away_back = np.nan
-    if not isinstance(away_lay, float)  : away_lay = np.nan
-    
-    
-    
-    
-    
-    clause = insert(tbl_odds).values(event_id=event_id,bettyp_id = 1,way = 1,bookie_id = 2,backlay = 1,odds=home_back, \
-                                               odds_update=dt) 
-    
-    clause = clause.on_conflict_do_update(
-    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
-    set_=dict(odds=home_back,odds_update=dt)
-    )
-    con.execute(clause)   
-    
-    clause = insert(tbl_odds).values(event_id=event_id, \
-                                               bettyp_id = 1, \
-                                               way = 1, \
-                                               bookie_id = 2, \
-                                               backlay = 2,\
-                                               odds=home_lay, \
-                                               odds_update=dt) 
-    
-    clause = clause.on_conflict_do_update(
-    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
-    set_=dict(odds=home_lay,odds_update=dt)
-    )
-    con.execute(clause)  
-    
-    clause = insert(tbl_odds).values(event_id=event_id, \
-                                               bettyp_id = 1, \
-                                               way = 2, \
-                                               bookie_id = 2, \
-                                               backlay = 1,\
-                                               odds=away_back,\
-                                               odds_update=dt) 
-    
-    clause = clause.on_conflict_do_update(
-    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
-    set_=dict(odds=away_back,odds_update=dt)
-    )
-    con.execute(clause)  
-
-    clause = insert(tbl_odds).values(event_id=event_id, \
-                                               bettyp_id = 1, \
-                                               way = 2, \
-                                               bookie_id = 2, \
-                                               backlay = 2,\
-                                               odds=away_lay, \
-                                               odds_update=dt) 
-
-    clause = clause.on_conflict_do_update(
-    index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
-    set_=dict(odds=away_lay,odds_update=dt)
-    )
-    con.execute(clause)  
 
 
 def getOdds() :
@@ -226,22 +60,31 @@ def getOdds() :
            
     con, meta = connect()    
     
+    api_betbtc = betbtc('back')
+    api_pinnacle = pinnacle()
     
     
     tbl_odds = meta.tables['tbl_odds']
 
-    pinnacle_odds = getPinnacleEventOdds()
     
 
-    events = con.execute('Select pinnacle_event_id, event_id from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
+    events = con.execute('Select event_id, betbtc_event_id, pinnacle_event_id, event_id from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
     for event in events :
         log.info("Looking for odds on the event " + str(event[0]))
-        setPinnacleEventOdds(pinnacle_odds, event[0], event[1], tbl_odds, con)
+        df_betbtc   = api_betbtc.getOdds(event[1])
+        df_betbtc['bookie_id'] = 2
+        df_pinnacle = api_pinnacle.getOdds(event[2])
+        df_pinnacle['bookie_id'] = 1
+                   
+        frames = [df_betbtc, df_pinnacle]
     
-    events = con.execute('Select betbtc_event_id, event_id, home_player_name, away_player_name from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
-    for event in events :
-        log.info("Looking for odds on the event " + str(event[0]))
-        setBetBecEventOdds(event[0], event[1], event[2], event[3], tbl_odds, con)
+        df_concat_odds = pd.concat(frames)
+        df_concat_odds['event_id'] = event[0]
+                   
+        df_concat_odds.apply((lambda x: updateOdds(x, tbl_odds, con)), axis=1)
+                   
+        
+        #setPinnacleEventOdds(pinnacle_odds, event[0], event[1], tbl_odds, con)   
         
     log.info("no more events")
               
