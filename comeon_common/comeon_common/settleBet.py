@@ -50,18 +50,18 @@ def settleBet(order_id) :
             #pinnacle bet 
             bet_status, winnings, odds, response = checkPinnacleSettledBet(bet_id)
             winnings = float(winnings) 
-            winnings_local = winnings
-            winnings_eur = winnings
+            winnings_local = winnings + float(stakes)
+            winnings_eur = winnings + float(stakes)
             net_winnings_local = winnings
             net_winnings_eur = winnings            
         elif bookie_id == 2 :
             bet_status, winnings, odds, response = checkBetBtcSettledBet(bet_id)
-            winnings = float(winnings) + float(stakes)
+            win = float(winnings) + float(stakes)
             odds = float(odds) 
 
 
-            winnings_eur = round(winnings * getBtcEurPrice(), 2)
-            winnings_local = winnings
+            winnings_eur = round(win * getBtcEurPrice(), 2)
+            winnings_local = win
             net_winnings_eur = winnings_eur
             net_winnings_local = winnings_local   
         else :
@@ -76,6 +76,10 @@ def settleBet(order_id) :
             else :
                 status = 3
                 log.warning("Bet lost: Order ID " + str(order_id))
+                winnings_local = 0
+                winnings_eur = 0
+                net_winnings_local = 0
+                net_winnings_eur = 0                    
                 
             clause = update(tbl_orderbook).where(tbl_orderbook.columns.order_id == order_id).values({'eff_odds' : odds, 'bet_settlement_date' : dt, 'winnings_local' : winnings_local, 'winnings_eur' : winnings_eur, 'commission' : 0, 'net_winnings_eur' : net_winnings_eur, 'net_winnings_local' : net_winnings_local, 'status' : status, 'update' : dt})
             con.execute(clause) 
