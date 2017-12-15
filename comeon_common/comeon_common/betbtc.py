@@ -197,7 +197,39 @@ class betbtc:
         result = result.append([away_lay])    
         
         return result
+
+
+    def checkSettledBet(self, betbtc_bet_id) :
+        """
+        check unsettled bests   
+        Args:
+            betbtc_bet_id (int) : the Number of the betbtc bet
+        Returns:
+            status : unmatched, matched oder not found
+            winnings (float): the winnings on the bet
+            odds (float) : the odds on the bet
+            line (dict) : additional information about the bet
+            
+        """  
+        response =  requests.get("http://www.betbtc.co/api/user/statement",headers=self.header).json()
+        for line in response :
+            if str(betbtc_bet_id) in line['description'] :
+                if line['credit'] == None:
+                    winnings = 0
+                else :
+                    winnings = line['credit']
+                    
+                odds = line['odd']
+                return 'settled', winnings, odds, line
+            
+        status, line = checkBetBtcOpenBet(betbtc_bet_id)
         
+        if status == 1:
+            return 'unmatched', 0, 0 ,line
+        elif status == 2:
+            return 'matched', 0, 0, line
+        
+        return 'Not Found', 0, 0, None        
     
 
 
@@ -209,6 +241,8 @@ x.header
 
 x.checkBalance()
 odds = x.getOdds(511372, 'S Cakarevic', 'L Maetschke')
+
+x.checkSettledBet(57692805)
 
 
 
@@ -225,85 +259,6 @@ headers = {"Authorization":"Token token=" + cfg['betbtc']['api']['token']}
 
 
 
-
-
-def getBetBtcEventData():
-    """
-    get Open Events form BetBTC    
-    Args:
-        -        
-    Returns:
-        json : A list of events
-        
-    """  
-    return requests.get("http://www.betbtc.co/api/event?sport=3",headers=headers).json()
-
-
-
-def getBetBtcMaketOdds(event_id):
-    """
-    get Open Odds form BetBTC    
-    Args:
-        event_id : event id        
-    Returns:
-        json : A list of odds
-        
-    """      
-    data = requests.get("http://www.betbtc.co/api/market?id=" + str(event_id),headers=headers)
-    time.sleep(0.5)
-    return data.json()
-    
-
-#def placeBetBtcBet() :
-#   return requests.get("http://www.betbtc.co/api/bet?id=" + str(event_id),headers=headers).json()
-    
-def checkBetBtcBalance() :
-    """
-    Check the Balance on the account  
-    Args:
-        -        
-    Returns:
-        total_balance : total balance (including placed open bets)
-        availiable : availiable balance for betting
-        blocked : placed balance
-        
-    """  
-    balance = requests.get("http://www.betbtc.co/api/user/balance",headers=headers).json()
-    availiable = balance[0]['Balance']
-    blocked = balance[0]['Blocked']
-    return float(availiable) + float(blocked), availiable, blocked
-
-def checkBetBtcSettledBet(betbtc_bet_id) :
-    """
-    check unsettled bests   
-    Args:
-        betbtc_bet_id (int) : the Number of the betbtc bet
-    Returns:
-        status : unmatched, matched oder not found
-        winnings (float): the winnings on the bet
-        odds (float) : the odds on the bet
-        line (dict) : additional information about the bet
-        
-    """  
-    response =  requests.get("http://www.betbtc.co/api/user/statement",headers=headers).json()
-    for line in response :
-        if str(betbtc_bet_id) in line['description'] :
-            if line['credit'] == None:
-                winnings = 0
-            else :
-                winnings = line['credit']
-                
-            odds = line['odd']
-            return 'settled', winnings, odds, line
-        
-    status, line = checkBetBtcOpenBet(betbtc_bet_id)
-    
-    if status == 1:
-        return 'unmatched', 0, 0 ,line
-    elif status == 2:
-        return 'matched', 0, 0, line
-    
-    return 'Not Found', 0, 0, None
 
 def checkBetBtcOpenBet(betbtc_bet_id) :
     """
