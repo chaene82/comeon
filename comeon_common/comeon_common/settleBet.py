@@ -5,7 +5,7 @@ Created on Thu Nov 16 12:31:14 2017
 @author: haenec
 """
 
-from .betbtc import checkBetBtcSettledBet
+from .betbtc import betbtc
 from .Pinnacle import checkPinnacleSettledBet
 from sqlalchemy import select, update
 from .base import startBetLogging
@@ -20,7 +20,6 @@ con, meta = connect()
 tbl_orderbook = meta.tables['tbl_orderbook']
 #tbl_tournament = meta.tables['tbl_tournament']
 #tbl_match = meta.tables['tbl_match']  
-
 
 
 def settleBet(order_id) :
@@ -55,7 +54,7 @@ def settleBet(order_id) :
             net_winnings_local = winnings
             net_winnings_eur = winnings            
         elif bookie_id == 2 :
-            bet_status, winnings, odds, response = checkBetBtcSettledBet(bet_id)
+            bet_status, winnings, odds, response = betbtc('back').checkBetBtcSettledBet(bet_id)
             win = float(winnings) + float(stakes)
             odds = float(odds) 
 

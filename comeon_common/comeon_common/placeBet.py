@@ -5,7 +5,7 @@ Created on Thu Nov 16 12:31:14 2017
 @author: haenec
 """
 
-from .betbtc import placeBetBtcBet, placeBetBtcOffer, updateBetBtcBet
+from .betbtc import betbtc
 from .Pinnacle import placePinnacleBet
 from sqlalchemy.dialects.postgresql import insert
 from .base import startBetLogging
@@ -40,6 +40,8 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
        True: The placement was successful
        False: there was a problem placing the bet
     """  
+    
+    
     dt = datetime.now()
     data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, home_player_name, away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id, pin_line_id FROM public.tbl_odds o inner join public.tbl_events e using(event_id) where odds_id =" + str(odds_id) + ";").fetchone()
     
@@ -76,7 +78,7 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
          
 
         
-        betid, message, resultset = placeBetBtcBet(betbtc_event_id, player_name, backlay, request_odds, stake)
+        betid, message, resultset = betbtc('back').placeBet(betbtc_event_id, player_name, backlay, request_odds, stake)
     
     
     log.info("place Bet for [ID " + str(odds_id) + "] " + message )
@@ -155,7 +157,7 @@ def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybe
     stake = offer_laybet_stakes / getBtcEurPrice()
     currency = 'BTC'
 
-    betid, message, resultset = placeBetBtcOffer(betbtc_event_id, player_name, backlay, offer_odds, stake)
+    betid, message, resultset = betbtc('back').placeOffer(betbtc_event_id, player_name, backlay, offer_odds, stake)
 
     if betid > 0:
         
@@ -200,7 +202,7 @@ def updateOffer(offer_id, offer_odds) :
     stake = offer_laybet_stakes / getBtcEurPrice()
     currency = 'BTC'
 
-    status, betid = updateBetBtcBet(betbtc_event_id, offer_odds)
+    status, betid = betbtc('back').updateBet(betbtc_event_id, offer_odds)
 
     if status == 0:
         log.info("offer successfull update")              

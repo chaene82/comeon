@@ -6,7 +6,7 @@ Scripts for checking bets.
 """
 
 from .base import connect
-from .betbtc import checkBetBtcBetForPlace, checkBetBtcBalance, checkBetBtcOpenBet
+from .betbtc import betbtc
 from .Pinnacle import checkPinnacleBetForPlace, checkPinnacleBalance
 from .base import startBetLogging
 from .getPrice import getBtcEurPrice
@@ -70,13 +70,13 @@ def checkBetforPlace(odds_id, request_odds, request_stake) :
         else :
             player_name = away_player_name
         btc_stake = request_stake / getBtcEurPrice()
-        balance = checkBetBtcBalance()
+        balance = betbtc('back').checkBalance()
         if btc_stake > float(balance[1]):
             log.info("not enough balance on betbtc for placing the odds id " + str(odds_id))
             return False
         
         
-        status, message = checkBetBtcBetForPlace(betbtc_event_id, player_name, backlay, request_odds, btc_stake)
+        status, message = betbtc('back').checkBetForPlace(betbtc_event_id, player_name, backlay, request_odds, btc_stake)
     
     # Check for Balance
     
@@ -109,7 +109,7 @@ def checkOffer(offer_id) :
     betbtc_bet_id = con.execute("SELECT bookie_bet_id FROM public.tbl_offer where offer_id =" + str(offer_id) + ";").fetchone()[0]
     
     log.debug("checking for bet " + str(offer_id))
-    status, line = checkBetBtcOpenBet(betbtc_bet_id)    
+    status, line = betbtc('back').checkOpenBet(betbtc_bet_id)    
 
     log.debug("Status of the bet " + str(offer_id) + " " + str(status))
     return status, line    
