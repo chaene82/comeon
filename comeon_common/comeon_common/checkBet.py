@@ -7,7 +7,7 @@ Scripts for checking bets.
 
 from .base import connect
 from .betbtc import betbtc
-from .Pinnacle import checkPinnacleBetForPlace, checkPinnacleBalance
+from .Pinnacle import pinnacle
 from .base import startBetLogging
 from .getPrice import getBtcEurPrice
 
@@ -56,27 +56,31 @@ def checkBetforPlace(odds_id, request_odds, request_stake) :
     if bookie_id == 1 :
         #Pinnacle
         # check balance
-        balance = checkPinnacleBalance()
+        api = pinnacle()
+        
+        balance = api.checkBalance()
         if request_stake > float(balance[1]):
             log.info("not enough balance on pinnacle for placing the odds id " + str(odds_id))
             return False
         
-        status, message = checkPinnacleBetForPlace(pinnalce_event_id, pinnacle_league_id, bettyp_id, way, backlay, request_odds, request_stake)
+        status, message = api.checkBetForPlace(pinnalce_event_id, pinnacle_league_id, bettyp_id, way, backlay, request_odds, request_stake)
 
     elif bookie_id == 2 :
         #BetBTC
+        api = betbtc('back')
+        
         if way == 1:
             player_name = home_player_name
         else :
             player_name = away_player_name
         btc_stake = request_stake / getBtcEurPrice()
-        balance = betbtc('back').checkBalance()
+        balance = api.checkBalance()
         if btc_stake > float(balance[1]):
             log.info("not enough balance on betbtc for placing the odds id " + str(odds_id))
             return False
         
         
-        status, message = betbtc('back').checkBetForPlace(betbtc_event_id, player_name, backlay, request_odds, btc_stake)
+        status, message = api.checkBetForPlace(betbtc_event_id, player_name, backlay, request_odds, btc_stake)
     
     # Check for Balance
     
@@ -105,11 +109,11 @@ def checkOffer(offer_id) :
         line: The information from the bookie
         
     """    
-    
+    api = betbtc('back')
     betbtc_bet_id = con.execute("SELECT bookie_bet_id FROM public.tbl_offer where offer_id =" + str(offer_id) + ";").fetchone()[0]
     
     log.debug("checking for bet " + str(offer_id))
-    status, line = betbtc('back').checkOpenBet(betbtc_bet_id)    
+    status, line = api.checkOpenBet(betbtc_bet_id)    
 
     log.debug("Status of the bet " + str(offer_id) + " " + str(status))
     return status, line    

@@ -6,7 +6,7 @@ Created on Thu Nov 16 12:31:14 2017
 """
 
 from .betbtc import betbtc
-from .Pinnacle import checkPinnacleSettledBet
+from .Pinnacle import pinnacle
 from sqlalchemy import select, update
 from .base import startBetLogging
 from .getPrice import getBtcEurPrice
@@ -47,14 +47,19 @@ def settleBet(order_id) :
         
         if bookie_id == 1 :
             #pinnacle bet 
-            bet_status, winnings, odds, response = checkPinnacleSettledBet(bet_id)
+            api = pinnacle()
+            
+            bet_status, winnings, odds, response = api.checkSettledBet(bet_id)
             winnings = float(winnings) 
             winnings_local = winnings + float(stakes)
             winnings_eur = winnings + float(stakes)
             net_winnings_local = winnings
             net_winnings_eur = winnings            
         elif bookie_id == 2 :
-            bet_status, winnings, odds, response = betbtc('back').checkBetBtcSettledBet(bet_id)
+            # Betbtc
+            api = betbtc('back')
+            
+            bet_status, winnings, odds, response = api.checkBetBtcSettledBet(bet_id)
             win = float(winnings) + float(stakes)
             odds = float(odds) 
 

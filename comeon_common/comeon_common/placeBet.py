@@ -6,7 +6,7 @@ Created on Thu Nov 16 12:31:14 2017
 """
 
 from .betbtc import betbtc
-from .Pinnacle import placePinnacleBet
+from .Pinnacle import pinnacle
 from sqlalchemy.dialects.postgresql import insert
 from .base import startBetLogging
 from .getPrice import getBtcEurPrice
@@ -60,14 +60,17 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
     
     if bookie_id == 1 :
         #Pinnacle
+        api = pinnacle()
         
         stake = request_stake
         currency = 'EUR'
-        betid, message, resultset = placePinnacleBet(pinnalce_event_id, pin_line_id, bettyp_id, way, backlay, request_odds, request_stake)
+        betid, message, resultset = api.placeBet(pinnalce_event_id, pin_line_id, bettyp_id, way, backlay, request_odds, request_stake)
         #betid, message, resultset = 0, '', ''
 
     elif bookie_id == 2 :
         #BetBTC
+        api = betbtc('back')
+        
         if way == 1:
             player_name = home_player_name
         else :
@@ -78,7 +81,7 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
          
 
         
-        betid, message, resultset = betbtc('back').placeBet(betbtc_event_id, player_name, backlay, request_odds, stake)
+        betid, message, resultset = api.placeBet(betbtc_event_id, player_name, backlay, request_odds, stake)
     
     
     log.info("place Bet for [ID " + str(odds_id) + "] " + message )
@@ -156,8 +159,10 @@ def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybe
            
     stake = offer_laybet_stakes / getBtcEurPrice()
     currency = 'BTC'
+    
+    api = betbtc('lay')
 
-    betid, message, resultset = betbtc('back').placeOffer(betbtc_event_id, player_name, backlay, offer_odds, stake)
+    betid, message, resultset = api.placeOffer(betbtc_event_id, player_name, backlay, offer_odds, stake)
 
     if betid > 0:
         
@@ -192,6 +197,7 @@ def updateOffer(offer_id, offer_odds) :
     
     dt = datetime.now()
 
+    api = betbtc('lay')
 
 
     if way == 1:
@@ -202,7 +208,7 @@ def updateOffer(offer_id, offer_odds) :
     stake = offer_laybet_stakes / getBtcEurPrice()
     currency = 'BTC'
 
-    status, betid = betbtc('back').updateBet(betbtc_event_id, offer_odds)
+    status, betid = api.updateBet(betbtc_event_id, offer_odds)
 
     if status == 0:
         log.info("offer successfull update")              
