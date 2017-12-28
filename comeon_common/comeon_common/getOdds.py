@@ -34,7 +34,7 @@ def updateOdds(row, tbl_odds, conn):
 
     clause = clause.on_conflict_do_update(
     index_elements=['event_id', 'bettyp_id','way','bookie_id','backlay'],
-    set_=dict(odds=row['odds'],pin_line_id=row['pin_line_id'],odds_update=dt)
+    set_=dict(odds=row['odds'],pin_line_id=row['pin_line_id'],max_stake= row['maxStake'],odds_update=dt)
     )
     
     conn.execute(clause)  
