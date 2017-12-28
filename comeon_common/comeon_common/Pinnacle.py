@@ -255,7 +255,7 @@ class pinnacle:
         return response['betStatus'], response
     
     
-    def checkPinnacleSettledBet(self, pin_bet_id) :
+    def checkSettledBet(self, pin_bet_id) :
         """
         check unsettled bests   
         Args:

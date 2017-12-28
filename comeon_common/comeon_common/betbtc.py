@@ -244,12 +244,12 @@ class betbtc:
                 odds = line['odd']
                 return 'settled', winnings, odds, line
             
-        status, line = self.checkOpenBet(betbtc_bet_id)
+        status, matched, unmatched = self.checkOpenBet(betbtc_bet_id)
         
         if status == 1:
-            return 'unmatched', 0, 0 ,line
+            return 'unmatched', 0, 0 ,matched
         elif status == 2:
-            return 'matched', 0, 0, line
+            return 'matched', 0, 0, matched
         
         return 'Not Found', 0, 0, None       
     

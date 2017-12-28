@@ -20,6 +20,9 @@ SET search_path = public, pg_catalog;
 
 \connect tennis
 
+ALTER TABLE public.tbl_bookie
+    ALTER COLUMN bookie_name TYPE character (20);
+
 ALTER TABLE public.tbl_odds
     ALTER COLUMN betbtc_max_stake TYPE numeric ;
 	

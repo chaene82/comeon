@@ -59,7 +59,7 @@ def settleBet(order_id) :
             # Betbtc
             api = betbtc('back')
             
-            bet_status, winnings, odds, response = api.checkBetBtcSettledBet(bet_id)
+            bet_status, winnings, odds, response = api.checkSettledBet(bet_id)
             win = float(winnings) + float(stakes)
             odds = float(odds) 
 
@@ -72,7 +72,7 @@ def settleBet(order_id) :
             # Betbtc Laybot
             api = betbtc('lay')
             
-            bet_status, winnings, odds, response = api.checkBetBtcSettledBet(bet_id)
+            bet_status, winnings, odds, response = api.checkSettledBet(bet_id)
             win = float(winnings) + float(stakes)
             odds = float(odds) 
 
