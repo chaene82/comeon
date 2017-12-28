@@ -86,7 +86,7 @@ def getBookieEvents(bookie) :
     
    
     ## Get List with events
-    print (bookie)
+    #print (bookie)
     if bookie == "pinnacle" :
         bookie_api = pinnacle()
     elif bookie == "betbtc" :
