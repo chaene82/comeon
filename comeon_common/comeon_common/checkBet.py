@@ -109,11 +109,11 @@ def checkOffer(offer_id) :
         line: The information from the bookie
         
     """    
-    api = betbtc('back')
+    api = betbtc('lay')
     betbtc_bet_id = con.execute("SELECT bookie_bet_id FROM public.tbl_offer where offer_id =" + str(offer_id) + ";").fetchone()[0]
     
     log.debug("checking for bet " + str(offer_id))
-    status, line = api.checkOpenBet(betbtc_bet_id)    
+    status, matched, unmatched = api.checkOpenBet(betbtc_bet_id)    
 
     log.debug("Status of the bet " + str(offer_id) + " " + str(status))
-    return status, line    
+    return status, matched, unmatched    

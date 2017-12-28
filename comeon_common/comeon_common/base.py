@@ -86,7 +86,7 @@ def startBetLogging(application) :
     if application == 'surebet' :
         SLACK_CHANNEL = cfg['log']['slack']['surebet']['channel']
     elif application == 'laybet' :
-        SLACK_CHANNEL = cfg['log']['slack']['klaybet']['channel']
+        SLACK_CHANNEL = cfg['log']['slack']['laybet']['channel']
     elif application == 'balance' :
         SLACK_CHANNEL = cfg['log']['slack']['balance']['channel'] 
     elif application == 'etl' :

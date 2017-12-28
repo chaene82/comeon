@@ -281,17 +281,6 @@ class pinnacle:
 
 
 
-## Testing
-
-x = pinnacle()
-
-x.getEvents()
-x.getOdds(795379718)
-
-x.odds
-
-
-            
             
 
 

@@ -29,7 +29,7 @@ def updateOdds(row, tbl_odds, conn):
                                    backlay = row['backlay'],\
                                    odds= row['odds'], \
                                    pin_line_id= row['pin_line_id'], \
-                                   betbtc_max_stake= row['maxStake'], \
+                                   max_stake= row['maxStake'], \
                                    odds_update=dt) 
 
     clause = clause.on_conflict_do_update(
@@ -68,10 +68,10 @@ def getOdds() :
 
     
 
-    events = con.execute('Select event_id, betbtc_event_id, pinnacle_event_id, event_id from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
+    events = con.execute('Select event_id, betbtc_event_id, pinnacle_event_id, home_player_name, away_player_name from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
     for event in events :
         log.info("Looking for odds on the event " + str(event[0]))
-        df_betbtc   = api_betbtc.getOdds(event[1])
+        df_betbtc   = api_betbtc.getOdds(event[1], event[3], event[4])
         df_betbtc['bookie_id'] = 2
         df_pinnacle = api_pinnacle.getOdds(event[2])
         df_pinnacle['bookie_id'] = 1

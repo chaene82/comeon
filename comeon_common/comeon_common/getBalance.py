@@ -39,10 +39,12 @@ def getBalance() :
     
     
     betbtc_total, btbtc_availiable, betbtc_blocked = betbtc('back').checkBalance()
+    betbtc_lay_total, btbtc_lay_availiable, betbtc_lay_blocked = betbtc('lay').checkBalance()    
     pin_total, pin_availiable, pin_blocked = pinnacle().checkBalance()    
     
     btceur = getBtcEurPrice()
     betbtc_total_eur = float(betbtc_total) * float(btceur)
+    betbtc_lay_total_eur = float(betbtc_lay_total) * float(btceur)    
     
     # Insert Pinnancle
     clause = insert(tbl_balance).values(bookie_id=1, \
@@ -61,6 +63,16 @@ def getBalance() :
                     blocked_balance=betbtc_blocked, \
                     date=dt)
     con.execute(clause)    
+    
+    # Insert betbetc_lay
+    clause = insert(tbl_balance).values(bookie_id=6, \
+                    total_balance=betbtc_lay_total, \
+                    total_balance_eur=betbtc_lay_total_eur, \
+                    free_balance=btbtc_lay_availiable, \
+                    blocked_balance=betbtc_lay_blocked, \
+                    date=dt)
+    con.execute(clause)      
+    
     
     balance_sql = select([tbl_bookie]).where(tbl_bookie.columns.bookie_id == 1)
     bookie = con.execute(balance_sql).fetchone() 
@@ -81,7 +93,18 @@ def getBalance() :
         log.error("BetBtc Balance to high, please withdraw "+ str(betbtc_total))
     else :
         log.info("BetBtc Balance okay by " + str(betbtc_total))
+        
+    balance_sql = select([tbl_bookie]).where(tbl_bookie.columns.bookie_id == 6)
+    bookie = con.execute(balance_sql).fetchone() 
+    
+    if betbtc_lay_total < bookie[8] :
+        log.error("BetBtc Balance to small, please deposit " + str(betbtc_lay_total))
+    elif betbtc_lay_total > bookie[9] :
+        log.error("BetBtc Balance to high, please withdraw "+ str(betbtc_lay_total))
+    else :
+        log.info("BetBtc Balance okay by " + str(betbtc_lay_total))        
+        
 
-    total_balance = pin_total + (betbtc_total_eur)
+    total_balance = pin_total + (betbtc_total_eur) + (betbtc_lay_total_eur)
     
     log.info("Total Balance on the system " + str(total_balance) + " EUR")

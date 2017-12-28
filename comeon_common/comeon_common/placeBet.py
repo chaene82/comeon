@@ -12,6 +12,7 @@ from .base import startBetLogging
 from .getPrice import getBtcEurPrice
 from .base import connect
 from datetime import datetime
+from sqlalchemy import update
 
 
 log = startBetLogging("placeBet")
@@ -136,7 +137,7 @@ def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybe
     
     dt = datetime.now()
 
-    turnover_local = turnover_eur / getBtcEurPrice()
+    turnover_local = offer_laybet_stakes / getBtcEurPrice()
     data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, home_player_name, away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id, pin_line_id FROM public.tbl_odds o inner join public.tbl_events e using(event_id) where odds_id =" + str(place_odds_id) + ";").fetchone()
     
     event_id = data[1]
@@ -170,7 +171,7 @@ def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybe
 
         clause = insert(tbl_offer).values(odds_id = place_odds_id, \
                                                hedge_odds_id= hedge_odds_id, \
-                                               hedge_oods=hedge_oods,\
+                                               hedge_odds=hedge_oods,\
                                                odds = offer_odds, \
                                                bookie_bet_id=betid,\
                                                turnover_eur = offer_laybet_stakes,\
@@ -184,35 +185,48 @@ def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybe
 
         return True   
     else:
-        log.info("Error by offer placement")        
+        log.info("Error by offer placement")     
+        log.warning(resultset)   
+    
         return False   
         
         
-def updateOffer(offer_id, offer_odds) :
+def closeOffer(offer_id) :
     """
-    ToDo:
-        Rewrite this new (not a part of 0.0.1)
+    Close a open offer
+
+    Args:
+        offer_id (int) : the offer ID 
+
+    Returns:
+       True: The deletion was successful
+       False: there was a problem deleting the offer
     
     """
+    
+    
+    data = con.execute("SELECT offer_id, od.odds_id, e.betbtc_event_id, case when od.way = 1 then home_player_name else away_player_name end as player_name FROM public.tbl_offer o  inner join tbl_odds od using(odds_id)  inner join tbl_events e using(event_id) where offer_id = " + str(offer_id) + ";").fetchone()
     
     dt = datetime.now()
+    
+    player_name = data[3]
+    betbtc_event_id = data[2]
 
     api = betbtc('lay')
+    
+    status = api.closeBet(betbtc_event_id, player_name)
 
+    if status[0]['status'] == 'OK':
+        log.info("offer successfull update") 
 
-    if way == 1:
-        player_name = home_player_name
-    else :
-        player_name = away_player_name
-           
-    stake = offer_laybet_stakes / getBtcEurPrice()
-    currency = 'BTC'
-
-    status, betid = api.updateBet(betbtc_event_id, offer_odds)
-
-    if status == 0:
-        log.info("offer successfull update")              
-        return True, betid   
+            
+        clause = update(tbl_offer).where(offer_id == offer_id).values(status=2,update=dt)     
+        con.execute(clause)     
+             
+        return True   
     else:
-        log.info("Error by offer update")        
+        log.warning("Error by offer update for event if " )  
+        
+        con.execute(clause)     
+        
         return False  

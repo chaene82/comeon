@@ -88,11 +88,11 @@ def getBookieEvents(bookie) :
     ## Get List with events
     print (bookie)
     if bookie == "pinnacle" :
-        api = pinnacle()
+        bookie_api = pinnacle()
     elif bookie == "betbtc" :
-        api = betbtc('back')        
+        bookie_api = betbtc('back')        
         
-    df_api_events =  api.getEvents()
+    df_api_events =  bookie_api.getEvents()
     
     frames = [df_events, df_api_events]
     
@@ -115,6 +115,7 @@ def getEvents() :
     bookies = ['betbtc', 'pinnacle']
     
     for bookie in bookies :
+        log.info("bookie : " + bookie)
         getBookieEvents(bookie)
 
     

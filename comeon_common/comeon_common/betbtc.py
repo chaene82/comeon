@@ -144,6 +144,7 @@ class betbtc:
             json : A list of odds
             
         """              
+        print(bookie_event_id)
         odds = requests.get("http://www.betbtc.co/api/market?id=" + str(bookie_event_id),headers=self.header).json()
         
         if len(odds) != 2:
@@ -151,25 +152,46 @@ class betbtc:
             home_lay = np.nan
             away_back = np.nan
             away_lay = np.nan
+            home_back_max = np.nan
+            home_lay_max = np.nan
+            away_back_max = np.nan
+            away_lay_max = np.nan
         else :      
             
             if home_name in odds[0] :
                 home_odd = list(odds[0].values())[0]
                 home_back = home_odd['Back'][0][0]
+                home_back_max = home_odd['Back'][0][1] if len(home_odd['Back'][0]) == 2 else np.nan
                 home_lay = home_odd['Lay'][0][0]
+                home_lay_max = home_odd['Lay'][0][1] if len(home_odd['Lay'][0]) == 2 else np.nan
             elif home_name in odds[1] :
-                home_odd = list(odds[1].values())[0]
+                home_odd = list(odds[1].values())[0]             
                 home_back = home_odd['Back'][0][0]
+                home_back_max = home_odd['Back'][0][1] if len(home_odd['Back'][0]) == 2 else np.nan
                 home_lay = home_odd['Lay'][0][0]
+                home_lay_max = home_odd['Lay'][0][1] if len(home_odd['Lay'][0]) == 2 else np.nan
             
             if away_name in odds[0] :
                 away_odd = list(odds[0].values())[0]
                 away_back = away_odd['Back'][0][0]
+                away_back_max = away_odd['Back'][0][1] if len(away_odd['Back'][0]) == 2 else np.nan
                 away_lay = away_odd['Lay'][0][0]
+                away_lay_max = away_odd['Lay'][0][1] if len(away_odd['Lay'][0]) == 2 else np.nan                
             elif away_name in odds[1] : 
                 away_odd = list(odds[1].values())[0]
                 away_back = away_odd['Back'][0][0]
+                away_back_max = away_odd['Back'][0][1] if len(away_odd['Back'][0]) == 2 else np.nan
                 away_lay = away_odd['Lay'][0][0]
+                away_lay_max = away_odd['Lay'][0][1] if len(away_odd['Lay'][0]) == 2 else np.nan   
+            else:
+                home_back = np.nan
+                home_lay = np.nan
+                away_back = np.nan
+                away_lay = np.nan       
+                home_back_max = np.nan
+                home_lay_max = np.nan
+                away_back_max = np.nan
+                away_lay_max = np.nan
 
         if not isinstance(home_back, float) : home_back = np.nan
         if not isinstance(home_lay, float)  : home_lay = np.nan
@@ -177,24 +199,24 @@ class betbtc:
         if not isinstance(away_lay, float)  : away_lay = np.nan
         
                         
-        home_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 1,
-                             'odds' : home_back, 'minStake': 0, 'maxStake' : 0, 'pin_line_id' : 0})
+        dict_home_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 1,
+                             'odds' : home_back, 'minStake': 0, 'maxStake' : home_back_max, 'pin_line_id' : 0})
 
-        home_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 1,
-                             'odds' : home_lay, 'minStake': 0, 'maxStake' : 0, 'pin_line_id' : 0})                         
+        dict_home_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 1,
+                             'odds' : home_lay, 'minStake': 0, 'maxStake' : home_lay_max, 'pin_line_id' : 0})                         
 
-        away_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 2,
-                             'odds' : away_back, 'minStake': 0, 'maxStake' : 0, 'pin_line_id' : 0})
+        dict_away_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 2,
+                             'odds' : away_back, 'minStake': 0, 'maxStake' : away_back_max, 'pin_line_id' : 0})
 
-        away_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 2,
-                             'odds' : away_lay, 'minStake': 0, 'maxStake' : 0, 'pin_line_id' : 0})                          
+        dict_away_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 2,
+                             'odds' : away_lay, 'minStake': 0, 'maxStake' : away_lay_max, 'pin_line_id' : 0})                          
         
         result = pd.DataFrame()
         
-        result = result.append([home_back])
-        result = result.append([home_lay])                 
-        result = result.append([away_back])
-        result = result.append([away_lay])    
+        result = result.append([dict_home_back])
+        result = result.append([dict_home_lay])                 
+        result = result.append([dict_away_back])
+        result = result.append([dict_away_lay])    
         
         return result
 
@@ -244,16 +266,26 @@ class betbtc:
             
         """  
         response =  requests.get("http://www.betbtc.co/api/bet/",headers=self.header).json()
+        matched_sum = 0
+        unmatched_sum = 0
         for line in response :
             if betbtc_bet_id == line[0] :
-                if line[2] == 'Unmatched' :
-                    return 1, line
+                if line[2] == 'Unmatched' :      
+                    unmatched_sum = unmatched_sum + line[6] 
+                    #return 1, line
                 elif line[2] == 'Matched' :
-                    return 2, line
-        
-        return 0, None
+                    matched_sum = matched_sum + line[6] 
+                    #return 2, line
+        if (matched_sum > 0 and unmatched_sum > 0 ) :
+            return 3, matched_sum, unmatched_sum
+        elif (matched_sum > 0 and unmatched_sum == 0 ) :
+            return 2, matched_sum, unmatched_sum
+        elif (matched_sum == 0 and unmatched_sum > 0 ) :
+            return 1, matched_sum, unmatched_sum      
+        else :
+            return 0, 0, 0
 
-    def checkBetBtcBetForPlace(self, betbtc_event_id, player_name, backlay, odds, stake) :   
+    def checkBetForPlace(self, betbtc_event_id, player_name, backlay, odds, stake) :   
         """
         Check if a odd still okay for place a bet
         
@@ -344,7 +376,7 @@ class betbtc:
         
         
 
-    def placeBetBtcOffer(self, betbtc_event_id, player_name, backlay, odds, stake) :
+    def placeOffer(self, betbtc_event_id, player_name, backlay, odds, stake) :
         """
         Place a bet offer on betbtc
         
@@ -368,6 +400,8 @@ class betbtc:
         
         parameters = {'market_id' : str(betbtc_event_id), 'selection' : player_name, 'odd' : str(odds), 'stake' : str(stake), 'bet_type' : bettyp}
     
+        log.info("placing offer")
+    
         url = add_url_params("https://www.betbtc.co/api/bet/", parameters)
     
         response = requests.post(url, headers=self.header)    
@@ -380,7 +414,7 @@ class betbtc:
 
 
 
-    def closeBetBtcBet(self, betbtc_event_id) :
+    def closeBet(self, betbtc_event_id, player_name) :
         """
         Close all bets on a event
         
@@ -392,16 +426,17 @@ class betbtc:
         """
     
         
-        url = "https://www.betbtc.co/api/bet/"+str(betbtc_event_id)+"?selection=all"
+        url = "https://www.betbtc.co/api/bet/"+str(betbtc_event_id)+"?selection=" + str(player_name)
         
         response =  requests.delete(url ,headers=self.header).json()
+        
         return response    
 
 
     
     def updateBetBtcBet(self, betbtc_bet_id, odds) :
         """
-        Update an existing bet with a odd
+        Update an existing bet with a odd --> do not use, not safe!!!!
         
         Args:
             betbtc_event_id : id of the event
@@ -435,17 +470,6 @@ class betbtc:
         
         return 0, betbtc_bet_id 
 
-
-### Testing
-
-x = betbtc('back')
-
-x.header
-
-x.checkBalance()
-odds = x.getOdds(511372, 'S Cakarevic', 'L Maetschke')
-
-x.checkOpenBet(511372)
 
 
     
