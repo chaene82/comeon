@@ -9,9 +9,14 @@ from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
 import numpy as np
-from comeon_common import connect
+from comeon_common import connect, getBtcEurPrice
 from comeon_common import startBetLogging
 from comeon_common import checkBetforPlace, placeBet
+
+# load data from the configuration
+import yaml
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
 
 log = startBetLogging("surebet")
 con, meta = connect()  
@@ -19,6 +24,16 @@ tbl_surebet = meta.tables['tbl_surebet']
 tbl_events = meta.tables['tbl_events']
 
 
+
+def checkStake(market_stake, bookie_stake, max_market_stake_btc):
+    max_market_stake_btc = float(max_market_stake_btc) * getBtcEurPrice()
+    if market_stake < max_market_stake_btc :
+        return market_stake, bookie_stake
+    elif market_stake >= max_market_stake_btc :
+        new_market_stake = round(max_market_stake_btc - 1, 2)
+        new_bookie_stake = round(bookie_stake * (new_market_stake / market_stake),2)
+        return new_market_stake, new_bookie_stake
+        
 
 
 def placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake, home_bookie=0, away_bookie=0) :
@@ -108,11 +123,11 @@ def searchSurebetEvent(event_id, tbl_surebet) :
     #event_id = 362
     surebet_numbers = 0
     bettyps = [1]
-    stake_total = 20
-    margin = 0
+    stake_total = cfg['surebet']['stake_total']
+    margin = cfg['surebet']['margin']
     
-    high_risk_margin = 0
-    betbtc_margin = 4
+    high_risk_margin = cfg['surebet']['high_risk_margin']
+    betbtc_margin = cfg['surebet']['betbtc_margin']
     
     
     #ways = [1,2]
@@ -122,7 +137,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
     for bettyp in bettyps :
         for bookie in bookies :
     
-            h = select([tbl_odds.columns.odds, tbl_odds.columns.odds_id])\
+            h = select([tbl_odds.columns.odds, tbl_odds.columns.odds_id, tbl_odds.columns.max_stake])\
                       .where(tbl_odds.columns.event_id == event_id)\
                       .where(tbl_odds.columns.bettyp_id == bettyp)\
                       .where(tbl_odds.columns.bookie_id == bookie)\
@@ -136,7 +151,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
             
             for check_bookie in bookies :
                    
-                a = select([tbl_odds.columns.odds, tbl_odds.columns.odds_id])\
+                a = select([tbl_odds.columns.odds, tbl_odds.columns.odds_id, tbl_odds.columns.max_stake])\
                           .where(tbl_odds.columns.event_id == event_id)\
                           .where(tbl_odds.columns.bettyp_id == bettyp)\
                           .where(tbl_odds.columns.bookie_id == check_bookie)\
@@ -189,9 +204,13 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         log.info("Away Odds " + str(away_odds_id))                            
 
                         if bookie == 2 :
+                            home_stake, away_stake = checkStake(home_stake, away_stake, h_odd[2])
                             home_return = (home_return - home_stake) * (1 - (betbtc_margin/100)) + home_stake
                         if check_bookie == 2 :
+                            away_stake, home_stake  = checkStake(away_stake, home_stake, a_odd[2])
                             away_return = (away_return - away_stake) * (1 - (betbtc_margin/100)) + away_stake
+                                          
+                        stake_total = home_stake + away_stake                               
                             
                         theoretical_winnings = (home_return * home_prob) + (away_return * away_prob)
                             

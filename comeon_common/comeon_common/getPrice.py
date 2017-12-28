@@ -23,5 +23,5 @@ def getBtcEurPrice():
     
     """   
     response = requests.get("https://api.cryptowat.ch/markets/kraken/btceur/price").json()
-    return response['result']['price']
+    return float(response['result']['price'])
 

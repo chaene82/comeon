@@ -68,6 +68,20 @@ def settleBet(order_id) :
             winnings_local = win
             net_winnings_eur = winnings_eur
             net_winnings_local = winnings_local   
+        elif bookie_id == 6 :
+            # Betbtc Laybot
+            api = betbtc('lay')
+            
+            bet_status, winnings, odds, response = api.checkBetBtcSettledBet(bet_id)
+            win = float(winnings) + float(stakes)
+            odds = float(odds) 
+
+
+            winnings_eur = round(win * getBtcEurPrice(), 2)
+            winnings_local = win
+            net_winnings_eur = winnings_eur
+            net_winnings_local = winnings_local       
+            
         else :
             bet_status, winnings, odds, response = 'matched', 0, 0, 0
   

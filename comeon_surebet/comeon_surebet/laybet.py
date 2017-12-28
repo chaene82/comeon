@@ -12,9 +12,17 @@ from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
 import numpy as np
 import math
-from comeon_common import connect
+from comeon_common import connect, getBtcEurPrice
 from comeon_common import startBetLogging
 from comeon_common import checkBetforPlace, placeBet, checkOffer, placeOffer
+
+
+# load data from the configuration
+import yaml
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
+
+
 
 log = startBetLogging("laybet")
 con, meta = connect()  
@@ -23,7 +31,7 @@ tbl_events = meta.tables['tbl_events']
 tbl_orderbook = meta.tables['tbl_orderbook']
 
 
-def calcLayOdds(back_odds=1.2, margin=0.1, invest=20) :
+def calcLayOdds(back_odds=1.2, margin=0.1, invest=cfg['laybet']['invest']) :
    # invest = 1
     
     back_stake = round(invest/back_odds, 2)
@@ -48,7 +56,7 @@ def calcLayOdds(back_odds=1.2, margin=0.1, invest=20) :
         return False, 0, 0, 0
     
 
-def checkLayOdds(offerLayOdds, hedgeLayOdds, min_margin=0.05, invest=20) :
+def checkLayOdds(offerLayOdds, hedgeLayOdds, min_margin=0.05, invest=cfg['laybet']['invest']) :
     status, odds, lay_stake, back_stake = calcLayOdds(hedgeLayOdds,  margin=min_margin, invest=invest)
     if (status and odds >= offerLayOdds):
         log.info("laybet still okay")
@@ -62,7 +70,7 @@ def checkLayOdds(offerLayOdds, hedgeLayOdds, min_margin=0.05, invest=20) :
 
 
 def placeLayBet(odds_id) :
-    laybot_bookie = 2
+    laybot_bookie = 6
     backbet_bookie = 1
     
     # Check if laybet already exist and give the odds
@@ -124,15 +132,15 @@ def updateLayBet(odds_id, offer_id) :
         
 def checkLayBet(offer_id) :
     dt = datetime.now()
-    invest = 10
+    invest = cfg['laybet']['invest']
     product_id = 4
     bettyp_id=1
 
-    laybot_bookie = 2
+    laybot_bookie = 6
     backbet_bookie = 1
     
     # Check if laybet already exist and give the odds
-    offer  = con.execute('SELECT odds_id, hedge_odds_id, odds, hedge_odds, turnover_eur, turnover_local, currency, status, bookie_bet_id, hedge_stakes FROM tbl_offer WHERE offer_id = ' + str(offer_id)).fetchone()
+    offer  = con.execute('SELECT of.odds_id, of.hedge_odds_id, of.odds, of.hedge_odds, of.turnover_eur, of.turnover_local, of.currency, of.status, of.bookie_bet_id, of.hedge_stakes, od.way FROM tbl_offer of inner join tbl_odds od using(odds_id) WHERE offer_id = ' + str(offer_id)).fetchone()
     odds_id = offer[0]
     hedge_odds_id = offer[1]
     hedge_odds = offer[3]
@@ -143,6 +151,7 @@ def checkLayBet(offer_id) :
     status =  offer[7]
     bookie_bet_id = offer[8]
     hedge_stake = offer[9]
+    way = offer[10]
     
 
     offer_bookie_status = checkOffer(offer_id)
@@ -169,7 +178,7 @@ def checkLayBet(offer_id) :
     elif offer_bookie_status[0] == 2 :
         
         ##  matched     
-        log.info("Offer matched, hedge it")
+        log.warning("Offer matched, hedge it")
         hedge_bet_status = placeBet(hedge_odds_id, hedge_odds, float(hedge_stake), product_id=product_id, surebet_id=0, offer_id=offer_id) 
 
                 
@@ -179,7 +188,7 @@ def checkLayBet(offer_id) :
                                                bookie_bet_id = bookie_bet_id, \
                                                backlay_id = 2,\
                                                bettype_id=bettyp_id, \
-                                               way=0, \
+                                               way=way, \
                                                odds=odds,\
                                                turnover_eur=stake_eur, \
                                                turnover_local=stake_local, \
@@ -196,17 +205,75 @@ def checkLayBet(offer_id) :
         con.execute(clause)         
 
     elif offer_bookie_status[0] == 3 :
-        
-        ##  matched     
+        ##  part-matched     
         log.info("Offer particular matched, do nothing")
-             
-     
+        if (offer_bookie_status[1] * 0.75 > stake_local):
+            log.warning("part-match > 75 %, hedge it")
+            hedge_bet_status = placeBet(hedge_odds_id, hedge_odds, float(hedge_stake), product_id=product_id, surebet_id=0, offer_id=offer_id) 
+           
+            clause = insert(tbl_orderbook).values(product_id=product_id, \
+                                               odds_id = odds_id, \
+                                               bookie_id= laybot_bookie, \
+                                               bookie_bet_id = bookie_bet_id, \
+                                               backlay_id = 2,\
+                                               bettype_id=bettyp_id, \
+                                               way=way, \
+                                               odds=odds,\
+                                               turnover_eur=stake_eur, \
+                                               turnover_local=stake_local, \
+                                               Currency=currency,\
+                                               betdate=dt,\
+                                               status=1,\
+                                               surebet_id=0, \
+                                               offer_id=offer_id,\
+                                               update=dt) 
+            
+            con.execute(clause)      
 
+            clause = update(tbl_offer).where(tbl_offer.columns.offer_id == offer_id).values(status=4, update=dt)
+            con.execute(clause)       
+              
+        else :            
+            log.info("Offer particular matched but not enough, update orderbook")
+            
+            stake_local = offer_bookie_status[1]
+            stake_eur = getBtcEurPrice() * stake_local
+                                      
+            laybet_sql = select([tbl_orderbook.c.order_id]).where(tbl_orderbook.columns.odds_id == odds_id).where(tbl_orderbook.columns.bookie_bet_id == bookie_bet_id)
+            db_laybet_id = con.execute(laybet_sql).fetchone() 
+            if db_laybet_id == None :
+                log.info("offer not in orderbook, add it")
+                clause = insert(tbl_orderbook).values(product_id=product_id, \
+                                               odds_id = odds_id, \
+                                               bookie_id = laybot_bookie, \
+                                               bookie_bet_id = bookie_bet_id, \
+                                               backlay_id = 2,\
+                                               bettype_id=bettyp_id, \
+                                               way=way, \
+                                               odds=odds,\
+                                               turnover_eur=stake_eur, \
+                                               turnover_local=stake_local, \
+                                               Currency=currency,\
+                                               betdate=dt,\
+                                               status=1,\
+                                               surebet_id=0, \
+                                               offer_id=offer_id,\
+                                               update=dt) 
+            
+                con.execute(clause)              
+            else :
+                log.info("allready exists, update it")
+                clause = update(tbl_orderbook).where(tbl_orderbook.columns.odds_id == odds_id).where(tbl_orderbook.columns.bookie_bet_id == bookie_bet_id)\
+                                               .values(turnover_eur=stake_eur, \
+                                                turnover_local=stake_local, \
+                                                update=dt) 
+            
+                con.execute(clause)                 
     return True
 
         
 def searchLayBetOffer() :
-    concurrent_open_bets = 6
+    concurrent_open_bets = cfg['laybet']['concurrent_open_bets']
     con, meta = connect()  
     #tbl_surebet = meta.tables['tbl_surebet']
     open_offers = con.execute('SELECT count (offer_id) FROM tbl_offer WHERE status = 1').fetchone()
@@ -220,6 +287,7 @@ def searchLayBetOffer() :
             placeLayBet(odds_id[0])
             open_offers = con.execute('SELECT count (offer_id) FROM tbl_offer WHERE status = 1').fetchone()
             open_bets = open_offers[0]
+    log.info("no more laybet offer")
             
 def checkOffers():
     open_offer_ids = con.execute('SELECT offer_id FROM tbl_offer WHERE status = 1').fetchall()
