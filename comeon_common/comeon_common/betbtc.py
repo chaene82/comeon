@@ -144,7 +144,7 @@ class betbtc:
             json : A list of odds
             
         """              
-        print(bookie_event_id)
+        #print(bookie_event_id)
         odds = requests.get("http://www.betbtc.co/api/market?id=" + str(bookie_event_id),headers=self.header).json()
         
         if len(odds) != 2:
@@ -305,7 +305,7 @@ class betbtc:
             
         """  
     
-        data = self.getOdds(betbtc_event_id)
+        data = requests.get("http://www.betbtc.co/api/market?id=" + str(betbtc_event_id),headers=self.header).json()
         
         if backlay == 1 :
             bettyp = 'Back'

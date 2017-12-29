@@ -103,7 +103,7 @@ class pinnacle:
         for league in self.odds['leagues']:
             for event in league['events']:
                 if event['id'] == bookie_event_id:
-                    print(bookie_event_id)
+                   # print(bookie_event_id)
                     
                     event_odds = event
                     i = 0
