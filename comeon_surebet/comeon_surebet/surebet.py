@@ -246,11 +246,11 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 for id in result :
                                     surebet_id = id[0]
                                 
-                                log.info("Surebet ID " + str(surebet_id))  
+                                log.warning("Surebet ID " + str(surebet_id))  
                                 
                                 surebetStatus = placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake, bookie, check_bookie)
                                 
-                                log.info("SureBet place? " + str(surebetStatus))  
+                                log.warning("SureBet place? " + str(surebetStatus))  
                                 
                                 if surebetStatus :
                                     clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=2)
