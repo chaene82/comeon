@@ -367,8 +367,8 @@ class betbtc:
             if status == 2 :
                 return data[0]['id'], "bet placed and matched", data
             if status == 1 :
-                closeBetBtcBet(betbtc_event_id)
-                return data[0]['id'], "bet placed and unmatched", data
+                self.closeBet(betbtc_event_id, player_name)
+                return -1, "bet placed, unmatched and closed", data
             else :
                 return data[0]['id'], "problem by checking bet", data
         else :
