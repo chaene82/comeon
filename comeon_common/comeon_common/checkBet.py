@@ -79,6 +79,7 @@ def checkBetforPlace(odds_id, request_odds, request_stake) :
             log.info("not enough balance on betbtc for placing the odds id " + str(odds_id))
             return False
         
+        print(betbtc_event_id, player_name, backlay, request_odds, btc_stake)
         
         status, message = api.checkBetForPlace(betbtc_event_id, player_name, backlay, request_odds, btc_stake)
     
