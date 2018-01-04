@@ -358,6 +358,8 @@ class betbtc:
         elif backlay == 2 :
             bettyp = 'lay'
         
+        stake = round(stake, 6)
+        
         parameters = {'market_id' : str(betbtc_event_id), 'selection' : player_name, 'odd' : str(odds), 'stake' : str(stake), 'bet_type' : bettyp}
         print(parameters)
         url = add_url_params("https://www.betbtc.co/api/bet/", parameters)
