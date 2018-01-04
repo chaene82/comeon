@@ -193,6 +193,14 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         
                         home_return = home_stake * home_odds
                         away_return = away_stake * away_odds
+
+                        if bookie == 2 :
+                            home_stake, away_stake = checkStake(home_stake, away_stake, h_odd[2])
+                            home_return = (home_return - home_stake) * (1 - (betbtc_margin/100)) + home_stake
+                        if check_bookie == 2 :
+                            away_stake, home_stake  = checkStake(away_stake, home_stake, a_odd[2])
+                            away_return = (away_return - away_stake) * (1 - (betbtc_margin/100)) + away_stake
+
                         
                         log.info("home stake " + str(home_stake))
                         log.info("away stake " + str(away_stake))   
@@ -203,12 +211,6 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         log.info("Home Odds " + str(home_odds_id))
                         log.info("Away Odds " + str(away_odds_id))                            
 
-                        if bookie == 2 :
-                            home_stake, away_stake = checkStake(home_stake, away_stake, h_odd[2])
-                            home_return = (home_return - home_stake) * (1 - (betbtc_margin/100)) + home_stake
-                        if check_bookie == 2 :
-                            away_stake, home_stake  = checkStake(away_stake, home_stake, a_odd[2])
-                            away_return = (away_return - away_stake) * (1 - (betbtc_margin/100)) + away_stake
                                           
                         stake_total = home_stake + away_stake                               
                             
