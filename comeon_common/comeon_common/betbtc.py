@@ -313,7 +313,7 @@ class betbtc:
             bettyp = 'Back'
         else:
             bettyp = 'Lay'
-            
+        print(data)    
         
         for line in data:
             if player_name in line:
@@ -359,7 +359,7 @@ class betbtc:
             bettyp = 'lay'
         
         parameters = {'market_id' : str(betbtc_event_id), 'selection' : player_name, 'odd' : str(odds), 'stake' : str(stake), 'bet_type' : bettyp}
-    
+        print(parameters)
         url = add_url_params("https://www.betbtc.co/api/bet/", parameters)
     
         response = requests.post(url, headers=self.header)    
