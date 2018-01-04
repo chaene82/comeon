@@ -119,7 +119,7 @@ def createMatch(row) :
         winner = 2 
     
     score = str(row['home_result'])[:1] + ':' + str(row['away_result'])[:1]
-    MatchDateYearWeek = int(str(row['MatchDate'].to_datetime().year) + str('%02d' % row['MatchDate'].to_datetime().isocalendar()[1]))
+    MatchDateYearWeek = int(str(row['MatchDate'].to_pydatetime().year) + str('%02d' % row['MatchDate'].to_pydatetime().isocalendar()[1]))
         
     # insert or update new Match (event)
     clause = insert(tbl_match).values(tournament_id=tournament_id[0], \
@@ -187,4 +187,14 @@ def transform_te_player(con_postgres):
 
 def etl_transform_te():
     transform_te_match(con_postgres)
+    #transform_te_player(con_postgres)
+    
+    
+def etl_transform_te_results():
+    transform_te_match(con_postgres)
+    #transform_te_player(con_postgres)    
+    
+
+def etl_transform_te_players():
     transform_te_player(con_postgres)
+    #transform_te_player(con_postgres)        

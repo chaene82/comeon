@@ -13,11 +13,11 @@ from datetime import datetime
 import sqlalchemy
 from sqlalchemy import create_engine
 from comeon_common import connect
-from .tennis_config import *
+#from .tennis_config import *
 
 
 
-conn_sqllite3 = sqlite3.connect(sqllite3_path)
+conn_sqllite3 = sqlite3.connect('te_data.db')
 con_postgres, meta = connect()    
 
     
@@ -100,6 +100,13 @@ def etl_import_te_ranking(conn_sqllite3, con_postgres, days = 10000) :
 def etl_import_te(days=100) :
 
     ## Testing
-#    etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
-#    etl_import_te_player(conn_sqllite3, con_postgres, days=days)
-    etl_import_te_ranking(conn_sqllite3, con_postgres, days=days)
+    etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
+    #etl_import_te_player(conn_sqllite3, con_postgres, days=days)
+    #etl_import_te_ranking(conn_sqllite3, con_postgres, days=days)
+    
+def etl_import_te_daily_results(days=1) :
+    etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
+    
+
+def etl_import_te_daily_player(days=1) :
+    etl_import_te_player(conn_sqllite3, con_postgres, days=days)

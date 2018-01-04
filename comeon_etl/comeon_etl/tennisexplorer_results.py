@@ -14,7 +14,7 @@ import re
 import sqlite3
 import time
 import random
-
+from comeon_common import connect
 
 
 ##TODO
@@ -26,7 +26,7 @@ import random
 def store_matchlist_to_database (df) :
     conn = sqlite3.connect('te_data.db')
 
-    df.to_sql('tmp_te_matchlist', conn, if_exists='append')
+    df.to_sql('tmp_te_matchlist', conn, if_exists='replace')
 
 
 def get_te_matchlist(year = '2010', month = '09', day = '05'):
@@ -138,8 +138,8 @@ def get_te_matchlist(year = '2010', month = '09', day = '05'):
 #endDate = '20/09/2017'
 #date = datetime.strptime(strDate, "%d/%m/%Y") 
 #todate = datetime.strptime(endDate, "%d/%m/%Y") 
-date = datetime.now().date()
-todate = datetime.now().date()
+date = datetime.now().date() - timedelta(days=1)
+todate = datetime.now().date()- timedelta(days=1)
 
 
 while date <= todate :
