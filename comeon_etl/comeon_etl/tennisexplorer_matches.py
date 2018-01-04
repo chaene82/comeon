@@ -134,26 +134,30 @@ def get_te_matchlist(year = '2010', month = '09', day = '05'):
     
     return result
 
-#strDate = '28/08/2017'
-#endDate = '20/09/2017'
-#date = datetime.strptime(strDate, "%d/%m/%Y") 
-#todate = datetime.strptime(endDate, "%d/%m/%Y") 
-date = datetime.now().date()
-todate = datetime.now().date()
 
 
-while date <= todate :
+def etl_te_get_matches() : 
+
+    #strDate = '28/08/2017'
+    #endDate = '20/09/2017'
+    #date = datetime.strptime(strDate, "%d/%m/%Y") 
+    #todate = datetime.strptime(endDate, "%d/%m/%Y") 
+    date = datetime.now().date() - timedelta(days=1)
+    todate = datetime.now().date()- timedelta(days=1)
     
-    print("Get Matchlist for" , date )
-    year = date.strftime('%Y')
-    month = date.strftime('%m')
-    day = date.strftime('%d')
-    df = get_te_matchlist(year = year, month = month, day = day)
-    if not df.empty:
-        store_matchlist_to_database(df)
     
-    sleep_sec = random.randint(6,10)
-    print("sleep for (s) ", sleep_sec)
-    time.sleep(sleep_sec)
-    
-    date = date+timedelta(days=1)
+    while date <= todate :
+        
+        print("Get Matchlist for" , date )
+        year = date.strftime('%Y')
+        month = date.strftime('%m')
+        day = date.strftime('%d')
+        df = get_te_matchlist(year = year, month = month, day = day)
+        if not df.empty:
+            store_matchlist_to_database(df)
+        
+        sleep_sec = random.randint(6,10)
+        print("sleep for (s) ", sleep_sec)
+        time.sleep(sleep_sec)
+        
+        date = date+timedelta(days=1)

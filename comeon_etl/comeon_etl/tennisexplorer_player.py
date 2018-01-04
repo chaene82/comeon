@@ -120,7 +120,7 @@ def getplayer() :
         i = i + 1
 
 
-def getMissingPlayer() :
+def etl_te_get_missing_players() :
     con, meta = connect()    
 
 
