@@ -365,7 +365,7 @@ class betbtc:
         response = requests.post(url, headers=self.header)    
         data = response.json()
         if data[0]['status'] == 'OK' :
-            sleep(0.5)
+            sleep(5)
             status, matched, unmatches = self.checkOpenBet(data[0]['id'])
             if status == 2 :
                 return data[0]['id'], "bet placed and matched", data
