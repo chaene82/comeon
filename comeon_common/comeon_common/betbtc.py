@@ -18,6 +18,8 @@ from .base import startBetLogging, removeTime
 from urllib.parse import (
     urlencode, unquote, urlparse, parse_qsl, ParseResult
 )
+from time import sleep
+
 
 log = startBetLogging("BET BTC Wrapper")
 
@@ -311,7 +313,7 @@ class betbtc:
             bettyp = 'Back'
         else:
             bettyp = 'Lay'
-            
+        print(data)    
         
         for line in data:
             if player_name in line:
@@ -357,20 +359,21 @@ class betbtc:
             bettyp = 'lay'
         
         parameters = {'market_id' : str(betbtc_event_id), 'selection' : player_name, 'odd' : str(odds), 'stake' : str(stake), 'bet_type' : bettyp}
-    
+        print(parameters)
         url = add_url_params("https://www.betbtc.co/api/bet/", parameters)
     
         response = requests.post(url, headers=self.header)    
         data = response.json()
         if data[0]['status'] == 'OK' :
-            status, matched, unmatches = self.checkOpenBet(data[0]['id'])
-            if status == 2 :
-                return data[0]['id'], "bet placed and matched", data
-            if status == 1 :
-                self.closeBet(betbtc_event_id, player_name)
-                return -1, "bet placed, unmatched and closed", data
-            else :
-                return data[0]['id'], "problem by checking bet", data
+            #sleep(5)
+            #status, matched, unmatches = self.checkOpenBet(data[0]['id'])
+            #if status == 2 :
+            return data[0]['id'], "bet placed and matched", data
+            #if status == 1 :
+            #    self.closeBet(betbtc_event_id, player_name)
+            #    return -1, "bet placed, unmatched and closed", data
+            #else :
+            #    return data[0]['id'], "problem by checking bet", data
         else :
             return -1, "error placing bet, Errorcode", data
         

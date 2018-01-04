@@ -9,7 +9,7 @@ Created on Sun Oct 15 17:08:25 2017
 
 import pandas as pd
 import numpy as np
-from sqlalchemy import create_engine, MetaData, select
+from sqlalchemy import create_engine, MetaData, select, update
 from datetime import datetime
 from comeon_common import connect
 
@@ -87,7 +87,19 @@ def updatePlayer(row) :
               dayofbirth = convertDate(row['player_dob']), \
               update=dt) 
     )
-    con_postgres.execute(clause)         
+    con_postgres.execute(clause)       
+    
+
+
+def updateMatchDetails(row) :
+    dt = datetime.now()
+
+    #print("update player", row['player_name'], )
+    #print("dob", convertDate(row['player_dob']), )
+    
+    clause = update(tbl_match).where(tbl_match.columns.te_link==row['match_link']).values(surface=row['surface'], update=dt) 
+
+    con_postgres.execute(clause)   
 
     
 def createTournament(row) :
@@ -184,6 +196,11 @@ def transform_te_player(con_postgres):
     
     df_player.apply(updatePlayer, axis = 1)
     
+def transform_te_matchdetail(con_postgres):
+    df_matchdetails = pd.read_sql('select * from tbl_te_matchdetails', con_postgres)
+    
+    df_matchdetails.apply(updateMatchDetails, axis = 1)    
+    
 
 def etl_transform_te():
     transform_te_match(con_postgres)
@@ -198,3 +215,7 @@ def etl_transform_te_results():
 def etl_transform_te_players():
     transform_te_player(con_postgres)
     #transform_te_player(con_postgres)        
+    
+def etl_transform_te_matchdetails():
+    transform_te_matchdetail(con_postgres)
+    #transform_te_player(con_postgres)          

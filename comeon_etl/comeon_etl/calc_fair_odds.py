@@ -15,15 +15,16 @@ log = startBetLogging("calculate fair odds")
 tbl_match = meta.tables['tbl_match']  
 
 
-def updateSQL(row) :
+def updateSQLfairbet(row) :
     
-   stm = update(tbl_match).where(tbl_match.columns.match_id==row['match_id']).\
+    
+    stm = update(tbl_match).where(tbl_match.columns.match_id==row['match_id']).\
                  values(player1_proba=row['player1_proba'],
                         player2_proba=row['player2_proba'],\
                         player1_fair_odds=row['player1_fair_odds'],\
                         player2_fair_odds=row['player2_fair_odds'])
 
-   conn.execute(stm)
+    conn.execute(stm)
 
 def calcFairOdds() :
    
@@ -44,5 +45,5 @@ def calcFairOdds() :
     df['player1_fair_odds'] = 1 / df['player1_proba']
     df['player2_fair_odds'] = 1 / df['player2_proba']
     
-    df.apply(updateSQL, axis=0)
+    df.apply(updateSQLfairbet, axis=1)
 
