@@ -204,6 +204,8 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         
                         log.info("home stake " + str(home_stake))
                         log.info("away stake " + str(away_stake))   
+                        log.info("home max btcbet stake " + str(h_odd[2])) 
+                        log.info("away max btcbet stake " + str(a_odd[2]))                         
                         log.info("home return " + str(home_return))
                         log.info("away return " + str(away_return))  
                         log.info("home prop " + str(home_prob))
