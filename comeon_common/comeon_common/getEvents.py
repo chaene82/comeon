@@ -82,9 +82,11 @@ def getPlayerId(player_name, con, bookie) :
         if player_id == None :
             log.info("New Player for Pinnacle " + str(player_name))
             
-            stm = insert(tbl_event_player).values(pin_player_name=player_name)
-            con.execute(stm)    
-            player_id = con.execute("Select event_player_id from tbl_event_player WHERE pin_player_name = '" + str(player_name) + "'").fetchone()
+            player_id = checkPlayerExists(player_name)
+            if (player_id == -1) :            
+                stm = insert(tbl_event_player).values(pin_player_name=player_name)
+                con.execute(stm)    
+                player_id = con.execute("Select event_player_id from tbl_event_player WHERE pin_player_name = '" + str(player_name) + "'").fetchone()
 
 
     return player_id[0]
