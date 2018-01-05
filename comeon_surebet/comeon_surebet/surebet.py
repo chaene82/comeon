@@ -97,6 +97,9 @@ def placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, hom
                 home_bet_status = placeBet(home_odds_id, home_odds, home_stake, product_id=surebet_typ, surebet_id=surebet_id) 
                 if home_bet_status :
                     return True
+                
+    home_status = checkBetforPlace(home_odds_id, home_odds, home_stake)     
+    away_status = checkBetforPlace(away_odds_id, away_odds, away_stake)                
     return False
 
 def searchSurebetEvent(event_id, tbl_surebet) :
@@ -193,15 +196,6 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         
                         home_return = home_stake * home_odds
                         away_return = away_stake * away_odds
-                        
-                        log.info("home stake " + str(home_stake))
-                        log.info("away stake " + str(away_stake))   
-                        log.info("home return " + str(home_return))
-                        log.info("away return " + str(away_return))  
-                        log.info("home prop " + str(home_prob))
-                        log.info("away prop " + str(away_prob))         
-                        log.info("Home Odds " + str(home_odds_id))
-                        log.info("Away Odds " + str(away_odds_id))                            
 
                         if bookie == 2 :
                             home_stake, away_stake = checkStake(home_stake, away_stake, h_odd[2])
@@ -209,6 +203,19 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         if check_bookie == 2 :
                             away_stake, home_stake  = checkStake(away_stake, home_stake, a_odd[2])
                             away_return = (away_return - away_stake) * (1 - (betbtc_margin/100)) + away_stake
+
+                        
+                        log.info("home stake " + str(home_stake))
+                        log.info("away stake " + str(away_stake))   
+                        log.info("home max btcbet stake " + str(h_odd[2])) 
+                        log.info("away max btcbet stake " + str(a_odd[2]))                         
+                        log.info("home return " + str(home_return))
+                        log.info("away return " + str(away_return))  
+                        log.info("home prop " + str(home_prob))
+                        log.info("away prop " + str(away_prob))         
+                        log.info("Home Odds " + str(home_odds_id))
+                        log.info("Away Odds " + str(away_odds_id))                            
+
                                           
                         stake_total = home_stake + away_stake                               
                             
