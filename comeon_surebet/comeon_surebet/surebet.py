@@ -97,6 +97,9 @@ def placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, hom
                 home_bet_status = placeBet(home_odds_id, home_odds, home_stake, product_id=surebet_typ, surebet_id=surebet_id) 
                 if home_bet_status :
                     return True
+                
+    home_status = checkBetforPlace(home_odds_id, home_odds, home_stake)     
+    away_status = checkBetforPlace(away_odds_id, away_odds, away_stake)                
     return False
 
 def searchSurebetEvent(event_id, tbl_surebet) :
