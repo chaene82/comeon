@@ -14,7 +14,7 @@ import re
 import sqlite3
 import time
 import random
-from comeon_common import connect
+
 
 
 ##TODO
@@ -26,12 +26,12 @@ from comeon_common import connect
 def store_matchlist_to_database (df) :
     conn = sqlite3.connect('te_data.db')
 
-    df.to_sql('tmp_te_matchlist', conn, if_exists='replace')
+    df.to_sql('tmp_te_matchlist', conn, if_exists='append')
 
 
 def get_te_matchlist(year = '2010', month = '09', day = '05'):
 
-    url = 'http://www.tennisexplorer.com/results/?type=atp-single&year=' + year + '&month=' + month + '&day=' + day
+    url = 'http://www.tennisexplorer.com/matches/'
     
     req = urllib.request.Request(url)
     #http://live-tennis.eu/en/official-atp-ranking
@@ -92,8 +92,8 @@ def get_te_matchlist(year = '2010', month = '09', day = '05'):
             for td in tr.findAll("td" , attrs={"class": "score"}):
                 globals()["home_score_" + str(i)] = td.text
                 i = i + 1
-            home_odds = tr.find("td" , attrs={"class": "coursew"}).text.strip()  
-            away_odds = tr.find("td" , attrs={"class": "course"}).text.strip()     
+            #home_odds = tr.find("td" , attrs={"class": "coursew"}).text.strip()  
+            #away_odds = tr.find("td" , attrs={"class": "course"}).text.strip()     
             match_link = tr.find("td", text="info").a.attrs['href'].strip()
             continue
 
@@ -133,6 +133,7 @@ def get_te_matchlist(year = '2010', month = '09', day = '05'):
     
     
     return result
+
 
 
 def etl_te_get_matches() : 

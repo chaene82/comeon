@@ -13,6 +13,7 @@ import re
 import random
 import time
 from datetime import datetime, timedelta
+from comeon_common import connect
 
 
 
@@ -28,7 +29,7 @@ def store_player_to_database (df) :
     conn.close()
 
 
-def get_te_ranking(player_url = "/player/laaksonen/"):
+def get_te_player(player_url = "/player/laaksonen/"):
 
     url = 'http://www.tennisexplorer.com/' + player_url 
     
@@ -88,28 +89,46 @@ def get_te_ranking(player_url = "/player/laaksonen/"):
     
     return result
 
-conn = sqlite3.connect('te_data.db')
 
-home = pd.read_sql("SELECT DISTINCT home_link from tmp_te_matchlist ", conn)
-away = pd.read_sql("SELECT DISTINCT away_link from tmp_te_matchlist ", conn)
 
-home_list = home.home_link.tolist()
-away_list = away.away_link.tolist()
 
-players = home_list  + away_list
-players = list(set(players))
 
-players = players[12592:]
 
-i = 0
-for link in players:
-    print(link)
-    print(i)
-    link = link.replace('â' , 'a')
-    df = get_te_ranking(link)
-    store_player_to_database(df)
-    #sleep_sec = random.randint(3,5)
-    #print("sleep for (s) ", sleep_sec)
-    #time.sleep(sleep_sec)
-    i = i + 1
+def getplayer() :
+    conn = sqlite3.connect('te_data.db')
+    
+    home = pd.read_sql("SELECT DISTINCT home_link from tmp_te_matchlist ", conn)
+    away = pd.read_sql("SELECT DISTINCT away_link from tmp_te_matchlist ", conn)
+    
+    home_list = home.home_link.tolist()
+    away_list = away.away_link.tolist()
+    
+    players = home_list  + away_list
+    players = list(set(players))
+    
+    
+    i = 0
+    for link in players:
+        print(link)
+        print(i)
+        link = link.replace('â' , 'a')
+        df = get_te_player(link)
+        store_player_to_database(df)
+        #sleep_sec = random.randint(3,5)
+        #print("sleep for (s) ", sleep_sec)
+        #time.sleep(sleep_sec)
+        i = i + 1
 
+
+def etl_te_get_missing_players() :
+    con, meta = connect()    
+
+
+    players = con.execute('SELECT te_link FROM public.tbl_player where te_link is not null and plays is null;' )
+    
+    for link_list in players:
+        link = link_list[0]
+        print(link)
+        link = link.replace('â' , 'a')
+        df = get_te_player(link)
+        store_player_to_database(df)

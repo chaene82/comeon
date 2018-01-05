@@ -39,8 +39,8 @@ def getScore(unique_players, matchesList) :
         d = {'player_id' : player, 
              'service_score' : service_score,
              'return_score' : return_score,
-             'camp_score' : return_score,
-             'fast_player_score' : camp_score,
+             'camp_score' : camp_score,
+             'fast_player_score' : fast_player_score,
              'front_runner_score' : front_runner_score
              }
              

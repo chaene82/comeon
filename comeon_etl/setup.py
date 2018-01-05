@@ -7,8 +7,8 @@ Created on Tue Oct 31 14:05:03 2017
 
 from setuptools import setup
 
-setup(name='comeone-etl',
-      version='0.0.1',
+setup(name='comeon-etl',
+      version='0.2.0',
       description='ComeOn Tennis Betting Tools - ETL package',
       url='https://gitlab.com/christophH/comeon',
       author='Christoph Haene',

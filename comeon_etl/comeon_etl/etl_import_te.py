@@ -13,11 +13,11 @@ from datetime import datetime
 import sqlalchemy
 from sqlalchemy import create_engine
 from comeon_common import connect
-from .tennis_config import *
+#from .tennis_config import *
 
 
 
-conn_sqllite3 = sqlite3.connect(sqllite3_path)
+conn_sqllite3 = sqlite3.connect('te_data.db')
 con_postgres, meta = connect()    
 
     
@@ -77,6 +77,18 @@ def etl_import_te_player(conn_sqllite3, con_postgres, days = 10000) :
 
     df_player.to_sql('tbl_te_player', con_postgres, if_exists='replace')
     
+
+def etl_import_te_matchdetails(conn_sqllite3, con_postgres, days = 10000) :
+    print("Load Tennis Explorer match details")    
+            
+    df_matchdetails = pd.read_sql('select * from tmp_te_matches_details', conn_sqllite3)
+    df_matchdetails = df_matchdetails.drop_duplicates()
+      
+    print("Store Tennis Explorer match details")    
+
+    df_matchdetails.to_sql('tbl_te_matchdetails', con_postgres, if_exists='replace')
+
+
     
 def etl_import_te_ranking(conn_sqllite3, con_postgres, days = 10000) :
     print("Load Tennis Explorer ranking list")    
@@ -100,6 +112,16 @@ def etl_import_te_ranking(conn_sqllite3, con_postgres, days = 10000) :
 def etl_import_te(days=100) :
 
     ## Testing
-#    etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
-#    etl_import_te_player(conn_sqllite3, con_postgres, days=days)
-    etl_import_te_ranking(conn_sqllite3, con_postgres, days=days)
+    etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
+    #etl_import_te_player(conn_sqllite3, con_postgres, days=days)
+    #etl_import_te_ranking(conn_sqllite3, con_postgres, days=days)
+    
+def etl_import_te_daily_results(days=1) :
+    etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
+    
+
+def etl_import_te_daily_player(days=1) :
+    etl_import_te_player(conn_sqllite3, con_postgres, days=days)
+
+def etl_import_te_daily_matchdetails(days=1) :
+    etl_import_te_matchdetails(conn_sqllite3, con_postgres, days=days)    

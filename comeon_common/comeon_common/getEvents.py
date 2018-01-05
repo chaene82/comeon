@@ -17,6 +17,42 @@ log = startBetLogging("Events")
 
 
 
+"""
+To Do:
+    
+- Check if Event exists before checking Player
+- Add Player to the table it it not exists
+- Check Player with strange Character (Quotes)
+
+"""
+
+
+
+def getPlayerId(player_name, con) :
+    """ 
+    use the player name to get a player id
+    
+    arg:
+        player_name (str) a player name (as R Federer or Roger Federer)
+    return:
+        player_id or -1 if not matches
+    
+    """
+    search_char = 12
+    
+    string_name = ' '.join(reversed(player_name.split(' ')))
+    
+    resultset = con.execute("Select player_id, name_long, name_short from tbl_player WHERE metaphone(name_short, " + str(search_char) + ") = metaphone('" + string_name + "', " + str(search_char) + ")" ).fetchall()
+    if len(resultset) == 0 :
+        resultset = con.execute("Select player_id, name_long, name_short from tbl_player WHERE metaphone(name_long, " + str(search_char) + ") = metaphone('" + string_name + "', " + str(search_char) + ")" ).fetchall()
+    if len(resultset) == 1 :
+        ## Good match
+        id = resultset[0][0]
+        print(id)
+        return id
+    else:
+        return -1
+
 
 
 def updateEvents(row, bookie, tbl_events, con) :
@@ -25,6 +61,14 @@ def updateEvents(row, bookie, tbl_events, con) :
     """
     dt = datetime.now()
     
+    
+    home_player_id = getPlayerId(row['home_player_name'], con)
+    away_player_id = getPlayerId(row['away_player_name'], con)
+    
+    print ("home player id", home_player_id)
+    print ("away player id", away_player_id)
+        
+    
     if bookie == 'pinnacle' :
         clause = insert(tbl_events).values(pinnacle_event_id=row['pinnacle_event_id'], \
                                            pinnacle_league_id=row['pinnacle_league_id'],\
@@ -32,6 +76,8 @@ def updateEvents(row, bookie, tbl_events, con) :
                                            StartDateTime=row['StartDateTime'], \
                                            home_player_name=row['home_player_name'], \
                                            away_player_name=row['away_player_name'], \
+                                           home_player_id=home_player_id, \
+                                           away_player_id=away_player_id, \
                                            Live=row['live'], \
                                            LastUpdate=dt)
 
@@ -50,6 +96,8 @@ def updateEvents(row, bookie, tbl_events, con) :
                                            betfair_event_id=row['betfair_event_id'], \
                                            home_player_name=row['home_player_name'], \
                                            away_player_name=row['away_player_name'], \
+                                           home_player_id=home_player_id, \
+                                           away_player_id=away_player_id, \
                                            LastUpdate=dt)
                 
         clause = clause.on_conflict_do_update(
