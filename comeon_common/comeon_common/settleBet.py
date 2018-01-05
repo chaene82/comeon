@@ -85,7 +85,7 @@ def settleBet(order_id) :
         else :
             bet_status, winnings, odds, response = 'matched', 0, 0, 0
   
-        winnings = int(winnings)      
+        winnings = float(winnings)      
         
         odds = float(odds) 
         if bet_status == 'settled' :
