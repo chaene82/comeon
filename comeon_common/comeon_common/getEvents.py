@@ -27,8 +27,42 @@ To Do:
 """
 
 
+           
+con, meta = connect()        
+    
+tbl_events = meta.tables['tbl_events']
+tbl_event_player = meta.tables['tbl_event_player']
 
-def getPlayerId(player_name, con) :
+
+def checkPlayerExists(player_name, con) :
+    
+    
+    sql = """
+    Select event_player_id     
+    from tbl_event_player   
+    WHERE metaphone(pin_player_name, 12) = metaphone('{player_name}', 12)
+    """
+    
+    d = { 'player_name': player_name }
+    
+    sql = sql.format(**d)
+    
+    resultset = con.execute(sql).fetchone()
+    
+    if resultset == None :
+        player_id = -1
+    else :
+        player_id = resultset[0]
+    
+    return player_id
+
+
+checkPlayerExists("Roger Federer", con)
+checkPlayerExists("Rolf Federer", con)
+
+
+
+def getPlayerId(player_name, con, bookie) :
     """ 
     use the player name to get a player id
     
@@ -38,22 +72,22 @@ def getPlayerId(player_name, con) :
         player_id or -1 if not matches
     
     """
-    search_char = 12
     
-    string_name = ' '.join(reversed(player_name.split(' ')))
+    #get player_id, if it exists
     
-    resultset = con.execute("Select player_id, name_long, name_short from tbl_player WHERE metaphone(name_short, " + str(search_char) + ") = metaphone('" + string_name + "', " + str(search_char) + ")" ).fetchall()
-    if len(resultset) == 0 :
-        resultset = con.execute("Select player_id, name_long, name_short from tbl_player WHERE metaphone(name_long, " + str(search_char) + ") = metaphone('" + string_name + "', " + str(search_char) + ")" ).fetchall()
-    if len(resultset) == 1 :
-        ## Good match
-        id = resultset[0][0]
-        print(id)
-        return id
-    else:
-        return -1
+    if bookie == 'pinnacle' :
+        player_id = con.execute("Select event_player_id from tbl_event_player WHERE pin_player_name = '" + str(player_name) + "'").fetchone()
+       
+    
+        if player_id == None :
+            log.info("New Player for Pinnacle " + str(player_name))
+            
+            stm = insert(tbl_event_player).values(pin_player_name=player_name)
+            con.execute(stm)    
+            player_id = con.execute("Select event_player_id from tbl_event_player WHERE pin_player_name = '" + str(player_name) + "'").fetchone()
 
 
+    return player_id[0]
 
 def updateEvents(row, bookie, tbl_events, con) :
     """    
@@ -62,8 +96,8 @@ def updateEvents(row, bookie, tbl_events, con) :
     dt = datetime.now()
     
     
-    home_player_id = getPlayerId(row['home_player_name'], con)
-    away_player_id = getPlayerId(row['away_player_name'], con)
+    home_player_id = getPlayerId(row['home_player_name'], con, bookie)
+    away_player_id = getPlayerId(row['away_player_name'], con, bookie)
     
     print ("home player id", home_player_id)
     print ("away player id", away_player_id)
