@@ -14,7 +14,7 @@ import numpy as np
 import math
 from comeon_common import connect, getBtcEurPrice
 from comeon_common import startBetLogging
-from comeon_common import checkBetforPlace, placeBet, checkOffer, placeOffer
+from comeon_common import checkBetforPlace, placeBet, checkOffer, placeOffer, closeOffer
 
 
 # load data from the configuration
