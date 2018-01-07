@@ -70,7 +70,7 @@ def checkLayOdds(offerLayOdds, hedgeLayOdds, min_margin=0.05, invest=cfg['laybet
 
 
 def placeLayBet(odds_id) :
-    laybot_bookie = 6
+    laybot_bookie = 2
     backbet_bookie = 1
     
     # Check if laybet already exist and give the odds
