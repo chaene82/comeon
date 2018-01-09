@@ -71,3 +71,10 @@ ALTER TABLE public.tbl_match
 
 ALTER TABLE public.tbl_match
     ADD COLUMN player2_proba numeric;	
+	
+ALTER TABLE public.tbl_events
+	DROP CONSTRAINT match;
+
+	
+ALTER TABLE public.tbl_events
+    ADD CONSTRAINT match UNIQUE ("StartDate", home_player_id, away_player_id);

@@ -91,6 +91,8 @@ def startBetLogging(application) :
         SLACK_CHANNEL = cfg['log']['slack']['balance']['channel'] 
     elif application == 'etl' :
         SLACK_CHANNEL = cfg['log']['slack']['etl']['channel']     
+    elif application == 'p_l' :
+        SLACK_CHANNEL = cfg['log']['slack']['p_l']['channel']             
     else :
         SLACK_CHANNEL = cfg['log']['slack']['common']['channel']        
     
