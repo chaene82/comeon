@@ -5,13 +5,18 @@ Created on Wed Nov  1 14:27:52 2017
 @author: haenec
 """
 
-from sqlalchemy import create_engine, MetaData, select, update
+from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
 import numpy as np
-from comeon_common import connect
+from comeon_common import connect, getBtcEurPrice
 from comeon_common import startBetLogging
 from comeon_common import checkBetforPlace, placeBet
+
+# load data from the configuration
+import yaml
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
 
 log = startBetLogging("surebet")
 con, meta = connect()  
@@ -20,9 +25,39 @@ tbl_events = meta.tables['tbl_events']
 
 
 
+def checkStake(market_stake, bookie_stake, max_market_stake_btc):
+    max_market_stake_btc = float(max_market_stake_btc) * getBtcEurPrice()
+    if market_stake < max_market_stake_btc :
+        return market_stake, bookie_stake
+    elif market_stake >= max_market_stake_btc :
+        new_market_stake = round(max_market_stake_btc - 1, 2)
+        new_bookie_stake = round(bookie_stake * (new_market_stake / market_stake),2)
+        return new_market_stake, new_bookie_stake
+        
+
 
 def placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake, home_bookie=0, away_bookie=0) :
-    
+    """
+    Place a surebet on the selected bookies
+     
+    Args:
+        surebet_typ (int): The type of the surebet  
+        event_id (int): The event, on which the surebet is placed    
+        surebet_id (int): ID of the surebet.    
+        home_odds_id (int): home bet odds id
+        away_odds_id (int): away bet odds id
+        home_odds (float): home odds
+        away_odds (float): away odds
+        home_stake (float): home stakes
+        away_stake (float): away away stakes       
+        home_bookie (int): home booke id
+        away_bookie (id): away bookie id
+        
+    Returns:
+        True: if successful
+        False: if there was an error
+        
+    """    
     # get add required information
     
     log.debug("odds id " + str(home_odds_id))
@@ -62,9 +97,26 @@ def placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, hom
                 home_bet_status = placeBet(home_odds_id, home_odds, home_stake, product_id=surebet_typ, surebet_id=surebet_id) 
                 if home_bet_status :
                     return True
+                
+    home_status = checkBetforPlace(home_odds_id, home_odds, home_stake)     
+    away_status = checkBetforPlace(away_odds_id, away_odds, away_stake)                
     return False
 
 def searchSurebetEvent(event_id, tbl_surebet) :
+    """
+    Search for a surebet event and if found, place it
+     
+    Args:
+        event_id (int): The event, on which the surebet is placed    
+        tbl_surebet (table): the table object for the tbl_surebet   
+
+        
+    Returns:
+        True: if successful
+        False: if there was an error
+        
+    """        
+    
     dt = datetime.now()
     con, meta = connect()    
           
@@ -74,11 +126,11 @@ def searchSurebetEvent(event_id, tbl_surebet) :
     #event_id = 362
     surebet_numbers = 0
     bettyps = [1]
-    stake_total = 20
-    margin = 0
+    stake_total = cfg['surebet']['stake_total']
+    margin = cfg['surebet']['margin']
     
-    high_risk_margin = 0
-    betbtc_margin = 4
+    high_risk_margin = cfg['surebet']['high_risk_margin']
+    betbtc_margin = cfg['surebet']['betbtc_margin']
     
     
     #ways = [1,2]
@@ -88,7 +140,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
     for bettyp in bettyps :
         for bookie in bookies :
     
-            h = select([tbl_odds.columns.odds, tbl_odds.columns.odds_id])\
+            h = select([tbl_odds.columns.odds, tbl_odds.columns.odds_id, tbl_odds.columns.max_stake])\
                       .where(tbl_odds.columns.event_id == event_id)\
                       .where(tbl_odds.columns.bettyp_id == bettyp)\
                       .where(tbl_odds.columns.bookie_id == bookie)\
@@ -102,7 +154,7 @@ def searchSurebetEvent(event_id, tbl_surebet) :
             
             for check_bookie in bookies :
                    
-                a = select([tbl_odds.columns.odds, tbl_odds.columns.odds_id])\
+                a = select([tbl_odds.columns.odds, tbl_odds.columns.odds_id, tbl_odds.columns.max_stake])\
                           .where(tbl_odds.columns.event_id == event_id)\
                           .where(tbl_odds.columns.bettyp_id == bettyp)\
                           .where(tbl_odds.columns.bookie_id == check_bookie)\
@@ -144,9 +196,19 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         
                         home_return = home_stake * home_odds
                         away_return = away_stake * away_odds
+
+                        if bookie == 2 :
+                            home_stake, away_stake = checkStake(home_stake, away_stake, h_odd[2])
+                            home_return = (home_return) * (1 - (betbtc_margin/100))
+                        if check_bookie == 2 :
+                            away_stake, home_stake  = checkStake(away_stake, home_stake, a_odd[2])
+                            away_return = (away_return) * (1 - (betbtc_margin/100))
+
                         
                         log.info("home stake " + str(home_stake))
                         log.info("away stake " + str(away_stake))   
+                        log.info("home max btcbet stake " + str(h_odd[2])) 
+                        log.info("away max btcbet stake " + str(a_odd[2]))                         
                         log.info("home return " + str(home_return))
                         log.info("away return " + str(away_return))  
                         log.info("home prop " + str(home_prob))
@@ -154,10 +216,8 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                         log.info("Home Odds " + str(home_odds_id))
                         log.info("Away Odds " + str(away_odds_id))                            
 
-                        if bookie == 2 :
-                            home_return = (home_return - home_stake) * (1 - (betbtc_margin/100)) + home_stake
-                        if check_bookie == 2 :
-                            away_return = (away_return - away_stake) * (1 - (betbtc_margin/100)) + away_stake
+                                          
+                        stake_total = home_stake + away_stake                               
                             
                         theoretical_winnings = (home_return * home_prob) + (away_return * away_prob)
                             
@@ -202,6 +262,8 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 if surebetStatus :
                                     clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=2)
                                     con.execute(clause) 
+                                    log.warning("SureBet place in the event " + str(event_id))  
+
                                 else :
                                     clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=6)                              
                                     con.execute(clause) 
@@ -250,6 +312,8 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 if surebetStatus :
                                     clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=2)
                                     con.execute(clause) 
+                                    log.warning("SureBet place in the event " + str(event_id))  
+
                                 else :
                                     clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=6)                              
                                     con.execute(clause) 
@@ -295,10 +359,22 @@ def searchSurebetEvent(event_id, tbl_surebet) :
 
 
 def searchSurebet() :
+    """
+    Search for open events with more then one matching bookie
+     
+    Args:
+        -
+        
+    Returns:
+        -
+        
+    """  
     con, meta = connect()  
     tbl_surebet = meta.tables['tbl_surebet']
     events = con.execute('Select event_id from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
     for event in events :
         log.debug(event[0])
         searchSurebetEvent(event[0], tbl_surebet)
+        
+    log.info("no more events for a surebet")
     

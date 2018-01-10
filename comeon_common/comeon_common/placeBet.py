@@ -5,16 +5,17 @@ Created on Thu Nov 16 12:31:14 2017
 @author: haenec
 """
 
-from .betbtc import placeBetBtcBet, placeBetBtcOffer, updateBetBtcBet
-from .Pinnacle import placePinnacleBet
+from .betbtc import betbtc
+from .Pinnacle import pinnacle
 from sqlalchemy.dialects.postgresql import insert
 from .base import startBetLogging
 from .getPrice import getBtcEurPrice
 from .base import connect
 from datetime import datetime
+from sqlalchemy import update
 
 
-log = startBetLogging("checkBet")
+log = startBetLogging("placeBet")
 
 con, meta = connect()  
 tbl_orderbook = meta.tables['tbl_orderbook']
@@ -25,6 +26,23 @@ tbl_offer = meta.tables['tbl_offer']
 
 
 def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, offer_id=0) :
+    """
+    Place a bet based on a odds ID and store it on the orderbook
+    
+    Args:
+        odds_id (int) : the odds ID 
+        request_odds (float) : The requested odds
+        request_stake (float) : The requested stakes
+        product_id (int) : the Number of the product for which the bet is placed
+        surebet_id (int) : the surebet nummer (if exists)
+        offer_id (int) : the number ot the offer (if exists)
+
+    Returns:
+       True: The placement was successful
+       False: there was a problem placing the bet
+    """  
+    
+    
     dt = datetime.now()
     data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, home_player_name, away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id, pin_line_id FROM public.tbl_odds o inner join public.tbl_events e using(event_id) where odds_id =" + str(odds_id) + ";").fetchone()
     
@@ -43,15 +61,17 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
     
     if bookie_id == 1 :
         #Pinnacle
-        # still deactivted
+        api = pinnacle()
         
         stake = request_stake
         currency = 'EUR'
-        betid, message, resultset = placePinnacleBet(pinnalce_event_id, pin_line_id, bettyp_id, way, backlay, request_odds, request_stake)
+        betid, message, resultset = api.placeBet(pinnalce_event_id, pin_line_id, bettyp_id, way, backlay, request_odds, request_stake)
         #betid, message, resultset = 0, '', ''
 
     elif bookie_id == 2 :
         #BetBTC
+        api = betbtc('back')
+        
         if way == 1:
             player_name = home_player_name
         else :
@@ -60,18 +80,12 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
         stake = request_stake / getBtcEurPrice()
         currency = 'BTC'
          
-        #still deactivated
-        print(betbtc_event_id)
-        print(player_name)
-        print(backlay)
-        print(request_odds)
-        print(float(stake))
+
         
-        betid, message, resultset = placeBetBtcBet(betbtc_event_id, player_name, backlay, request_odds, stake)
-        #status, message, resultset = 0, '', ''    
+        betid, message, resultset = api.placeBet(betbtc_event_id, player_name, backlay, request_odds, stake)
     
     
-    log.info("place Bet for [ID " + str(odds_id) + "] " + message )
+    log.info("place Bet for [ID " + str(odds_id) + "] " + message + ", " + str(resultset) )
     log.debug("Full resultset :  " + str(resultset))
     
     if betid > 0:
@@ -104,10 +118,26 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
 
 
         
-def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybet_stakes, hedge_laybet_stakes) :
+def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybet_stakes, hedge_stakes) :
+    """
+    Place a bet offer based on a odds ID and store it on the orderbook
+    
+    Args:
+        place_odds_id (int) : the odds ID 
+        hedge_odds_id (int) : id of the hedge odd
+        offer_odds (float) : odds for the offer
+        hedge_oods (float) : odds for the hedge offer
+        offer_laybet_stakes (float) : Stakes for the offer
+        hedge_stakes (float) : Stakes for the hedge bet
+
+    Returns:
+       True: The placement was successful
+       False: there was a problem placing the bet
+    """  
+    
     dt = datetime.now()
 
-    turnover_local = turnover_eur / getBtcEurPrice()
+    turnover_local = offer_laybet_stakes / getBtcEurPrice()
     data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, home_player_name, away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id, pin_line_id FROM public.tbl_odds o inner join public.tbl_events e using(event_id) where odds_id =" + str(place_odds_id) + ";").fetchone()
     
     event_id = data[1]
@@ -130,8 +160,10 @@ def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybe
            
     stake = offer_laybet_stakes / getBtcEurPrice()
     currency = 'BTC'
+    
+    api = betbtc('lay')
 
-    betid, message, resultset = placeBetBtcOffer(betbtc_event_id, player_name, backlay, offer_odds, stake)
+    betid, message, resultset = api.placeOffer(betbtc_event_id, player_name, backlay, offer_odds, stake)
 
     if betid > 0:
         
@@ -139,7 +171,7 @@ def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybe
 
         clause = insert(tbl_offer).values(odds_id = place_odds_id, \
                                                hedge_odds_id= hedge_odds_id, \
-                                               hedge_oods=hedge_oods,\
+                                               hedge_odds=hedge_oods,\
                                                odds = offer_odds, \
                                                bookie_bet_id=betid,\
                                                turnover_eur = offer_laybet_stakes,\
@@ -147,34 +179,54 @@ def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybe
                                                currency=currency, \
                                                betdate=dt,\
                                                status=1, \
-                                               hedge_stakes=hedge_laybet_stakes,\
+                                               hedge_stakes=hedge_stakes,\
                                                update=dt)     
         resultset = con.execute(clause) 
 
         return True   
     else:
-        log.info("Error by offer placement")        
+        log.info("Error by offer placement")     
+        log.warning(resultset)   
+    
         return False   
         
         
-def updateOffer(offer_id, offer_odds) :
+def closeOffer(offer_id) :
+    """
+    Close a open offer
+
+    Args:
+        offer_id (int) : the offer ID 
+
+    Returns:
+       True: The deletion was successful
+       False: there was a problem deleting the offer
+    
+    """
+    
+    
+    data = con.execute("SELECT offer_id, od.odds_id, e.betbtc_event_id, case when od.way = 1 then home_player_name else away_player_name end as player_name FROM public.tbl_offer o  inner join tbl_odds od using(odds_id)  inner join tbl_events e using(event_id) where offer_id = " + str(offer_id) + ";").fetchone()
+    
     dt = datetime.now()
+    
+    player_name = data[3]
+    betbtc_event_id = data[2]
 
+    api = betbtc('lay')
+    
+    status = api.closeBet(betbtc_event_id, player_name)
 
+    if status[0]['status'] == 'OK':
+        log.info("offer successfull update") 
 
-    if way == 1:
-        player_name = home_player_name
-    else :
-        player_name = away_player_name
-           
-    stake = offer_laybet_stakes / getBtcEurPrice()
-    currency = 'BTC'
-
-    status, betid = updateBetBtcBet(betbtc_event_id, offer_odds)
-
-    if status == 0:
-        log.info("offer successfull update")              
-        return True, betid   
+            
+        clause = update(tbl_offer).where(offer_id == offer_id).values(status=2,update=dt)     
+        con.execute(clause)     
+             
+        return True   
     else:
-        log.info("Error by offer update")        
+        log.warning("Error by offer update for event if " )  
+        
+        con.execute(clause)     
+        
         return False  

@@ -58,4 +58,7 @@ def createRanking() :
     ranking_select['player_id'] = ranking_select['player_id'].astype('int32')
     ranking_select['atp_points'] = ranking_select['atp_points'].astype('float')
     
+    log.info("store to database")
+
+    
     ranking_select.to_sql("tbl_rating", conn, if_exists='replace', index=False)

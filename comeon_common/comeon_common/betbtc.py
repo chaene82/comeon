@@ -1,23 +1,27 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Oct 11 17:10:07 2017
+This is a first version of a wrapper for Bet Btc
 
+ToDo:
+    Rewrite is as a class
 @author: haenec
 """
 
 import requests
-import pandas as pd
-import json
 from json import dumps
+import pandas as pd
 import time
+import yaml
+import collections
+import numpy as np
+from .base import startBetLogging, removeTime
 from urllib.parse import (
     urlencode, unquote, urlparse, parse_qsl, ParseResult
 )
+from time import sleep
 
-## to do: move that to the database
-headers = {"Authorization":"Token token=4bb29bd1d3a647859fbf1f920814bf56"}
 
-#leagues = requests.get("http://www.betbtc.co/api/sportsleagues/leagues?id=3",headers=headers).json()
+log = startBetLogging("BET BTC Wrapper")
 
 
 
@@ -63,173 +67,428 @@ def add_url_params(url, params):
     return new_url
 
 
-def getBetBtcEventData():
-    return requests.get("http://www.betbtc.co/api/event?sport=3",headers=headers).json()
+
+## Class for as Wrapper
 
 
-
-def getBetBtcMaketOdds(event_id):
-    data = requests.get("http://www.betbtc.co/api/market?id=" + str(event_id),headers=headers)
-    time.sleep(0.5)
-    return data.json()
+class betbtc:
     
-
-#def placeBetBtcBet() :
-#   return requests.get("http://www.betbtc.co/api/bet?id=" + str(event_id),headers=headers).json()
+    account = ''
+    header = ''
+    sports = ''
     
-def checkBetBtcBalance() :
-    balance = requests.get("http://www.betbtc.co/api/user/balance",headers=headers).json()
-    availiable = balance[0]['Balance']
-    blocked = balance[0]['Blocked']
-    return float(availiable) + float(blocked), availiable, blocked
+    def __init__(self, account):
+        with open("config.yml", 'r') as ymlfile:
+            self.account = account
+            self.cfg = yaml.load(ymlfile)
+            self.header=  {"Authorization":"Token token=" + self.cfg['betbtc']['api'][self.account]['token']}
+            self.sports = self.cfg['betbtc']['api']['tennis']
+ 
 
-def checkBetBtcSettledBet(betbtc_bet_id) :
-    response =  requests.get("http://www.betbtc.co/api/user/statement",headers=headers).json()
-    for line in response :
-        if str(betbtc_bet_id) in line['description'] :
-            if line['credit'] == None:
-                winnings = 0
-            else :
-                winnings = line['credit']
-                
-            odds = line['odd']
-            return 'settled', winnings, odds, line
+                   
+    
+    def checkBalance(self) :
+        """
+        Check the Balance on the account  
+        Args:
+            -        
+        Returns:
+            total_balance : total balance (including placed open bets)
+            availiable : availiable balance for betting
+        blocked : placed balance
         
-    status, line = checkBetBtcOpenBet(betbtc_bet_id)
-    
-    if status == 1:
-        return 'unmatched', 0, 0 ,line
-    elif status == 2:
-        return 'matched', 0, 0, line
-    
-    return 'Not Found', 0, 0, None
+        """  
+        balance = requests.get("http://www.betbtc.co/api/user/balance",headers=self.header).json()
+        availiable = balance[0]['Balance']
+        blocked = balance[0]['Blocked']
+        return float(availiable) + float(blocked), availiable, blocked
 
-def checkBetBtcOpenBet(betbtc_bet_id) :
-    response =  requests.get("http://www.betbtc.co/api/bet/",headers=headers).json()
-    for line in response :
-        if betbtc_bet_id == line[0] :
-            if line[2] == 'Unmatched' :
-                return 1, line
-            elif line[2] == 'Matched' :
-                return 2, line
-    
-    return 0, None
-    
-    
-    
-def checkBetBtcBetForPlace(betbtc_event_id, player_name, backlay, odds, stake) :   
 
-    data = getBetBtcMaketOdds(betbtc_event_id)
-    
-    if backlay == 1 :
-        bettyp = 'Back'
-    else:
-        bettyp = 'Lay'
-        
-    
-    for line in data:
-        if player_name in line:
-            for key, value in line[player_name].items():
-                if bettyp in key:
-                    print(value)
-                    btc_odds = value[0][0]
-                    btc_stake = value[0][1]
-                    if backlay == 1 :
-                        if btc_odds < odds:
-                            return -4, "odds smaller then requested" + str(data)
-                        if stake > btc_stake:
-                            return -3, "Stake bigger then maxRiskStake" + str(data)
-                    else :
-                         if btc_odds > odds:
-                            return -4, "odds smaller then requested" + str(data)                       
-                    if stake > btc_stake:
-                       return -3, "Stake bigger then maxRiskStake" + str(data)
-                    return 0, "okay"
-    return -1, "bet not found"
-                            
+
+    def getEvents(self):
+        """
+        get Open Events form BetBTC    
+        Args:
+            -        
+        Returns:
+            json : A list of events
             
-def placeBetBtcBet(betbtc_event_id, player_name, backlay, odds, stake) :
-    if backlay == 1 :
-        bettyp = 'back'
-    elif backlay == 2 :
-        bettyp = 'lay'
+        """  
+        events = requests.get("http://www.betbtc.co/api/event?sport=" + str(self.sports), headers=self.header).json()    
+        
+        result = pd.DataFrame()
+        for event in events :
+        # looking for Match Odds
+            if event[7] == "Match Odds" :
+                log.info("betbtc_event_id "  + str(event[0]))
+                bookie_event_id = event[0]
+                StartDate        = removeTime(event[3])
+                StartDateTime    = event[3]
+                home_player_name = (event[6][0]['name'])
+                away_player_name = (event[6][1]['name'])
+                betfair_event_id = (event[5])
+                
+                dict = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'StartDate' : StartDate, 'StartDateTime' : StartDateTime,
+                                                'home_player_name' : home_player_name, 'away_player_name': away_player_name, 
+                                                'betfair_event_id' : betfair_event_id})
+                
+                result = result.append(pd.DataFrame([dict]))
+                
+        return result
+
     
-    parameters = {'market_id' : str(betbtc_event_id), 'selection' : player_name, 'odd' : str(odds), 'stake' : str(stake), 'bet_type' : bettyp}
+    def getOdds(self, bookie_event_id, home_name = None, away_name = None) :
+        """
+        get Open Odds form BetBTC    
+        Args:
+            event_id : event id        
+        Returns:
+            json : A list of odds
+            
+        """              
+        #print(bookie_event_id)
+        odds = requests.get("http://www.betbtc.co/api/market?id=" + str(bookie_event_id),headers=self.header).json()
+        
+        if len(odds) != 2:
+            home_back = np.nan
+            home_lay = np.nan
+            away_back = np.nan
+            away_lay = np.nan
+            home_back_max = np.nan
+            home_lay_max = np.nan
+            away_back_max = np.nan
+            away_lay_max = np.nan
+        else :      
+            
+            if home_name in odds[0] :
+                home_odd = list(odds[0].values())[0]
+                home_back = home_odd['Back'][0][0]
+                home_back_max = home_odd['Back'][0][1] if len(home_odd['Back'][0]) == 2 else np.nan
+                home_lay = home_odd['Lay'][0][0]
+                home_lay_max = home_odd['Lay'][0][1] if len(home_odd['Lay'][0]) == 2 else np.nan
+            elif home_name in odds[1] :
+                home_odd = list(odds[1].values())[0]             
+                home_back = home_odd['Back'][0][0]
+                home_back_max = home_odd['Back'][0][1] if len(home_odd['Back'][0]) == 2 else np.nan
+                home_lay = home_odd['Lay'][0][0]
+                home_lay_max = home_odd['Lay'][0][1] if len(home_odd['Lay'][0]) == 2 else np.nan
+            
+            if away_name in odds[0] :
+                away_odd = list(odds[0].values())[0]
+                away_back = away_odd['Back'][0][0]
+                away_back_max = away_odd['Back'][0][1] if len(away_odd['Back'][0]) == 2 else np.nan
+                away_lay = away_odd['Lay'][0][0]
+                away_lay_max = away_odd['Lay'][0][1] if len(away_odd['Lay'][0]) == 2 else np.nan                
+            elif away_name in odds[1] : 
+                away_odd = list(odds[1].values())[0]
+                away_back = away_odd['Back'][0][0]
+                away_back_max = away_odd['Back'][0][1] if len(away_odd['Back'][0]) == 2 else np.nan
+                away_lay = away_odd['Lay'][0][0]
+                away_lay_max = away_odd['Lay'][0][1] if len(away_odd['Lay'][0]) == 2 else np.nan   
+            else:
+                home_back = np.nan
+                home_lay = np.nan
+                away_back = np.nan
+                away_lay = np.nan       
+                home_back_max = np.nan
+                home_lay_max = np.nan
+                away_back_max = np.nan
+                away_lay_max = np.nan
 
-    url = add_url_params("https://www.betbtc.co/api/bet/", parameters)
+        if not isinstance(home_back, float) : home_back = np.nan
+        if not isinstance(home_lay, float)  : home_lay = np.nan
+        if not isinstance(away_back, float) : away_back = np.nan
+        if not isinstance(away_lay, float)  : away_lay = np.nan
+        
+                        
+        dict_home_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 1,
+                             'odds' : home_back, 'minStake': 0, 'maxStake' : home_back_max, 'pin_line_id' : 0})
 
-    response = requests.post(url, headers=headers)    
-    data = response.json()
-    if data[0]['status'] == 'OK' :
-        status, line = checkBetBtcOpenBet(data[0]['id'])
-        if status == 2 :
-            return data[0]['id'], "bet placed and matched", data
-        if status == 1 :
-            closeBetBtcBet(betbtc_event_id)
-            return data[0]['id'], "bet placed and unmatched", data
+        dict_home_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 1,
+                             'odds' : home_lay, 'minStake': 0, 'maxStake' : home_lay_max, 'pin_line_id' : 0})                         
+
+        dict_away_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 2,
+                             'odds' : away_back, 'minStake': 0, 'maxStake' : away_back_max, 'pin_line_id' : 0})
+
+        dict_away_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 2,
+                             'odds' : away_lay, 'minStake': 0, 'maxStake' : away_lay_max, 'pin_line_id' : 0})                          
+        
+        result = pd.DataFrame()
+        
+        result = result.append([dict_home_back])
+        result = result.append([dict_home_lay])                 
+        result = result.append([dict_away_back])
+        result = result.append([dict_away_lay])    
+        
+        return result
+
+
+    def checkSettledBet(self, betbtc_bet_id) :
+        """
+        check unsettled bests   
+        Args:
+            betbtc_bet_id (int) : the Number of the betbtc bet
+        Returns:
+            status : unmatched, matched oder not found
+            winnings (float): the winnings on the bet
+            odds (float) : the odds on the bet
+            line (dict) : additional information about the bet
+            
+        """  
+        response =  requests.get("http://www.betbtc.co/api/user/statement",headers=self.header).json()
+        for line in response :
+            if str(betbtc_bet_id) in line['description']  :
+                desc_string = (line['description'])
+                market_id_begin = desc_string.index("market id: ") + 11
+                market_id_end = desc_string[market_id_begin:].index(")") + market_id_begin
+                market_id = int(desc_string[market_id_begin:market_id_end])
+                commission = 0
+                if market_id > 0:
+                    for market_line in response :
+                        if str(market_id) in market_line['description'] and "Comission Charged" in market_line['description']  :
+                            print(market_line)
+                            if market_line['debit'] == None:
+                                commission = 0   
+                            else :
+                                commission = market_line['debit'] 
+                
+                if line['credit'] == None:
+                    winnings = 0
+                else :
+                    winnings = line['credit']
+                    
+                odds = line['odd']
+                return 'settled', winnings, odds, commission, line
+            
+        status, matched, unmatched = self.checkOpenBet(betbtc_bet_id)
+        
+        if status == 1:
+            return 'unmatched', 0, 0, 0 ,matched
+        elif status == 2:
+            return 'matched', 0, 0, 0, matched
+        
+        return 'Not Found', 0, 0, 0, None       
+    
+    
+    def checkOpenBet(self, betbtc_bet_id) :
+        """
+        Check for open bet (matched and unmatched)
+        Args:
+            betbtc_bet_id : betbtc id of the bet   
+        Returns:
+            status : 1 = matched
+                     2 = unmatched
+            lien : additional information about the bet
+            
+        """  
+        response =  requests.get("http://www.betbtc.co/api/bet/",headers=self.header).json()
+        matched_sum = 0
+        unmatched_sum = 0
+        for line in response :
+            if betbtc_bet_id == line[0] :
+                if line[2] == 'Unmatched' :      
+                    unmatched_sum = unmatched_sum + line[6] 
+                    #return 1, line
+                elif line[2] == 'Matched' :
+                    matched_sum = matched_sum + line[6] 
+                    #return 2, line
+        if (matched_sum > 0 and unmatched_sum > 0 ) :
+            return 3, matched_sum, unmatched_sum
+        elif (matched_sum > 0 and unmatched_sum == 0 ) :
+            return 2, matched_sum, unmatched_sum
+        elif (matched_sum == 0 and unmatched_sum > 0 ) :
+            return 1, matched_sum, unmatched_sum      
         else :
-            return data[0]['id'], "problem by checking bet", data
-    else :
-        return -1, "error placing bet, Errorcode", data
+            return 0, 0, 0
+
+    def checkBetForPlace(self, betbtc_event_id, player_name, backlay, odds, stake) :   
+        """
+        Check if a odd still okay for place a bet
+        
+        Args:
+            betbtc_bet_id : betbtc id of the bet   
+            player_name : name of the player
+            backlay : type of the bet
+            odds : the requested odds
+            stake : the requested stakes
+        Returns:
+            status : 0 = bet check successful
+                     -1 = bet not found
+                     -3 = Stake bigger then maxRiskStake
+                     -4 = odds smaller then requested
+            message : the message (look above)
+    
+            
+        """  
+    
+        data = requests.get("http://www.betbtc.co/api/market?id=" + str(betbtc_event_id),headers=self.header).json()
+        
+        if backlay == 1 :
+            bettyp = 'Back'
+        else:
+            bettyp = 'Lay'
+        print(data)    
+        
+        for line in data:
+            if player_name in line:
+                for key, value in line[player_name].items():
+                    if bettyp in key:
+                        print(value)
+                        btc_odds = value[0][0]
+                        btc_stake = value[0][1]
+                        if backlay == 1 :
+                            if btc_odds < odds:
+                                return -4, "odds smaller then requested" + str(data)
+                            if stake > btc_stake:
+                                return -3, "Stake bigger then maxRiskStake" + str(data)
+                        else :
+                             if btc_odds > odds:
+                                return -4, "odds smaller then requested" + str(data)                       
+                        if stake > btc_stake:
+                           return -3, "Stake bigger then maxRiskStake" + str(data)
+                        return 0, "okay"
+        return -1, "bet not found"    
+
+
+    def placeBet(self, betbtc_event_id, player_name, backlay, odds, stake) :
+        """
+        Place a bet on betbtc
+        
+        Args:
+            betbtc_bet_id : betbtc id of the bet   
+            player_name : name of the player
+            backlay : type of the bet
+            odds : the requested odds
+            stake : the requested stakes
+        Returns:
+            betid : betbtc bet id (if successful)
+                    -1 = error placing bet
+            message : the message (look above)
+            data : additional data
+            
+        """  
+        if backlay == 1 :
+            bettyp = 'back'
+        elif backlay == 2 :
+            bettyp = 'lay'
+        
+        stake = round(stake, 6)
+        
+        parameters = {'market_id' : str(betbtc_event_id), 'selection' : player_name, 'odd' : str(odds), 'stake' : str(stake), 'bet_type' : bettyp}
+        print(parameters)
+        url = add_url_params("https://www.betbtc.co/api/bet/", parameters)
+    
+        response = requests.post(url, headers=self.header)    
+        data = response.json()
+        if data[0]['status'] == 'OK' :
+            sleep(2)
+            status, matched, unmatches = self.checkOpenBet(data[0]['id'])
+            if status == 2 :
+                return data[0]['id'], "bet placed and matched", data
+            if status == 1 :
+                self.closeBet(betbtc_event_id, player_name)
+                return -1, "bet placed, unmatched and closed", data
+            else :
+                return data[0]['id'], "problem by checking bet", data
+        else :
+            return -1, "error placing bet, Errorcode", data
         
         
-def placeBetBtcOffer(betbtc_event_id, player_name, backlay, odds, stake) :
-    if backlay == 1 :
-        bettyp = 'back'
-    elif backlay == 2 :
-        bettyp = 'lay'
-    
-    parameters = {'market_id' : str(betbtc_event_id), 'selection' : player_name, 'odd' : str(odds), 'stake' : str(stake), 'bet_type' : bettyp}
 
-    url = add_url_params("https://www.betbtc.co/api/bet/", parameters)
+    def placeOffer(self, betbtc_event_id, player_name, backlay, odds, stake) :
+        """
+        Place a bet offer on betbtc
+        
+        Args:
+            betbtc_bet_id : betbtc id of the bet   
+            player_name : name of the player
+            backlay : type of the bet
+            odds : the requested odds
+            stake : the requested stakes
+        Returns:
+            betid : betbtc bet id (if successful)
+                    -1 = error placing bet
+            message : the message (look above)
+            data : additional data
+            
+        """  
+        if backlay == 1 :
+            bettyp = 'back'
+        elif backlay == 2 :
+            bettyp = 'lay'
+        
+        parameters = {'market_id' : str(betbtc_event_id), 'selection' : player_name, 'odd' : str(odds), 'stake' : str(stake), 'bet_type' : bettyp}
+    
+        log.info("placing offer")
+    
+        url = add_url_params("https://www.betbtc.co/api/bet/", parameters)
+    
+        response = requests.post(url, headers=self.header)    
+        data = response.json()
+        if data[0]['status'] == 'OK' :
+            return data[0]['id'], "offer placed", data
+        else :
+            return -1, "error placing bet, Errorcode", data
 
-    response = requests.post(url, headers=headers)    
-    data = response.json()
-    if data[0]['status'] == 'OK' :
-        return data[0]['id'], "offer placed", data
-    else :
-        return -1, "error placing bet, Errorcode", data
+
+
+
+    def closeBet(self, betbtc_event_id, player_name) :
+        """
+        Close all bets on a event
+        
+        Args:
+            betbtc_event_id : id of the event
+            
+        Returns:
+            response : the response from the market
+        """
+    
+        
+        url = "https://www.betbtc.co/api/bet/"+str(betbtc_event_id)+"?selection=" + str(player_name)
+        
+        response =  requests.delete(url ,headers=self.header).json()
+        
+        return response    
+
 
     
+    def updateBetBtcBet(self, betbtc_bet_id, odds) :
+        """
+        Update an existing bet with a odd --> do not use, not safe!!!!
+        
+        Args:
+            betbtc_event_id : id of the event
+            odds : new odds
+            
+        Returns:
+            status : 0 = successfull
+            betid: the new bet ID
+        """
     
-def closeBetBtcBet(betbtc_event_id) :
-
-    
-    url = "https://www.betbtc.co/api/bet/"+str(betbtc_event_id)+"?selection=all"
-    
-    response =  requests.delete(url ,headers=headers).json()
-    return response    
-    
-    
-def updateBetBtcBet(betbtc_bet_id, odds) :
-
-    response =  requests.get("http://www.betbtc.co/api/bet/",headers=headers).json()
-    for line in response :
-        if betbtc_bet_id == line[0] :
-            print(line)
-            event_id = line[3]
-                      
-   
-    url = "https://www.betbtc.co/api/bet/"+str(betbtc_bet_id)+"?odd="+str(odds)
-    response_odds =  requests.put(url ,headers=headers).json()
-    print(response_odds)
-    time.sleep(5)
-
-    response =  requests.get("http://www.betbtc.co/api/bet/",headers=headers).json()
-    for line in response :
-        if event_id == line[3] :
-            if "lay" == line[7] and "Unmatched" in line[2] :
+        response =  requests.get("http://www.betbtc.co/api/bet/",headers=self.header).json()
+        for line in response :
+            if betbtc_bet_id == line[0] :
                 print(line)
-                betbtc_bet_id = line[0]    
+                event_id = line[3]
+                          
+       
+        url = "https://www.betbtc.co/api/bet/"+str(betbtc_bet_id)+"?odd="+str(odds)
+        response_odds =  requests.put(url ,headers=self.header).json()
+        print(response_odds)
+        time.sleep(5)
     
-    
-    
-    return 0, betbtc_bet_id 
-    
-#def placePinnacleBet(event_id, type_id, way, backlay, odds, stake) :
+        response =  requests.get("http://www.betbtc.co/api/bet/",headers=self.header).json()
+        for line in response :
+            if event_id == line[3] :
+                if "lay" == line[7] and "Unmatched" in line[2] :
+                    print(line)
+                    betbtc_bet_id = line[0]    
+        
+        
+        
+        return 0, betbtc_bet_id 
 
-#with open("betbtc/" + date_id + "_tennis_leagues.json", 'w') as fp:
-#    json.dump(leagues, fp)
-#    
-#with open("betbtc/" + date_id + "_tennis_events.json", 'w') as fp:
-#    json.dump(events, fp)    
+
+
+    
