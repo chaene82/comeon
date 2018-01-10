@@ -14,7 +14,7 @@ import numpy as np
 import math
 from comeon_common import connect, getBtcEurPrice
 from comeon_common import startBetLogging
-from comeon_common import checkBetforPlace, placeBet, checkOffer, placeOffer
+from comeon_common import checkBetforPlace, placeBet, checkOffer, placeOffer, closeOffer
 
 
 # load data from the configuration
@@ -70,7 +70,7 @@ def checkLayOdds(offerLayOdds, hedgeLayOdds, min_margin=0.05, invest=cfg['laybet
 
 
 def placeLayBet(odds_id) :
-    laybot_bookie = 6
+    laybot_bookie = 2
     backbet_bookie = 1
     
     # Check if laybet already exist and give the odds
