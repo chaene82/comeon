@@ -145,9 +145,9 @@ class matchbook:
         result = pd.DataFrame()
         for event in events['events'] :
          # looking for Match Odds
-             #print(event['id'])
+             print(event)
              #print(event['name'])
-             log.info("betbtc_event_id "  + str(event['id']))
+             log.info("matchbook id "  + str(event['id']))
              bookie_event_id = event['id']
              StartDate        = removeTime(event['start'])
              StartDateTime    = event['start']
