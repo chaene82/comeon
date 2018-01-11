@@ -66,19 +66,6 @@ def add_url_params(url, params):
 
 
 
-payload = '{"username": "chrhae", "password": "4access2MB"}'
-headers = {"Content-Type": "application/json"}
-r = requests.post('https://www.matchbook.com/edge/rest/security/session', data=payload, headers=headers)
-r_json = loads(r.text)
-
-url = "https://api.matchbook.com/edge/rest/account"
-
-response = requests.request("GET", url, headers=headers)
-
-print(response.text)
-
-## Class for as Wrapper
-
 
 class matchbook:
     
@@ -130,7 +117,7 @@ class matchbook:
         Args:
             -        
         Returns:
-            json : A list of events
+            df : A list of events
             
         """  
         url = "https://api.matchbook.com/edge/rest/events"
@@ -145,20 +132,21 @@ class matchbook:
         result = pd.DataFrame()
         for event in events['events'] :
          # looking for Match Odds
-             print(event)
-             #print(event['name'])
-             log.info("matchbook id "  + str(event['id']))
-             bookie_event_id = event['id']
-             StartDate        = removeTime(event['start'])
-             StartDateTime    = event['start']
-             home_player_name = event['name'].split('vs')[0]
-             away_player_name = event['name'].split('vs')[1]
-
-                
-             dict = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'StartDate' : StartDate, 'StartDateTime' : StartDateTime,
-                                             'home_player_name' : home_player_name, 'away_player_name': away_player_name})
-                
-             result = result.append(pd.DataFrame([dict]))
+             #print(event)
+             if ' vs ' in  event['name'] :
+                 print(event['name'])
+                 log.info("matchbook id "  + str(event['id']))
+                 bookie_event_id = event['id']
+                 StartDate        = removeTime(event['start'])
+                 StartDateTime    = event['start']
+                 home_player_name = event['name'].split(' vs ')[0]
+                 away_player_name = event['name'].split(' vs ')[1]
+    
+                    
+                 dict = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'StartDate' : StartDate, 'StartDateTime' : StartDateTime,
+                                                 'home_player_name' : home_player_name, 'away_player_name': away_player_name})
+                    
+                 result = result.append(pd.DataFrame([dict]))
                 
         return result
 
@@ -173,57 +161,61 @@ class matchbook:
             
         """              
         #print(bookie_event_id)
-        url = "https://api.matchbook.com/edge/rest/events/686947472240013/markets"
+        url = "https://api.matchbook.com/edge/rest/events/" + str(bookie_event_id) + "/markets"
 
-        querystring = {"types":"moneyline"}
-
-        response = requests.request("GET", url, params=querystring)
+        response = requests.request("GET", url)
         
-        if len(odds) != 2:
-            home_back = np.nan
-            home_lay = np.nan
-            away_back = np.nan
-            away_lay = np.nan
-            home_back_max = np.nan
-            home_lay_max = np.nan
-            away_back_max = np.nan
-            away_lay_max = np.nan
-        else :      
-            
-            if home_name in odds[0] :
-                home_odd = list(odds[0].values())[0]
-                home_back = home_odd['Back'][0][0]
-                home_back_max = home_odd['Back'][0][1] if len(home_odd['Back'][0]) == 2 else np.nan
-                home_lay = home_odd['Lay'][0][0]
-                home_lay_max = home_odd['Lay'][0][1] if len(home_odd['Lay'][0]) == 2 else np.nan
-            elif home_name in odds[1] :
-                home_odd = list(odds[1].values())[0]             
-                home_back = home_odd['Back'][0][0]
-                home_back_max = home_odd['Back'][0][1] if len(home_odd['Back'][0]) == 2 else np.nan
-                home_lay = home_odd['Lay'][0][0]
-                home_lay_max = home_odd['Lay'][0][1] if len(home_odd['Lay'][0]) == 2 else np.nan
-            
-            if away_name in odds[0] :
-                away_odd = list(odds[0].values())[0]
-                away_back = away_odd['Back'][0][0]
-                away_back_max = away_odd['Back'][0][1] if len(away_odd['Back'][0]) == 2 else np.nan
-                away_lay = away_odd['Lay'][0][0]
-                away_lay_max = away_odd['Lay'][0][1] if len(away_odd['Lay'][0]) == 2 else np.nan                
-            elif away_name in odds[1] : 
-                away_odd = list(odds[1].values())[0]
-                away_back = away_odd['Back'][0][0]
-                away_back_max = away_odd['Back'][0][1] if len(away_odd['Back'][0]) == 2 else np.nan
-                away_lay = away_odd['Lay'][0][0]
-                away_lay_max = away_odd['Lay'][0][1] if len(away_odd['Lay'][0]) == 2 else np.nan   
-            else:
-                home_back = np.nan
-                home_lay = np.nan
-                away_back = np.nan
-                away_lay = np.nan       
-                home_back_max = np.nan
-                home_lay_max = np.nan
-                away_back_max = np.nan
-                away_lay_max = np.nan
+        markets = loads(response.text)
+        
+        for market in markets['markets'] :
+            if 'money_line' in market['market-type']:
+                odds = market['runners']
+        
+                if len(odds) != 2:
+                    home_back = np.nan
+                    home_lay = np.nan
+                    away_back = np.nan
+                    away_lay = np.nan
+                    home_back_max = np.nan
+                    home_lay_max = np.nan
+                    away_back_max = np.nan
+                    away_lay_max = np.nan
+                else :      
+                    
+                    if home_name in odds[0]['name'] :
+                        home_odd = list(odds[0].values())[0]
+                        home_back = home_odd[0]['odds']
+                        home_back_max = home_odd[0]['available-amount']
+                        home_lay = home_odd[3]['odds']
+                        home_lay_max = home_odd[3]['available-amount']
+                    elif home_name in odds[1]['name'] :
+                        home_odd = list(odds[1].values())[0]             
+                        home_back = home_odd[0]['odds']
+                        home_back_max = home_odd[0]['available-amount']
+                        home_lay = home_odd[3]['odds']
+                        home_lay_max = home_odd[3]['available-amount']
+                    
+                    if away_name in odds[0]['name'] :
+                        away_odd = list(odds[0].values())[0]
+                        away_back = away_odd[0]['odds']
+                        away_back_max = away_odd[0]['available-amount']
+                        away_lay = away_odd[3]['odds']
+                        away_lay_max = away_odd[3]['available-amount']            
+                    elif away_name in odds[1]['name'] : 
+                        away_odd = list(odds[1].values())[0]
+                        away_back = away_odd[0]['odds']
+                        away_back_max = away_odd[0]['available-amount']
+                        away_lay = away_odd[3]['odds']
+                        away_lay_max = away_odd[3]['available-amount']    
+                    else:
+                        home_back = np.nan
+                        home_lay = np.nan
+                        away_back = np.nan
+                        away_lay = np.nan       
+                        home_back_max = np.nan
+                        home_lay_max = np.nan
+                        away_back_max = np.nan
+                        away_lay_max = np.nan
 
         if not isinstance(home_back, float) : home_back = np.nan
         if not isinstance(home_lay, float)  : home_lay = np.nan
@@ -406,102 +398,6 @@ class matchbook:
         else :
             return -1, "error placing bet, Errorcode", data
         
-        
-
-    def placeOffer(self, betbtc_event_id, player_name, backlay, odds, stake) :
-        """
-        Place a bet offer on betbtc
-        
-        Args:
-            betbtc_bet_id : betbtc id of the bet   
-            player_name : name of the player
-            backlay : type of the bet
-            odds : the requested odds
-            stake : the requested stakes
-        Returns:
-            betid : betbtc bet id (if successful)
-                    -1 = error placing bet
-            message : the message (look above)
-            data : additional data
-            
-        """  
-        if backlay == 1 :
-            bettyp = 'back'
-        elif backlay == 2 :
-            bettyp = 'lay'
-        
-        parameters = {'market_id' : str(betbtc_event_id), 'selection' : player_name, 'odd' : str(odds), 'stake' : str(stake), 'bet_type' : bettyp}
-    
-        log.info("placing offer")
-    
-        url = add_url_params("https://www.betbtc.co/api/bet/", parameters)
-    
-        response = requests.post(url, headers=self.header)    
-        data = response.json()
-        if data[0]['status'] == 'OK' :
-            return data[0]['id'], "offer placed", data
-        else :
-            return -1, "error placing bet, Errorcode", data
-
-
-
-
-    def closeBet(self, betbtc_event_id, player_name) :
-        """
-        Close all bets on a event
-        
-        Args:
-            betbtc_event_id : id of the event
-            
-        Returns:
-            response : the response from the market
-        """
-    
-        
-        url = "https://www.betbtc.co/api/bet/"+str(betbtc_event_id)+"?selection=" + str(player_name)
-        
-        response =  requests.delete(url ,headers=self.header).json()
-        
-        return response    
-
-
-    
-    def updateBetBtcBet(self, betbtc_bet_id, odds) :
-        """
-        Update an existing bet with a odd --> do not use, not safe!!!!
-        
-        Args:
-            betbtc_event_id : id of the event
-            odds : new odds
-            
-        Returns:
-            status : 0 = successfull
-            betid: the new bet ID
-        """
-    
-        response =  requests.get("http://www.betbtc.co/api/bet/",headers=self.header).json()
-        for line in response :
-            if betbtc_bet_id == line[0] :
-                print(line)
-                event_id = line[3]
-                          
-       
-        url = "https://www.betbtc.co/api/bet/"+str(betbtc_bet_id)+"?odd="+str(odds)
-        response_odds =  requests.put(url ,headers=self.header).json()
-        print(response_odds)
-        time.sleep(5)
-    
-        response =  requests.get("http://www.betbtc.co/api/bet/",headers=self.header).json()
-        for line in response :
-            if event_id == line[3] :
-                if "lay" == line[7] and "Unmatched" in line[2] :
-                    print(line)
-                    betbtc_bet_id = line[0]    
-        
-        
-        
-        return 0, betbtc_bet_id 
-
 
 
     

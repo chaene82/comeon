@@ -78,3 +78,9 @@ ALTER TABLE public.tbl_events
 	
 ALTER TABLE public.tbl_events
     ADD CONSTRAINT match UNIQUE ("StartDate", home_player_id, away_player_id);
+	
+ALTER TABLE public.tbl_events
+    ADD COLUMN matchbook_event_id bigint;
+
+ALTER TABLE public.tbl_events
+    ADD COLUMN betdaq_event_id bigint;	
