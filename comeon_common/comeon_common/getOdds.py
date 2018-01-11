@@ -12,12 +12,18 @@ import pandas as pd
 import numpy as np
 from .betbtc import betbtc
 from .Pinnacle import pinnacle
+from .Matchbook import matchbook
+from .Betdaq import betdaq
 from .base import connect, startBetLogging
 
 
 log = startBetLogging("getOdds")
 dt = datetime.now()
   
+api_betbtc = betbtc('back')
+api_pinnacle = pinnacle()
+api_matchbook = matchbook()
+api_betdaq = betdaq()
 
 
 def updateOdds(row, tbl_odds, conn):
@@ -60,24 +66,24 @@ def getOdds() :
     """    
            
     con, meta = connect()    
-    
-    api_betbtc = betbtc('back')
-    api_pinnacle = pinnacle()
-    
-    
+      
     tbl_odds = meta.tables['tbl_odds']
 
     
 
-    events = con.execute('Select event_id, betbtc_event_id, pinnacle_event_id, home_player_name, away_player_name from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
+    events = con.execute('Select event_id, betbtc_event_id, pinnacle_event_id, home_player_name, away_player_name, matchbook_event_id. betdaq_event_id  from tbl_events WHERE pinnacle_event_id is not null and betbtc_event_id is not null and "StartDateTime" >= now()' )
     for event in events :
         log.info("Looking for odds on the event " + str(event[0]))
         df_betbtc   = api_betbtc.getOdds(event[1], event[3], event[4])
         df_betbtc['bookie_id'] = 2
         df_pinnacle = api_pinnacle.getOdds(event[2])
-        df_pinnacle['bookie_id'] = 1                   
+        df_pinnacle['bookie_id'] = 1  
+        df_matchbook = api_matchbook.getOdds(event[5])
+        df_matchbook['bookie_id'] = 5 
+        df_betdaq = betdaq.getOdds(event[6])
+        df_betdaq['bookie_id'] = 3                  
                    
-        frames = [df_betbtc, df_pinnacle]
+        frames = [df_betbtc, df_pinnacle, df_matchbook, df_betdaq]
     
         df_concat_odds = pd.concat(frames)
         df_concat_odds['event_id'] = event[0]

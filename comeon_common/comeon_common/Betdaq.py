@@ -8,6 +8,7 @@ Created on Sun Sep 10 16:19:16 2017
 
 import pandas as pd
 from betdaq.apiclient import APIClient
+import numpy as np
 import collections
 from .base import startBetLogging, removeTime
 import yaml
@@ -93,41 +94,74 @@ class betdaq:
         
         Args:      
         """
-        if self.odds == None :
-            self.odds = self.api.market_data.get_odds(self.sports_id)
+        
+        odds_list = self.api.marketdata.get_prices([bookie_event_id])
             
             
         result = pd.DataFrame()
         
-        for league in self.odds['leagues']:
-            for event in league['events']:
-                if event['id'] == bookie_event_id:
-                   # print(bookie_event_id)
+                
+        for runners in odds_list:
+            for odds in runners['runners']:
+                
                     
-                    event_odds = event
-                    i = 0
-                    for line in event_odds['periods'] :
-                        if 'moneyline' in event_odds['periods'][i] and line['number'] == 0 :
-                            #print(line)
-                            
-                            home_ml = line['moneyline']['home']
-                            away_ml = line['moneyline']['away']
-                            
-                            line_id = line['lineId']
-                            
-                            home_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 1,
-                                             'odds' : home_ml, 'minStake': 0, 'maxStake' : 0, 'pin_line_id' : line_id})                            
- 
+                if len(odds['runner_book']) != 2:
+                    home_back = np.nan
+                    home_lay = np.nan
+                    away_back = np.nan
+                    away_lay = np.nan
+                    home_back_max = np.nan
+                    home_lay_max = np.nan
+                    away_back_max = np.nan
+                    away_lay_max = np.nan
+                else :      
+                    
+                    if home_name in odds['runner_name'] :
+                        home_odd = odds['runner_book']
+                        home_back = home_odd['batb'][0][1]
+                        home_back_max = home_odd['batb'][0][2]
+                        home_lay = home_odd['batl'][0][1]
+                        home_lay_max = home_odd['batl'][0][2]   
+                    
+                    elif away_name in odds['runner_name'] :
+                        away_odd = odds['runner_book']
+                        away_back = away_odd['batb'][0][1]
+                        away_back_max = away_odd['batb'][0][2]
+                        away_lay = away_odd['batl'][0][1]
+                        away_lay_max = away_odd['batl'][0][2]          
 
-                            away_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 2,
-                                             'odds' : away_ml, 'minStake': 0, 'maxStake' : 0, 'pin_line_id' : line_id})
-           
-                            result = result.append([home_back])
-                            result = result.append([away_back])
-         
-                        i = i +1
-                        
-                    
+                    else:
+                        home_back = np.nan
+                        home_lay = np.nan
+                        away_back = np.nan
+                        away_lay = np.nan       
+                        home_back_max = np.nan
+                        home_lay_max = np.nan
+                        away_back_max = np.nan
+                        away_lay_max = np.nan
+    
+                if not isinstance(home_back, float) : home_back = np.nan
+                if not isinstance(home_lay, float)  : home_lay = np.nan
+                if not isinstance(away_back, float) : away_back = np.nan
+                if not isinstance(away_lay, float)  : away_lay = np.nan
+                            
+                dict_home_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 1,
+                                     'odds' : home_back, 'minStake': 0, 'maxStake' : home_back_max, 'pin_line_id' : 0})
+        
+                dict_home_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 1,
+                                     'odds' : home_lay, 'minStake': 0, 'maxStake' : home_lay_max, 'pin_line_id' : 0})                         
+        
+                dict_away_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 2,
+                                     'odds' : away_back, 'minStake': 0, 'maxStake' : away_back_max, 'pin_line_id' : 0})
+        
+                dict_away_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 2,
+                                     'odds' : away_lay, 'minStake': 0, 'maxStake' : away_lay_max, 'pin_line_id' : 0})                          
+            
+            
+                result = result.append([dict_home_back])
+                result = result.append([dict_home_lay])                 
+                result = result.append([dict_away_back])
+                result = result.append([dict_away_lay])                        
 
                         
         return result
