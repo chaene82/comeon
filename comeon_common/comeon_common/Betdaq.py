@@ -20,11 +20,6 @@ log = startBetLogging("betdaq Wrapper")
 
 ## Class for as Wrapper
 
-api = APIClient("chrhae", "4access2Malta")
-
-api = betdaq()
-api.checkBalance()
-events = api.getEvents()
 
 
 class betdaq:
@@ -78,7 +73,9 @@ class betdaq:
                   
                 StartDate        = removeTime(event['market_start_time'])
                 StartDateTime    = event['market_start_time']
-                home_player_name = event['event_name'].split(' v ')[0][6:]
+                home_player_name = event['event_name'].split(' v ')[0] 
+                if not home_player_name[0].isalpha() :
+                    home_player_name = home_player_name[6:]
                 away_player_name = event['event_name'].split(' v ')[1]
            
                 dict = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'StartDate' : StartDate, 'StartDateTime' : StartDateTime,
@@ -86,7 +83,7 @@ class betdaq:
                     
                 result = result.append(pd.DataFrame([dict]))
                 
-        return events
+        return result
     
     
     

@@ -13,6 +13,7 @@ import pandas as pd
 from .betbtc import betbtc
 from .Pinnacle import pinnacle
 from .Matchbook import matchbook
+from .Betdaq import betdaq
 from .base import connect, startBetLogging, removeTime
 
 log = startBetLogging("Events")
@@ -38,6 +39,7 @@ tbl_event_player = meta.tables['tbl_event_player']
 api_matchbook = matchbook()
 api_betbtc = betbtc('back')
 api_pinnacle = pinnacle()
+api_betdaq = betdaq()
 
 
 def checkPlayerExists(player_name, con) :
@@ -137,6 +139,23 @@ def getPlayerId(player_name, con, bookie) :
                 stm = update(tbl_event_player).where(tbl_event_player.c.event_player_id == player_id).values(matchbook_player_name=player_name)
                 con.execute(stm)
 
+    if bookie == 'betdaq' :
+        player_id = con.execute("Select event_player_id from tbl_event_player WHERE betdaq_player_name = '" + str(player_name) + "'").fetchone()
+       
+    
+        if player_id == None :
+            log.info("New Player for betdaq " + str(player_name))
+            
+            player_id = checkPlayerExists(player_name, con)
+            if (player_id == -1) :            
+                stm = insert(tbl_event_player).values(betdaq_player_name=player_name)
+                con.execute(stm)    
+                player_id = con.execute("Select event_player_id from tbl_event_player WHERE betdaq_player_name = '" + str(player_name) + "'").fetchone()
+
+            else :
+                stm = update(tbl_event_player).where(tbl_event_player.c.event_player_id == player_id).values(betdaq_player_name=player_name)
+                con.execute(stm)
+
                 
     if type(player_id) != int :
         player_id = player_id[0]
@@ -214,6 +233,25 @@ def updateEvents(row, bookie, tbl_events, con) :
         )
                 
         con.execute(clause)
+        
+    elif bookie == 'betdaq' :
+            
+        clause = insert(tbl_events).values(betdaq_event_id=row['betdaq_event_id'], \
+                                           StartDate=row['StartDate'], \
+                                           StartDateTime=row['StartDateTime'], \
+                                           betfair_event_id=row['betfair_event_id'], \
+                                           #home_player_name=row['home_player_name'], \
+                                           #away_player_name=row['away_player_name'], \
+                                           home_player_id=home_player_id, \
+                                           away_player_id=away_player_id, \
+                                           LastUpdate=dt)
+                
+        clause = clause.on_conflict_do_update(
+        index_elements=['StartDate', 'home_player_id','away_player_id'],
+        set_=dict(betdaq_event_id=row['betdaq_event_id'], LastUpdate=dt)
+        )
+                
+        con.execute(clause)        
 
 
 def getBookieEvents(bookie) :
@@ -249,6 +287,8 @@ def getBookieEvents(bookie) :
         bookie_api = api_betbtc
     elif bookie == "matchbook" :
         bookie_api = api_matchbook          
+    elif bookie == "betdaq" :
+        bookie_api = api_betdaq      
         
     df_api_events =  bookie_api.getEvents()
     
@@ -263,6 +303,8 @@ def getBookieEvents(bookie) :
         df_concat_events.rename(columns={'bookie_event_id': 'betbtc_event_id'}, inplace=True)
     elif bookie == "matchbook" :
         df_concat_events.rename(columns={'bookie_event_id': 'matchbook_event_id'}, inplace=True)
+    elif bookie == "betdaq" :
+        df_concat_events.rename(columns={'bookie_event_id': 'betdaq_event_id'}, inplace=True)        
     
     df_concat_events.apply((lambda x: updateEvents(x, bookie, tbl_events, con)), axis=1)
     
@@ -272,7 +314,7 @@ def getEvents() :
     ## create, updated events
         
             
-    bookies = ['betbtc', 'pinnacle', 'matchbook']
+    bookies = ['betbtc', 'pinnacle', 'matchbook', 'betdaq']
     
     for bookie in bookies :
         log.info("bookie : " + bookie)

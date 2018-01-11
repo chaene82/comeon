@@ -54,6 +54,7 @@ def getOdds() :
 
     ToDo:
         Change to a better wrapper funtion
+        Change it on this way, that it's could be called by a event ID
     
     
     """    
@@ -74,7 +75,7 @@ def getOdds() :
         df_betbtc   = api_betbtc.getOdds(event[1], event[3], event[4])
         df_betbtc['bookie_id'] = 2
         df_pinnacle = api_pinnacle.getOdds(event[2])
-        df_pinnacle['bookie_id'] = 1
+        df_pinnacle['bookie_id'] = 1                   
                    
         frames = [df_betbtc, df_pinnacle]
     
