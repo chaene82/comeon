@@ -186,29 +186,29 @@ class matchbook:
                     
                     if home_name in odds[0]['name'] :
                         home_odd = list(odds[0].values())[0]
-                        home_back = home_odd[0]['odds']
-                        home_back_max = home_odd[0]['available-amount']
-                        home_lay = home_odd[3]['odds']
-                        home_lay_max = home_odd[3]['available-amount']
+                        home_back = home_odd[0]['odds'] if len(home_odd) >= 1 else np.nan 
+                        home_back_max = home_odd[0]['available-amount']   if len(home_odd) >= 1 else np.nan 
+                        home_lay = home_odd[3]['odds']  if len(home_odd) >= 4 else np.nan 
+                        home_lay_max = home_odd[3]['available-amount'] if len(home_odd) >= 4 else np.nan 
                     elif home_name in odds[1]['name'] :
                         home_odd = list(odds[1].values())[0]             
-                        home_back = home_odd[0]['odds']
-                        home_back_max = home_odd[0]['available-amount']
-                        home_lay = home_odd[3]['odds']
-                        home_lay_max = home_odd[3]['available-amount']
+                        home_back = home_odd[0]['odds']  if len(home_odd) >= 1 else np.nan 
+                        home_back_max = home_odd[0]['available-amount']  if len(home_odd) >= 1 else np.nan 
+                        home_lay = home_odd[3]['odds'] if len(home_odd) >= 4 else np.nan 
+                        home_lay_max = home_odd[3]['available-amount'] if len(home_odd) >= 4 else np.nan 
                     
                     if away_name in odds[0]['name'] :
                         away_odd = list(odds[0].values())[0]
-                        away_back = away_odd[0]['odds']
-                        away_back_max = away_odd[0]['available-amount']
-                        away_lay = away_odd[3]['odds']
-                        away_lay_max = away_odd[3]['available-amount']            
+                        away_back = away_odd[0]['odds'] if len(away_odd) >= 1 else np.nan 
+                        away_back_max = away_odd[0]['available-amount'] if len(away_odd) >= 1 else np.nan
+                        away_lay = away_odd[3]['odds'] if len(away_odd) >= 4 else np.nan 
+                        away_lay_max = away_odd[3]['available-amount'] if len(away_odd) >= 4 else np.nan            
                     elif away_name in odds[1]['name'] : 
                         away_odd = list(odds[1].values())[0]
-                        away_back = away_odd[0]['odds']
-                        away_back_max = away_odd[0]['available-amount']
-                        away_lay = away_odd[3]['odds']
-                        away_lay_max = away_odd[3]['available-amount']    
+                        away_back = away_odd[0]['odds'] if len(away_odd) >= 1 else np.nan
+                        away_back_max = away_odd[0]['available-amount'] if len(away_odd) >= 1 else np.nan
+                        away_lay = away_odd[3]['odds'] if len(away_odd) >= 4 else np.nan 
+                        away_lay_max = away_odd[3]['available-amount']  if len(away_odd) >= 4 else np.nan   
                     else:
                         home_back = np.nan
                         home_lay = np.nan
