@@ -79,7 +79,10 @@ def getOdds(event_id=None) :
     for event in events :
         log.info("Looking for odds on the event " + str(event[0]))
         if event[1] != None :         
-            df_betbtc   = api_betbtc.getOdds(event[1], event[3], event[4])
+            try :
+                df_betbtc   = api_betbtc.getOdds(event[1], event[3], event[4])
+            except TypeError:
+                continue
             df_betbtc['bookie_id'] = 2
             df_betbtc['event_id'] = event[0]             
             df_betbtc.apply((lambda x: updateOdds(x, tbl_odds, con)), axis=1)                             
@@ -89,7 +92,10 @@ def getOdds(event_id=None) :
             df_pinnacle['event_id'] = event[0]             
             df_pinnacle.apply((lambda x: updateOdds(x, tbl_odds, con)), axis=1)                             
         if event[5] != None :        
-            df_matchbook = api_matchbook.getOdds(event[5], event[7], event[8])
+            try :
+                df_matchbook = api_matchbook.getOdds(event[5], event[7], event[8])
+            except TypeError:
+                continue            
             df_matchbook['bookie_id'] = 5 
             df_matchbook['event_id'] = event[0]             
             df_matchbook.apply((lambda x: updateOdds(x, tbl_odds, con)), axis=1)                        

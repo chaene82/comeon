@@ -88,7 +88,7 @@ class betdaq:
     
     
     
-    def getOdds(self, bookie_event_id, home_name = None, away_name = None) :
+    def getOdds(self, bookie_event_id, home_name = '', away_name = '') :
         """
         Get all open odds on pinnacle
         
@@ -170,15 +170,13 @@ class betdaq:
             
         
         
-    def checkBetForPlace(self, pin_event_id, pin_league_id, type_id, way, backlay, odds, stake) :
+    def checkBetForPlace(self, bookie_event_id, player_name, backlay, odds, stake) :   
         """
         Check if a odd still okay for place a bet
         
         Args:
-            pin_event_id : pinnacle id of the bet   
-            pin_league_id : pinnacle league id
-            type_id: bettyp id
-            way : home or away
+            betbtc_bet_id : betbtc id of the bet   
+            player_name : name of the player
             backlay : type of the bet
             odds : the requested odds
             stake : the requested stakes
@@ -187,46 +185,24 @@ class betdaq:
                      -1 = bet not found
                      -3 = Stake bigger then maxRiskStake
                      -4 = odds smaller then requested
-                     -11 = not enough balance
-                     -99 = way not correct
             message : the message (look above)
     
             
         """  
-        sports_id = 33
-    #    pin_league_id = 10240
-    #    pin_event_id = 783630159
-    #    stake = 10
-        if type_id == 1 :
-            period_number = 0
-            bettype = "MONEYLINE"
+    
+        data = self.getOdds(bookie_event_id, home_name = player_name)
         
-        if way == 1 :
-            team = 'TEAM1'
-        elif way == 2 :
-            team = 'TEAM2'
-        else:
-            return -99, "way not correct"        
+        line = data[(data['backlay'] == backlay) & (data['way'] == 1) ]
         
-        bet_data = self.api.market_data.get_line(sports_id, league_id=pin_league_id, event_id=pin_event_id, period_number = period_number, bet_type = bettype, team=team)
+
         
-        ## Check if the bet still okay
-        
-        if stake < bet_data['minRiskStake'] :
-            return -2, "Stake smaller as minRiskStake (stake" + str(stake) + ") "  + str(bet_data)
-            
-        if stake > bet_data['maxRiskStake'] :
-            return -3, "Stake bigger then maxRiskStake (stake" + str(stake) + ") "  + str(bet_data)
-            
-        if odds > bet_data['price'] : 
-            return -4, "odds smaller then requested" + str(bet_data)
-        
-        balance = self.checkBalance()
-        
-        if stake >= balance[0] :
-            return -11, "Not enough balance"
-            
-        return 0, "okay"       
+        if float(line['odds']) < odds:
+            return -4, "odds smaller then requested" + str(data)
+        if float(line['maxStake']) < stake:
+            return -3, "Stake bigger then maxRiskStake" + str(data)
+
+        return 0, "okay"    
+     
 
 
     def placeBet(self, pin_event_id, pin_line_id, type_id,  way, backlay, odds, stake) :
