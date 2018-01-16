@@ -12,7 +12,7 @@ import numpy as np
 import collections
 from .base import startBetLogging, removeTime
 import yaml
-
+from betdaq.filters import create_order
 
 
 log = startBetLogging("betdaq Wrapper")
