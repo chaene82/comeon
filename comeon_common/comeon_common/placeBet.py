@@ -217,10 +217,10 @@ def closeOffer(offer_id) :
     status = api.closeBet(betbtc_event_id, player_name)
 
     if status[0]['status'] == 'OK':
-        log.info("offer successfull update " + str(offer_id)) 
+        log.info("offer successfull closed " + str(offer_id)) 
 
-            
-        clause = update(tbl_offer).where(offer_id == offer_id).values(status=2, update=dt)     
+        v_offer_id = offer_id    
+        clause = update(tbl_offer).where(tbl_offer.c.offer_id == v_offer_id).values(status=2, update=dt)     
         con.execute(clause)     
              
         return True   
