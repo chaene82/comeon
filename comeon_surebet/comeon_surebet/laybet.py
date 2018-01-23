@@ -22,6 +22,8 @@ import yaml
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
+margin_init = 0.06
+margin_check = 0.03
 
 
 log = startBetLogging("laybet")
@@ -31,7 +33,7 @@ tbl_events = meta.tables['tbl_events']
 tbl_orderbook = meta.tables['tbl_orderbook']
 
 
-def calcLayOdds(back_odds=1.2, margin=0.1, invest=cfg['laybet']['invest']) :
+def calcLayOdds(back_odds=1.2, margin=margin_init, invest=cfg['laybet']['invest']) :
    # invest = 1
     
     back_stake = round(invest/back_odds, 2)
@@ -56,7 +58,6 @@ def calcLayOdds(back_odds=1.2, margin=0.1, invest=cfg['laybet']['invest']) :
         return False, 0, 0, 0
     
 
-def checkLayOdds(offerLayOdds, hedgeLayOdds, min_margin=0.05, invest=cfg['laybet']['invest']) :
     status, odds, lay_stake, back_stake = calcLayOdds(hedgeLayOdds,  margin=min_margin, invest=invest)
     if (status and odds >= offerLayOdds):
         log.info("laybet still okay")
