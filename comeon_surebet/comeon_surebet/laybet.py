@@ -58,6 +58,7 @@ def calcLayOdds(back_odds=1.2, margin=margin_init, invest=cfg['laybet']['invest'
         return False, 0, 0, 0
     
 
+def checkLayOdds(offerLayOdds, hedgeLayOdds, min_margin=margin_check, invest=cfg['laybet']['invest']) :
     status, odds, lay_stake, back_stake = calcLayOdds(hedgeLayOdds,  margin=min_margin, invest=invest)
     if (status and odds >= offerLayOdds):
         log.info("laybet still okay")
