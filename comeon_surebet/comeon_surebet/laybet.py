@@ -279,9 +279,10 @@ def searchLayBetOffer() :
     con, meta = connect()  
     #tbl_surebet = meta.tables['tbl_surebet']
     open_offers = con.execute('SELECT count (offer_id) FROM tbl_offer WHERE status = 1').fetchone()
-    if open_offers[0] < concurrent_open_bets :
+    open_bets = open_offers[0]
+    log.info("Number of open offers " + str(open_bets))
+    if open_bets < concurrent_open_bets :
         odds = con.execute('Select odds_id from tbl_odds o INNER JOIN tbl_events e using(event_id) WHERE e.pinnacle_event_id is not null and e.betbtc_event_id is not null and e."StartDateTime" >= now() and o.bookie_id = 1 and odds_id not in (select hedge_odds_id from tbl_offer where status = 1)' )
-        open_bets = open_offers[0]
         for odds_id in odds :
             if open_bets >= concurrent_open_bets :
                 break
