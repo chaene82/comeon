@@ -287,8 +287,8 @@ def searchLayBetOffer() :
                 break
             log.info(odds_id[0])    
             placeLayBet(odds_id[0])
-            open_offers = con.execute('SELECT count (offer_id) FROM tbl_offer WHERE status = 1').fetchone()
-            open_bets = open_offers[0]
+            open_bets = open_bets + 1
+            log.info("Number of bet places " + str(open_bets))
     log.info("no more laybet offer")
             
 def checkOffers():
