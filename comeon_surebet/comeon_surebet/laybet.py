@@ -22,8 +22,8 @@ import yaml
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
-margin_init = 0.06
-margin_check = 0.03
+margin_init = 0.05
+margin_check = 0.5
 
 
 log = startBetLogging("laybet")
@@ -48,12 +48,13 @@ def calcLayOdds(back_odds=1.2, margin=margin_init, invest=cfg['laybet']['invest'
         odds_round = math.floor(odds_calc)
         
     # Testing Margin
-    laybet_stakes = max_lay / (odds_round - 1) + max_lay
-    win = laybet_stakes - invest
+    laybet_stakes = max_lay / (odds_round - 1)
+    win = laybet_stakes - back_stake
     calc_margin = win / invest
     
     if calc_margin > margin * 0.9 :
         return True, odds_round, laybet_stakes, back_stake
+        #return True, odds_round, max_lay, back_stake
     else:
         return False, 0, 0, 0
     
