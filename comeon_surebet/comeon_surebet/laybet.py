@@ -22,8 +22,8 @@ import yaml
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
-margin_init = 0.05
-margin_check = 0.5
+margin_init = 0.06
+margin_check = 0.03
 
 
 log = startBetLogging("laybet")
