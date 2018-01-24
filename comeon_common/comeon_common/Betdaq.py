@@ -205,7 +205,7 @@ class betdaq:
      
 
 
-    def placeBet(self, pin_event_id, pin_line_id, type_id,  way, backlay, odds, stake) :
+    def placeBet(self, event_id, line_id, type_id,  way, backlay, odds, stake) :
         """
         Place a bet on pinnalce
         

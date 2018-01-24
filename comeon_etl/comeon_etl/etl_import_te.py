@@ -116,12 +116,15 @@ def etl_import_te(days=100) :
     #etl_import_te_player(conn_sqllite3, con_postgres, days=days)
     #etl_import_te_ranking(conn_sqllite3, con_postgres, days=days)
     
-def etl_import_te_daily_results(days=1) :
+def etl_import_te_daily_results(days=10000) :
     etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
     
 
-def etl_import_te_daily_player(days=1) :
+def etl_import_te_daily_player(days=10000) :
     etl_import_te_player(conn_sqllite3, con_postgres, days=days)
 
-def etl_import_te_daily_matchdetails(days=1) :
+def etl_import_te_daily_matchdetails(days=10000) :
     etl_import_te_matchdetails(conn_sqllite3, con_postgres, days=days)    
+    
+def etl_import_te_weekly_ranking(days=10000) :
+    etl_import_te_ranking(conn_sqllite3, con_postgres, days = days)

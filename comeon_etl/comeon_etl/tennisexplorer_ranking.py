@@ -21,17 +21,16 @@ import random
 ## get seed and remove it from the name
 ## handling tiebreak result better
 ## --> 
-
+conn = sqlite3.connect('te_data.db')
 
 def store_ranking_to_database (df) :
-    conn = sqlite3.connect('te_data.db')
 
     df.to_sql('tmp_te_ranking', conn, if_exists='append')
 
 
-def get_te_ranking(year = '2010', month = '09', day = '05', page = 1):
+def get_te_ranking(year = '2018', month = '01', day = '22', page = 1):
 
-    url = 'http://www.tennisexplorer.com/ranking/atp-men/2003/?type=ATP&date=' + year + '-' + month + '-' + day +'&page=' + str(page)
+    url = 'http://www.tennisexplorer.com/ranking/atp-men/' + year + '?date=' + year + '-' + month + '-' + day +'&page=' + str(page)
     
     req = urllib.request.Request(url)
     #http://live-tennis.eu/en/official-atp-ranking
@@ -88,27 +87,31 @@ def get_te_ranking(year = '2010', month = '09', day = '05', page = 1):
     
     return result
 
-strDate = '25/01/2010'
-endDate = '20/09/2017'
-date = datetime.strptime(strDate, "%d/%m/%Y") 
-todate = datetime.strptime(endDate, "%d/%m/%Y") 
 
-while date < todate :
+def etl_te_get_ranking(date=datetime.now().date()) :
+
+    date = date
+    todate = date
+    cursor = conn.cursor()
+    cursor.execute('''DROP TABLE IF EXISTS tmp_te_ranking''')
+    conn.commit()
     
-    print("Get Ranking for" , date )
-    year = date.strftime('%Y')
-    month = date.strftime('%m')
-    day = date.strftime('%d')
-    for i in range(1, 25) :
-        print('Page ', i)
-        df = get_te_ranking(year = year, month = month, day = day, page = i)
-        if not df.empty:
-            store_ranking_to_database(df)
-        else:
-            break
-    
-        sleep_sec = random.randint(6,10)
-        print("sleep for (s) ", sleep_sec)
-        time.sleep(sleep_sec)
-    
-    date = date+timedelta(days=7)
+    while date <= todate :
+        
+        print("Get Ranking for" , date )
+        year = date.strftime('%Y')
+        month = date.strftime('%m')
+        day = date.strftime('%d')
+        for i in range(1, 25) :
+            print('Page ', i)
+            df = get_te_ranking(year = year, month = month, day = day, page = i)
+            if not df.empty:
+                store_ranking_to_database(df)
+            else:
+                break
+        
+           # sleep_sec = random.randint(6,10)
+           # print("sleep for (s) ", sleep_sec)
+           # time.sleep(sleep_sec)
+        
+        date = date+timedelta(days=7)
