@@ -172,7 +172,7 @@ def checkLayBet(offer_id) :
         eff_hedge_odds = con.execute('SELECT odds FROM tbl_odds WHERE odds_id = ' + str(hedge_odds_id)).fetchone()[0]
         if not checkLayOdds(odds, eff_hedge_odds, invest=float(stake_eur)) :
             # Odd no longer okay, close it
-            log.info("update offer" + str(offer_id))
+            log.info("close offer" + str(offer_id))
             
             closeOffer(offer_id)
 
