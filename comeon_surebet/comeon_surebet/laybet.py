@@ -93,7 +93,7 @@ def placeLayBet(odds_id) :
     odds_status, offer_odds, offer_laybet_stakes, hedge_laybet_stakes = calcLayOdds(hedge_odds)
     
     
-    if (offer_odds >= place_offer_odd or math.isnan(place_offer_odd))  :
+    if (offer_odds >= place_offer_odd or math.isnan(place_offer_odd)) and offer_odds > 1.02 and offer_odds < 10  :
         log.info("add offer on event id " + str(event_id) + " Odds : " + str(offer_odds) + " Hedge Odds : " + str(hedge_odds) )
         
         placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_odds, offer_laybet_stakes, hedge_laybet_stakes)
