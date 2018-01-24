@@ -19,7 +19,7 @@ date = datetime.strptime("01/01/10", "%m/%d/%y").date()
 while date <= todate :
 
     etl_te_get_matches(date)
-    etl_import_te_daily_results()
+    etl_import_te_daily_results(10000)
     etl_transform_te_results()
     
     etl_te_get_missing_players()
