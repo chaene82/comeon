@@ -449,6 +449,8 @@ class betbtc:
         
         response =  requests.delete(url ,headers=self.header).json()
         
+        print(response)
+        
         return response    
 
 
