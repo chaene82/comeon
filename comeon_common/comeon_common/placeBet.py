@@ -215,6 +215,7 @@ def closeOffer(offer_id) :
     api = betbtc('lay')
     
     status = api.closeBet(betbtc_event_id, player_name)
+    
 
     if status[0]['status'] == 'OK':
         log.info("offer successfull closed " + str(offer_id)) 
@@ -225,7 +226,7 @@ def closeOffer(offer_id) :
              
         return True   
     else:
-        log.warning("Error by offer closing for event if " )  
+        log.warning("Error by offer update for event if " )  
         
         #con.execute(clause)     
         

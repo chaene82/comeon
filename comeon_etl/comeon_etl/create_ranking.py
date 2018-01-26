@@ -8,6 +8,7 @@ Created on Thu Sep 14 17:01:56 2017
 import pandas as pd
 from comeon_common import connect
 from comeon_common import startBetLogging
+from datetime import datetime, timedelta
 
 
 conn, meta = connect()    
@@ -46,6 +47,22 @@ def createRanking(date) :
     sql = sql.format(**d)           
         
     atp_ranking = pd.read_sql(sql, conn)  
+    
+    if atp_ranking.empty :
+        log.info("atp ranking empyt, load that form the previous week")  
+        
+        date_pre_week = date - timedelta(days=7)
+        
+        sql = """
+             SELECT to_date as "StartDate", player_id ,  atp_points as points,  atp_rank as rank
+    	       FROM public.tbl_rating 
+              where from_date = date '{date}'         
+              
+            """
+        d = {'date': date_pre_week }
+        sql = sql.format(**d)           
+            
+        atp_ranking = pd.read_sql(sql, conn)         
 
 
     log.info("merge both together")
@@ -69,4 +86,4 @@ def createRanking(date) :
     log.info("store to database")
 
     
-    ranking_select.to_sql("tbl_rating", conn, if_exists='replace', index=False)
+    ranking_select.to_sql("tbl_rating", conn, if_exists='append', index=False)
