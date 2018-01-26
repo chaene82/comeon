@@ -84,3 +84,28 @@ ALTER TABLE public.tbl_events
 
 ALTER TABLE public.tbl_events
     ADD COLUMN betdaq_event_id bigint;	
+	
+	
+	
+-- Table: public.tbl_rating
+
+DROP TABLE public.tbl_rating;
+
+CREATE TABLE public.tbl_rating
+(
+    player_id integer,
+    from_date timestamp without time zone,
+    to_date timestamp without time zone,
+    atp_points double precision,
+    atp_rank double precision,
+    sw1yg double precision,
+    sw1yh double precision,
+    sw1yc double precision    
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.tbl_rating
+    OWNER to tennis;

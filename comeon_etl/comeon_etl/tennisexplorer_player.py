@@ -96,6 +96,7 @@ def get_te_player(player_url = "/player/laaksonen/"):
 
 def getplayer() :
     conn = sqlite3.connect('te_data.db')
+
     
     home = pd.read_sql("SELECT DISTINCT home_link from tmp_te_matchlist ", conn)
     away = pd.read_sql("SELECT DISTINCT away_link from tmp_te_matchlist ", conn)
@@ -122,6 +123,12 @@ def getplayer() :
 
 def etl_te_get_missing_players() :
     con, meta = connect()    
+    
+#    conn = sqlite3.connect('te_data.db')
+#    
+#    cursor = conn.cursor()
+#    cursor.execute('''TRUNCATE TABLE  tmp_te_player;''')
+#    conn.commit()
 
 
     players = con.execute('SELECT te_link FROM public.tbl_player where te_link is not null and plays is null;' )

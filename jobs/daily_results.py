@@ -13,6 +13,8 @@ from comeon_etl import calcFairOdds, etl_te_get_matchesdetails
 #sqllite3_path = 'c:\\users/haenec/python/home/comeon/data/te_data.db'
 
 
+
+
 etl_te_get_matches()
 etl_import_te_daily_results()
 etl_transform_te_results()

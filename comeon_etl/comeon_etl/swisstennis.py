@@ -206,16 +206,40 @@ def modelSwisstennis(start_value=0.1, days_between_run=7, look_back_weeks=52, Mo
     
 def weeklyModelSwisstennis(start_value=0.1, days_between_run=7, look_back_weeks=52, ModelName='SW1YALL', date=datetime.now().date()) :
     
-    ## ToDo: get just the data where needed in a weekly load
+    surface = ''
+    
+    from_date = date - timedelta(days=look_back_weeks*7)  
+    
+    from_date_id = '{:%Y%m%d}'.format(from_date)    
+    to_date_id = '{:%Y%m%d}'.format(date)
+
+    
+    sql = """
+    SELECT "MatchDate" as Date, player1_id as Winner, player2_id as Loser 
+    FROM public.tbl_match  
+    where te_link is not null
+    and surface = '{surface}'
+    and "MatchDate" > date '{from_date}' and "MatchDate" < date '{to_date}'
+    """ 
     
     if ModelName == 'SW1YC' :
-        tennis = pd.read_sql('SELECT "MatchDate" as Date, player1_id as Winner, player2_id as Loser FROM public.tbl_match  where te_link is not null and surface = \'Clay\'', conn)
+        surface = 'clay'
     elif ModelName == 'SW1YH' :
-        tennis = pd.read_sql('SELECT "MatchDate" as Date, player1_id as Winner, player2_id as Loser FROM public.tbl_match  where te_link is not null and surface = \'Hard\'', conn)
+        surface = 'hard'
     elif ModelName == 'SW1YG' :
-        tennis = pd.read_sql('SELECT "MatchDate" as Date, player1_id as Winner, player2_id as Loser FROM public.tbl_match  where te_link is not null and surface = \'Grass\'', conn)        
+        surface = 'grass'
     else :
-        tennis = pd.read_sql('SELECT "MatchDate" as Date, player1_id as Winner, player2_id as Loser FROM public.tbl_match  where te_link is not null', conn)
+        sql = """
+        SELECT "MatchDate" as Date, player1_id as Winner, player2_id as Loser 
+        FROM public.tbl_match  
+        where te_link is not null
+        and "MatchDate" > date '{from_date}' and "MatchDate" < date '{to_date}'
+        """ 
+
+    d = {'surface': surface, 'from_date' : from_date, 'to_date' : date}
+    sql = sql.format(**d)
+
+    tennis = pd.read_sql(sql, conn)
 
     players = tennis.winner.append(tennis.loser)
     
@@ -248,42 +272,46 @@ def weeklyModelSwisstennis(start_value=0.1, days_between_run=7, look_back_weeks=
     pd.options.mode.chained_assignment = None         
     #StartDate = "01/01/01"
     FromDate = date
-    LastDate = date
     
     
-    ## ToDo: remove the while loop
-    while FromDate <= LastDate :
-        ToDate = FromDate+timedelta(days=days_between_run)
-        LookBackDate = FromDate-timedelta(weeks=look_back_weeks)
-        print("FromDate", FromDate)
-        print("ToDate", ToDate)    
-        print("LookBackDate", LookBackDate)     
+    ToDate = FromDate+timedelta(days=days_between_run)
+    LookBackDate = FromDate-timedelta(weeks=look_back_weeks)
+    print("FromDate", FromDate)
+    print("ToDate", ToDate)    
+    print("LookBackDate", LookBackDate)     
+
     
-        
-        ## ToDo: get Values from the last load
-        if not new_ranking.empty:
-            ranking = pd.read_sql('SELECT "Player", "' + ModelName + '"	FROM public."temp_ranking_SW1MALL" where ToDate = ' + date + ';', conn)
-            ranking.columns = ['Player','W0']
-            ranking['W0']
-            ranking[ranking['W0'] == 0] = start_value
-        else:
-            ranking = pd.DataFrame(unique_players)
-            ranking.columns = ['Player']
-            ranking['W0'] = start_value
-        
-        current_matches = matchesList[(matchesList['Date'] < FromDate) & (matchesList['Date'] >= LookBackDate ) ] 
-        if current_matches.empty :
-            FromDate = ToDate
-            next
-        new_ranking = getSWRanking(unique_players, current_matches, ranking, start_value)
-        
-        curr_ranking = new_ranking[['Player','W5']]
-        curr_ranking.columns = ['Player', ModelName]
-        curr_ranking[ModelName][curr_ranking[ModelName] == 0] = start_value
-        curr_ranking['FromDate'] = FromDate
-        curr_ranking['ToDate'] = ToDate-timedelta(seconds=1)   
+    ## ToDo: get Values from the last load
+    ## Get Values from last week (if exists)
+    sql = """
+    SELECT "Player", "{ModelName}" FROM public."temp_ranking_{ModelName}" where "ToDate" = date '{ToDate}'
+    """
+    d = {'ModelName': ModelName, 'ToDate' : ToDate}
+    sql = sql.format(**d)    
     
-        curr_ranking.to_sql("temp_ranking_" + ModelName, conn, if_exists='append')
-        #all_ranking = all_ranking.append(curr_ranking)           
+    
+    ranking = pd.read_sql(sql, conn)
+    
+    if not ranking.empty:
+        ranking.columns = ['Player','W0']
+        ranking['W0']
+        ranking[ranking['W0'] == 0] = start_value
+    else:
+        ranking = pd.DataFrame(unique_players)
+        ranking.columns = ['Player']
+        ranking['W0'] = start_value
+    
+    current_matches = matchesList 
+    if current_matches.empty :
+        return
+    new_ranking = getSWRanking(unique_players, current_matches, ranking, start_value)
+    
+    curr_ranking = new_ranking[['Player','W5']]
+    curr_ranking.columns = ['Player', ModelName]
+    curr_ranking[ModelName][curr_ranking[ModelName] == 0] = start_value
+    curr_ranking['FromDate'] = FromDate
+    curr_ranking['ToDate'] = ToDate-timedelta(seconds=1)   
+
+    curr_ranking.to_sql("temp_ranking_" + ModelName, conn, if_exists='append')
+    #all_ranking = all_ranking.append(curr_ranking)           
                     
-        FromDate = ToDate    
