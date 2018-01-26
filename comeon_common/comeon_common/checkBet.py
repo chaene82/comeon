@@ -115,7 +115,7 @@ def checkOffer(offer_id) :
     log.debug("checking for bet " + str(offer_id))
     try :
         status, matched, unmatched = api.checkOpenBet(betbtc_bet_id)    
-    except :
+    except:
         status, matched, unmatched = 1, 0, 0
         
 
