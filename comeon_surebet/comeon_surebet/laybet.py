@@ -182,11 +182,11 @@ def checkLayBet(offer_id) :
         
         if (offer_bookie_status[1] * 0.75 < stake_local):
             log.warning("Close a partical match bet, do not hedge it")
-            return True
-        
-        ##  matched     
-        log.warning("Offer matched, hedge it")
-        hedge_bet_status = placeBet(hedge_odds_id, hedge_odds, float(hedge_stake), product_id=product_id, surebet_id=0, offer_id=offer_id) 
+        else :
+            
+            ##  matched     
+            log.warning("Offer matched, hedge it")
+            hedge_bet_status = placeBet(hedge_odds_id, hedge_odds, float(hedge_stake), product_id=product_id, surebet_id=0, offer_id=offer_id) 
 
                 
         clause = insert(tbl_orderbook).values(product_id=product_id, \
