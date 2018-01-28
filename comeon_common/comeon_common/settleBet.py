@@ -68,6 +68,7 @@ def settleBet(order_id) :
                 odds = float(odds) 
             except :
                 bet_status = 'unsetted'
+                commission = 0
             
                
 
@@ -88,6 +89,7 @@ def settleBet(order_id) :
                 
             except :
                 bet_status = 'unsetted'
+                commission = 0
                 
 
 
