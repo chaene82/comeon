@@ -250,7 +250,7 @@ class betbtc:
                             if market_line['debit'] == None:
                                 commission = 0   
                             else :
-                                commission = market_line['debit'] 
+                                commission = float(market_line['debit']) 
                 
                 if line['credit'] == None:
                     winnings = 0
