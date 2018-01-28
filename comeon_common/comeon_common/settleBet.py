@@ -78,7 +78,8 @@ def settleBet(order_id) :
             try :
                 net_winnings_eur = winnings_eur - round(commission * getBtcEurPrice(), 2)
             except :
-                net_winnings_eur = 0            net_winnings_local = winnings_local - commission
+                net_winnings_eur = 0          
+            net_winnings_local = winnings_local - commission
         elif bookie_id == 6 :
             # Betbtc Laybot
             api = betbtc('lay')
