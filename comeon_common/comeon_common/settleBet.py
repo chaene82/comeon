@@ -61,9 +61,15 @@ def settleBet(order_id) :
             # Betbtc
             api = betbtc('back')
             
-            bet_status, winnings, odds, commission, response = api.checkSettledBet(bet_id)
-            win = float(winnings) + float(stakes)
-            odds = float(odds) 
+            try : 
+            
+                bet_status, winnings, odds, commission, response = api.checkSettledBet(bet_id)
+                win = float(winnings) + float(stakes)
+                odds = float(odds) 
+            except :
+                bet_status = 'unsetted'
+            
+               
 
 
             winnings_eur = round(win * getBtcEurPrice(), 2)
@@ -74,9 +80,15 @@ def settleBet(order_id) :
             # Betbtc Laybot
             api = betbtc('lay')
             
-            bet_status, winnings, odds, commission, response = api.checkSettledBet(bet_id)
-            win = float(winnings) + float(stakes)
-            odds = float(odds) 
+            try:
+            
+                bet_status, winnings, odds, commission, response = api.checkSettledBet(bet_id)
+                win = float(winnings) + float(stakes)
+                odds = float(odds) 
+                
+            except :
+                bet_status = 'unsetted'
+                
 
 
             winnings_eur = round(win * getBtcEurPrice(), 2)
