@@ -109,3 +109,8 @@ TABLESPACE pg_default;
 
 ALTER TABLE public.tbl_rating
     OWNER to tennis;
+	
+CREATE INDEX idx_te_link
+    ON public.tbl_match USING btree
+    (te_link ASC NULLS LAST)
+    TABLESPACE pg_default;	

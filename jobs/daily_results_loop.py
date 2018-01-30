@@ -15,7 +15,7 @@ from comeon_etl import calcFairOdds, etl_te_get_matchesdetails, weeklyModelSwiss
 #sqllite3_path = 'c:\\users/haenec/python/home/comeon/data/te_data.db'
 
 todate = datetime.now().date()- timedelta(days=1825)
-date = datetime.strptime("01/01/10", "%d/%m/%y").date()
+date = datetime.strptime("04/05/11", "%d/%m/%y").date()
 
 while date <= todate :
     
