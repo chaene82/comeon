@@ -180,7 +180,7 @@ def checkLayBet(offer_id) :
         
     elif offer_bookie_status[0] == 2 :
         
-        if (offer_bookie_status[1] * 0.75 < stake_local):
+        if (offer_bookie_status[1] < stake_local * 0.75):
             log.warning("Close a partical match bet, do not hedge it")
         else :
             
