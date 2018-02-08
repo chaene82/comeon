@@ -17,13 +17,17 @@ from comeon_common import connect
 
 
 
-conn_sqllite3 = sqlite3.connect('te_data.db')
-con_postgres, meta = connect()    
+    
 
     
 def etl_import_te_matchlist(conn_sqllite3, con_postgres, days = 10000) :
     print("load Tennis Explorer Matchlist")
-    df_input = pd.read_sql('select * from tmp_te_matchlist where "MatchDate" > date("now","-' + str(days) + ' days") ', conn_sqllite3)
+    try:
+        df_input = pd.read_sql('select * from tmp_te_matchlist where "MatchDate" > date("now","-' + str(days) + ' days") ', conn_sqllite3)
+    except:
+        pass
+        
+    
     
     df_input = df_input.drop_duplicates()
     df_input = df_input.drop('index', axis=1)
@@ -114,6 +118,8 @@ def etl_import_te_ranking(conn_sqllite3, con_postgres, days = 10000) :
     
     
 def etl_import_te(days=100) :
+    conn_sqllite3 = sqlite3.connect('te_data.db')
+    con_postgres, meta = connect()
 
     ## Testing
     etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
@@ -121,14 +127,26 @@ def etl_import_te(days=100) :
     #etl_import_te_ranking(conn_sqllite3, con_postgres, days=days)
     
 def etl_import_te_daily_results(days=10000) :
+    conn_sqllite3 = sqlite3.connect('te_data.db')
+    con_postgres, meta = connect()
+    
     etl_import_te_matchlist(conn_sqllite3, con_postgres, days=days)
     
 
 def etl_import_te_daily_player(days=10000) :
+    conn_sqllite3 = sqlite3.connect('te_data.db')
+    con_postgres, meta = connect()
+
     etl_import_te_player(conn_sqllite3, con_postgres, days=days)
 
 def etl_import_te_daily_matchdetails(days=10000) :
+    conn_sqllite3 = sqlite3.connect('te_data.db')
+    con_postgres, meta = connect()
+
     etl_import_te_matchdetails(conn_sqllite3, con_postgres, days=days)    
     
 def etl_import_te_weekly_ranking(days=10000) :
+    conn_sqllite3 = sqlite3.connect('te_data.db')
+    con_postgres, meta = connect()
+
     etl_import_te_ranking(conn_sqllite3, con_postgres, days = days)
