@@ -61,27 +61,47 @@ def settleBet(order_id) :
             # Betbtc
             api = betbtc('back')
             
-            bet_status, winnings, odds, commission, response = api.checkSettledBet(bet_id)
-            win = float(winnings) + float(stakes)
-            odds = float(odds) 
+            try : 
+            
+                bet_status, winnings, odds, commission, response = api.checkSettledBet(bet_id)
+                win = float(winnings) + float(stakes)
+                odds = float(odds) 
+            except :
+                bet_status = 'unsetted'
+                commission = 0
+            
+               
 
 
             winnings_eur = round(win * getBtcEurPrice(), 2)
             winnings_local = win
-            net_winnings_eur = winnings_eur - round(commission * getBtcEurPrice(), 2)
+            try :
+                net_winnings_eur = winnings_eur - round(commission * getBtcEurPrice(), 2)
+            except :
+                net_winnings_eur = 0          
             net_winnings_local = winnings_local - commission
         elif bookie_id == 6 :
             # Betbtc Laybot
             api = betbtc('lay')
             
-            bet_status, winnings, odds, commission, response = api.checkSettledBet(bet_id)
-            win = float(winnings) + float(stakes)
-            odds = float(odds) 
+            try:
+            
+                bet_status, winnings, odds, commission, response = api.checkSettledBet(bet_id)
+                win = float(winnings) + float(stakes)
+                odds = float(odds) 
+                
+            except :
+                bet_status = 'unsetted'
+                commission = 0
+                
 
 
             winnings_eur = round(win * getBtcEurPrice(), 2)
             winnings_local = win
-            net_winnings_eur = winnings_eur - round(commission * getBtcEurPrice(), 2)
+            try :
+                net_winnings_eur = winnings_eur - round(commission * getBtcEurPrice(), 2)
+            except :
+                net_winnings_eur = 0
             net_winnings_local = winnings_local - commission     
             
         else :

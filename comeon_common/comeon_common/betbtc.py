@@ -250,7 +250,7 @@ class betbtc:
                             if market_line['debit'] == None:
                                 commission = 0   
                             else :
-                                commission = market_line['debit'] 
+                                commission = float(market_line['debit']) 
                 
                 if line['credit'] == None:
                     winnings = 0
@@ -448,6 +448,8 @@ class betbtc:
         url = "https://www.betbtc.co/api/bet/"+str(betbtc_event_id)+"?selection=" + str(player_name)
         
         response =  requests.delete(url ,headers=self.header).json()
+        
+        print(response)
         
         return response    
 

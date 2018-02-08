@@ -137,7 +137,7 @@ def placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_oods, offer_laybe
     
     dt = datetime.now()
 
-    turnover_local = offer_laybet_stakes / getBtcEurPrice()
+    turnover_local = offer_laybet_stakes / getBtcEurPrice() 
     data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, home_player_name, away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id, pin_line_id FROM public.tbl_odds o inner join public.tbl_events e using(event_id) where odds_id =" + str(place_odds_id) + ";").fetchone()
     
     event_id = data[1]
@@ -217,16 +217,16 @@ def closeOffer(offer_id) :
     status = api.closeBet(betbtc_event_id, player_name)
 
     if status[0]['status'] == 'OK':
-        log.info("offer successfull update") 
+        log.info("offer successfull closed " + str(offer_id)) 
 
-            
-        clause = update(tbl_offer).where(offer_id == offer_id).values(status=2,update=dt)     
+        v_offer_id = offer_id    
+        clause = update(tbl_offer).where(tbl_offer.c.offer_id == v_offer_id).values(status=2, update=dt)     
         con.execute(clause)     
              
         return True   
     else:
         log.warning("Error by offer update for event if " )  
         
-        con.execute(clause)     
+        #con.execute(clause)     
         
         return False  

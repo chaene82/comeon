@@ -22,6 +22,8 @@ import yaml
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
+margin_init = 0.02
+margin_check = 0.01
 
 
 log = startBetLogging("laybet")
@@ -31,7 +33,7 @@ tbl_events = meta.tables['tbl_events']
 tbl_orderbook = meta.tables['tbl_orderbook']
 
 
-def calcLayOdds(back_odds=1.2, margin=0.1, invest=cfg['laybet']['invest']) :
+def calcLayOdds(back_odds=1.2, margin=margin_init, invest=cfg['laybet']['invest']) :
    # invest = 1
     
     back_stake = round(invest/back_odds, 2)
@@ -46,17 +48,18 @@ def calcLayOdds(back_odds=1.2, margin=0.1, invest=cfg['laybet']['invest']) :
         odds_round = math.floor(odds_calc)
         
     # Testing Margin
-    laybet_stakes = max_lay / (odds_round - 1) + max_lay
-    win = laybet_stakes - invest
+    laybet_stakes = max_lay / (odds_round - 1)
+    win = laybet_stakes - back_stake
     calc_margin = win / invest
     
     if calc_margin > margin * 0.9 :
         return True, odds_round, laybet_stakes, back_stake
+        #return True, odds_round, max_lay, back_stake
     else:
         return False, 0, 0, 0
     
 
-def checkLayOdds(offerLayOdds, hedgeLayOdds, min_margin=0.05, invest=cfg['laybet']['invest']) :
+def checkLayOdds(offerLayOdds, hedgeLayOdds, min_margin=margin_check, invest=cfg['laybet']['invest']) :
     status, odds, lay_stake, back_stake = calcLayOdds(hedgeLayOdds,  margin=min_margin, invest=invest)
     if (status and odds >= offerLayOdds):
         log.info("laybet still okay")
@@ -90,7 +93,7 @@ def placeLayBet(odds_id) :
     odds_status, offer_odds, offer_laybet_stakes, hedge_laybet_stakes = calcLayOdds(hedge_odds)
     
     
-    if (offer_odds >= place_offer_odd or math.isnan(place_offer_odd))  :
+    if (offer_odds >= place_offer_odd or math.isnan(place_offer_odd)) and offer_odds > 1.02 and offer_odds < 10  :
         log.info("add offer on event id " + str(event_id) + " Odds : " + str(offer_odds) + " Hedge Odds : " + str(hedge_odds) )
         
         placeOffer(place_odds_id, hedge_odds_id, offer_odds, hedge_odds, offer_laybet_stakes, hedge_laybet_stakes)
@@ -169,7 +172,7 @@ def checkLayBet(offer_id) :
         eff_hedge_odds = con.execute('SELECT odds FROM tbl_odds WHERE odds_id = ' + str(hedge_odds_id)).fetchone()[0]
         if not checkLayOdds(odds, eff_hedge_odds, invest=float(stake_eur)) :
             # Odd no longer okay, close it
-            log.info("update offer")
+            log.info("close offer" + str(offer_id))
             
             closeOffer(offer_id)
 
@@ -177,9 +180,13 @@ def checkLayBet(offer_id) :
         
     elif offer_bookie_status[0] == 2 :
         
-        ##  matched     
-        log.warning("Offer matched, hedge it")
-        hedge_bet_status = placeBet(hedge_odds_id, hedge_odds, float(hedge_stake), product_id=product_id, surebet_id=0, offer_id=offer_id) 
+        if (offer_bookie_status[1] < stake_local * 0.75):
+            log.warning("Close a partical match bet, do not hedge it")
+        else :
+            
+            ##  matched     
+            log.warning("Offer matched, hedge it")
+            hedge_bet_status = placeBet(hedge_odds_id, hedge_odds, float(hedge_stake), product_id=product_id, surebet_id=0, offer_id=offer_id) 
 
                 
         clause = insert(tbl_orderbook).values(product_id=product_id, \
@@ -277,9 +284,10 @@ def searchLayBetOffer() :
     con, meta = connect()  
     #tbl_surebet = meta.tables['tbl_surebet']
     open_offers = con.execute('SELECT count (offer_id) FROM tbl_offer WHERE status = 1').fetchone()
-    if open_offers[0] < concurrent_open_bets :
+    open_bets = open_offers[0]
+    log.info("Number of open offers " + str(open_bets))
+    if open_bets < concurrent_open_bets :
         odds = con.execute('Select odds_id from tbl_odds o INNER JOIN tbl_events e using(event_id) WHERE e.pinnacle_event_id is not null and e.betbtc_event_id is not null and e."StartDateTime" >= now() and o.bookie_id = 1 and odds_id not in (select hedge_odds_id from tbl_offer where status = 1)' )
-        open_bets = open_offers[0]
         for odds_id in odds :
             if open_bets >= concurrent_open_bets :
                 break
@@ -287,6 +295,7 @@ def searchLayBetOffer() :
             placeLayBet(odds_id[0])
             open_offers = con.execute('SELECT count (offer_id) FROM tbl_offer WHERE status = 1').fetchone()
             open_bets = open_offers[0]
+            log.info("Number of bet places " + str(open_bets))
     log.info("no more laybet offer")
             
 def checkOffers():
