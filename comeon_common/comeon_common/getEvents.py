@@ -86,6 +86,7 @@ def getPlayerId(player_name, con, bookie) :
     """
     
     #get player_id, if it exists
+    player_id = None
     
     player_name = player_name.replace("'","")
     
