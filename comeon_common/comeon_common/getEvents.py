@@ -182,8 +182,8 @@ def updateEvents(row, bookie, tbl_events, con) :
                                            pinnacle_league_id=row['pinnacle_league_id'],\
                                            StartDate=row['StartDate'], \
                                            StartDateTime=row['StartDateTime'], \
-                                           home_player_name=row['home_player_name'], \
-                                           away_player_name=row['away_player_name'], \
+                                           #home_player_name=row['home_player_name'], \
+                                           #away_player_name=row['away_player_name'], \
                                            home_player_id=home_player_id, \
                                            away_player_id=away_player_id, \
                                            Live=row['live'], \
@@ -202,8 +202,8 @@ def updateEvents(row, bookie, tbl_events, con) :
                                            StartDate=row['StartDate'], \
                                            StartDateTime=row['StartDateTime'], \
                                            betfair_event_id=row['betfair_event_id'], \
-                                           #home_player_name=row['home_player_name'], \
-                                           #away_player_name=row['away_player_name'], \
+                                           home_player_name=row['home_player_name'], \
+                                           away_player_name=row['away_player_name'], \
                                            home_player_id=home_player_id, \
                                            away_player_id=away_player_id, \
                                            LastUpdate=dt)
