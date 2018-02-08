@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
-import re
+import os
 import sqlite3
 import time
 import random
@@ -21,9 +21,10 @@ import random
 ## get seed and remove it from the name
 ## handling tiebreak result better
 ## --> 
-conn = sqlite3.connect('te_data.db')
+
 
 def store_ranking_to_database (df) :
+    conn = sqlite3.connect('te_data_ranking.db')
 
     df.to_sql('tmp_te_ranking', conn, if_exists='append')
 
@@ -92,12 +93,11 @@ def etl_te_get_ranking(date=datetime.now().date()) :
 
     date = date
     todate = date
-    cursor = conn.cursor()
-    cursor.execute('''DROP TABLE IF EXISTS tmp_te_ranking''')
-    conn.commit()
-    cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE "tmp_te_ranking" ( "index" INTEGER, "StartDate" TIMESTAMP, "player" TEXT, "player_link" TEXT, "points" TEXT, "rank" TEXT )''')
-    conn.commit()
+
+    try:
+        os.remove('te_data_ranking.db')
+    except OSError:
+        pass
     
     while date <= todate :
         
