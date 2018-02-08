@@ -159,7 +159,7 @@ def getPlayerId(player_name, con, bookie) :
 
                 
     if type(player_id) != int :
-        player_id = player_id[0]
+        player_id = 0
     return player_id
 
 
