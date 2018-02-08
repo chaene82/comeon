@@ -334,6 +334,6 @@ def updateEventsPlayerID():
         home_player_id = getPlayerId(str(event[1]), con, 'pinnalce')
         away_player_id = getPlayerId(str(event[2]), con, 'pinnalce')    
         
-        stm = update(tbl_events).where(tbl_events.c.event__id == event_id).values(home_player_id=home_player_id,away_player_id=away_player_id)
+        stm = update(tbl_events).where(tbl_events.c.event_id == event_id).values(home_player_id=home_player_id,away_player_id=away_player_id)
         con.execute(stm)        
     
