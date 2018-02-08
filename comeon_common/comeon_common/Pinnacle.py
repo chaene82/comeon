@@ -269,15 +269,15 @@ class pinnacle:
         """  
         response =  self.api.betting.get_bets(betids = pin_bet_id)
         if not response['bets'] :
-            return 'not found', 0, 0, response
+            return 'not found', 0, 0, 0, response
         odds = response['bets'][0]['price']
         if response['bets'][0]['betStatus'] == 'WON' :
             winnings = response['bets'][0]['win']
         elif response['bets'][0]['betStatus'] == 'LOSE':
             winnings = 0
         else:
-            return 'not settled', 0, 0, response
-        return 'settled', winnings, odds, response
+            return 'not settled', 0, 0, 0, response
+        return 'settled', winnings, odds, 0, response
 
 
 

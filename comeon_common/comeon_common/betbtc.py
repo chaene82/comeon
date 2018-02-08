@@ -237,23 +237,37 @@ class betbtc:
         """  
         response =  requests.get("http://www.betbtc.co/api/user/statement",headers=self.header).json()
         for line in response :
-            if str(betbtc_bet_id) in line['description'] :
+            if str(betbtc_bet_id) in line['description']  :
+                desc_string = (line['description'])
+                market_id_begin = desc_string.index("market id: ") + 11
+                market_id_end = desc_string[market_id_begin:].index(")") + market_id_begin
+                market_id = int(desc_string[market_id_begin:market_id_end])
+                commission = 0
+                if market_id > 0:
+                    for market_line in response :
+                        if str(market_id) in market_line['description'] and "Comission Charged" in market_line['description']  :
+                            print(market_line)
+                            if market_line['debit'] == None:
+                                commission = 0   
+                            else :
+                                commission = float(market_line['debit']) 
+                
                 if line['credit'] == None:
                     winnings = 0
                 else :
                     winnings = line['credit']
                     
                 odds = line['odd']
-                return 'settled', winnings, odds, line
+                return 'settled', winnings, odds, commission, line
             
         status, matched, unmatched = self.checkOpenBet(betbtc_bet_id)
         
         if status == 1:
-            return 'unmatched', 0, 0 ,matched
+            return 'unmatched', 0, 0, 0 ,matched
         elif status == 2:
-            return 'matched', 0, 0, matched
+            return 'matched', 0, 0, 0, matched
         
-        return 'Not Found', 0, 0, None       
+        return 'Not Found', 0, 0, 0, None       
     
     
     def checkOpenBet(self, betbtc_bet_id) :
@@ -434,6 +448,8 @@ class betbtc:
         url = "https://www.betbtc.co/api/bet/"+str(betbtc_event_id)+"?selection=" + str(player_name)
         
         response =  requests.delete(url ,headers=self.header).json()
+        
+        print(response)
         
         return response    
 

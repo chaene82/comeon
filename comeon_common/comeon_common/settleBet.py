@@ -18,7 +18,7 @@ log = startBetLogging("settle")
 
 con, meta = connect()  
 tbl_orderbook = meta.tables['tbl_orderbook']
-#tbl_tournament = meta.tables['tbl_tournament']
+#tbl_odds = meta.tables['tbl_odds']
 #tbl_match = meta.tables['tbl_match']  
 
 
@@ -45,11 +45,13 @@ def settleBet(order_id) :
         bet_id = line['bookie_bet_id']
         stakes = line['turnover_local']
         
+        
+        
         if bookie_id == 1 :
             #pinnacle bet 
             api = pinnacle()
             
-            bet_status, winnings, odds, response = api.checkSettledBet(bet_id)
+            bet_status, winnings, odds, commission, response = api.checkSettledBet(bet_id)
             winnings = float(winnings) 
             winnings_local = winnings + float(stakes)
             winnings_eur = winnings + float(stakes)
@@ -59,31 +61,51 @@ def settleBet(order_id) :
             # Betbtc
             api = betbtc('back')
             
-            bet_status, winnings, odds, response = api.checkSettledBet(bet_id)
-            win = float(winnings) + float(stakes)
-            odds = float(odds) 
+            try : 
+            
+                bet_status, winnings, odds, commission, response = api.checkSettledBet(bet_id)
+                win = float(winnings) + float(stakes)
+                odds = float(odds) 
+            except :
+                bet_status = 'unsetted'
+                commission = 0
+            
+               
 
 
             winnings_eur = round(win * getBtcEurPrice(), 2)
             winnings_local = win
-            net_winnings_eur = winnings_eur
-            net_winnings_local = winnings_local   
+            try :
+                net_winnings_eur = winnings_eur - round(commission * getBtcEurPrice(), 2)
+            except :
+                net_winnings_eur = 0          
+            net_winnings_local = winnings_local - commission
         elif bookie_id == 6 :
             # Betbtc Laybot
             api = betbtc('lay')
             
-            bet_status, winnings, odds, response = api.checkSettledBet(bet_id)
-            win = float(winnings) + float(stakes)
-            odds = float(odds) 
+            try:
+            
+                bet_status, winnings, odds, commission, response = api.checkSettledBet(bet_id)
+                win = float(winnings) + float(stakes)
+                odds = float(odds) 
+                
+            except :
+                bet_status = 'unsetted'
+                commission = 0
+                
 
 
             winnings_eur = round(win * getBtcEurPrice(), 2)
             winnings_local = win
-            net_winnings_eur = winnings_eur
-            net_winnings_local = winnings_local       
+            try :
+                net_winnings_eur = winnings_eur - round(commission * getBtcEurPrice(), 2)
+            except :
+                net_winnings_eur = 0
+            net_winnings_local = winnings_local - commission     
             
         else :
-            bet_status, winnings, odds, response = 'matched', 0, 0, 0
+            bet_status, winnings, odds, commission, response = 'matched', 0, 0, 0
   
         winnings = float(winnings)      
         
@@ -100,7 +122,7 @@ def settleBet(order_id) :
                 net_winnings_local = 0
                 net_winnings_eur = 0                    
                 
-            clause = update(tbl_orderbook).where(tbl_orderbook.columns.order_id == order_id).values({'eff_odds' : odds, 'bet_settlement_date' : dt, 'winnings_local' : winnings_local, 'winnings_eur' : winnings_eur, 'commission' : 0, 'net_winnings_eur' : net_winnings_eur, 'net_winnings_local' : net_winnings_local, 'status' : status, 'update' : dt})
+            clause = update(tbl_orderbook).where(tbl_orderbook.columns.order_id == order_id).values({'eff_odds' : odds, 'bet_settlement_date' : dt, 'winnings_local' : winnings_local, 'winnings_eur' : winnings_eur, 'commission' : commission, 'net_winnings_eur' : net_winnings_eur, 'net_winnings_local' : net_winnings_local, 'status' : status, 'update' : dt})
             con.execute(clause) 
         else :
             clause = update(tbl_orderbook).where(tbl_orderbook.columns.order_id == order_id).values({'status' : 1, 'update' : dt})

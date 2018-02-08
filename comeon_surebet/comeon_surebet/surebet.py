@@ -199,10 +199,10 @@ def searchSurebetEvent(event_id, tbl_surebet) :
 
                         if bookie == 2 :
                             home_stake, away_stake = checkStake(home_stake, away_stake, h_odd[2])
-                            home_return = (home_return - home_stake) * (1 - (betbtc_margin/100)) + home_stake
+                            home_return = (home_return) * (1 - (betbtc_margin/100))
                         if check_bookie == 2 :
                             away_stake, home_stake  = checkStake(away_stake, home_stake, a_odd[2])
-                            away_return = (away_return - away_stake) * (1 - (betbtc_margin/100)) + away_stake
+                            away_return = (away_return) * (1 - (betbtc_margin/100))
 
                         
                         log.info("home stake " + str(home_stake))
@@ -253,11 +253,11 @@ def searchSurebetEvent(event_id, tbl_surebet) :
                                 for id in result :
                                     surebet_id = id[0]
                                 
-                                log.warning("Surebet ID " + str(surebet_id))  
+                                log.info("Surebet ID " + str(surebet_id))  
                                 
                                 surebetStatus = placeSureBet(surebet_typ, event_id, surebet_id, home_odds_id, home_odds, home_stake, away_odds_id, away_odds, away_stake, bookie, check_bookie)
                                 
-                                log.warning("SureBet place? " + str(surebetStatus))  
+                                log.info("SureBet place? " + str(surebetStatus))  
                                 
                                 if surebetStatus :
                                     clause = update(tbl_surebet).where(tbl_surebet.columns.surebet_id == surebet_id).values(status=2)
