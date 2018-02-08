@@ -18,8 +18,11 @@ log = startBetLogging("etl")
 
 #sqllite3_path = 'c:\\users/haenec/python/home/comeon/data/te_data.db'
 
-todate = datetime.now().date()
+todate = datetime.now().date() 
 date = datetime.strptime("01/01/10", "%d/%m/%y").date()
+todate = date 
+
+
 
 while date <= todate :
     
