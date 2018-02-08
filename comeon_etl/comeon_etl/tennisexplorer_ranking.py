@@ -94,6 +94,8 @@ def etl_te_get_ranking(date=datetime.now().date()) :
     todate = date
     cursor = conn.cursor()
     cursor.execute('''DROP TABLE IF EXISTS tmp_te_ranking''')
+    conn.commit()
+    cursor = conn.cursor()
     cursor.execute('''CREATE TABLE "tmp_te_ranking" ( "index" INTEGER, "StartDate" TIMESTAMP, "player" TEXT, "player_link" TEXT, "points" TEXT, "rank" TEXT )''')
     conn.commit()
     
