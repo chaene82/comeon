@@ -108,8 +108,11 @@ def etl_import_te_ranking(conn_sqllite3, con_postgres, days = 10000) :
     
     conn_sqllite3 = sqlite3.connect('te_data_ranking.db')
     con_postgres, meta = connect()    
-            
-    df_ranking = pd.read_sql('select * from tmp_te_ranking where "StartDate" > date("now","-' + str(days) + ' days") ', conn_sqllite3)
+
+    try:            
+        df_ranking = pd.read_sql('select * from tmp_te_ranking where "StartDate" > date("now","-' + str(days) + ' days") ', conn_sqllite3)
+    except:
+        return None
     df_ranking = df_ranking.drop_duplicates()
     
     df_ranking = df_ranking.drop('index', axis=1)
