@@ -106,7 +106,7 @@ def etl_te_get_ranking(date=datetime.now().date()) :
         month = date.strftime('%m')
         day = date.strftime('%d')
         for i in range(1, 40) :
-            print('Page ', i)
+            #print('Page ', i)
             df = get_te_ranking(year = year, month = month, day = day, page = i)
             if not df.empty:
                 store_ranking_to_database(df)

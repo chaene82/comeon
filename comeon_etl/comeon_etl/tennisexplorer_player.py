@@ -110,8 +110,8 @@ def getplayer() :
     
     i = 0
     for link in players:
-        print(link)
-        print(i)
+        #print(link)
+        #print(i)
         link = link.replace('â' , 'a')
         df = get_te_player(link)
         store_player_to_database(df)
