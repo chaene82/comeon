@@ -68,8 +68,12 @@ def etl_import_te_matchlist(conn_sqllite3, con_postgres, days = 10000) :
 
 def etl_import_te_player(conn_sqllite3, con_postgres, days = 10000) :
     print("Load Tennis Explorer player list")    
-            
-    df_player = pd.read_sql('select * from tmp_te_player where etl_date > date("now","-' + str(days) + ' days") ', conn_sqllite3)
+    
+    try:            
+        df_player = pd.read_sql('select * from tmp_te_player where etl_date > date("now","-' + str(days) + ' days") ', conn_sqllite3)
+    except:
+        return None
+    
     df_player = df_player.drop_duplicates()
     
     df_player = df_player.drop('index', axis=1)
@@ -85,7 +89,11 @@ def etl_import_te_player(conn_sqllite3, con_postgres, days = 10000) :
 def etl_import_te_matchdetails(conn_sqllite3, con_postgres, days = 10000) :
     print("Load Tennis Explorer match details")    
             
-    df_matchdetails = pd.read_sql('select * from tmp_te_matches_details', conn_sqllite3)
+    try:
+        df_matchdetails = pd.read_sql('select * from tmp_te_matches_details', conn_sqllite3)
+    except:
+        return None
+    
     df_matchdetails = df_matchdetails.drop_duplicates()
       
     print("Store Tennis Explorer match details")    
