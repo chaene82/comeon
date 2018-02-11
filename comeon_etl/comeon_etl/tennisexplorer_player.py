@@ -135,7 +135,7 @@ def etl_te_get_missing_players() :
     
     for link_list in players:
         link = link_list[0]
-        print(link)
+        #print(link)
         link = link.replace('â' , 'a')
         df = get_te_player(link)
         store_player_to_database(df)
