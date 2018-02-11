@@ -23,8 +23,12 @@ from comeon_common import connect
 
 def store_player_to_database (df) :
     conn = sqlite3.connect('te_data.db')
+    try:
 
-    df.to_sql('tmp_te_player', conn, if_exists='append')
+        df.to_sql('tmp_te_player', conn, if_exists='append')
+    
+    except:
+        pass
     
     conn.close()
 
