@@ -19,7 +19,7 @@ log = startBetLogging("etl")
 #sqllite3_path = 'c:\\users/haenec/python/home/comeon/data/te_data.db'
 
 todate = datetime.now().date() 
-date = datetime.strptime("25/12/11", "%d/%m/%y").date()
+date = datetime.strptime("21/06/14", "%d/%m/%y").date()
 #todate = date 
 
 
