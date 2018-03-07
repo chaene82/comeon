@@ -135,7 +135,7 @@ def etl_te_get_matchesdetails_all() :
     sql = """
           SELECT te_link, "MatchDate"
         	FROM public.tbl_match
-            where "MatchDate" > '2018-02-01'::date
+            where "MatchDate" > '2017-01-01'::date
         """
     
     match_list = con.execute(sql )
