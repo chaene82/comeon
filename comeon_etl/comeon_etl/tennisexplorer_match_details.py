@@ -12,6 +12,7 @@ import sqlite3
 import re
 import random
 import time
+import numpy as np
 from datetime import datetime, timedelta
 from comeon_common import connect
 
@@ -52,6 +53,9 @@ def get_te_match(match_url = "/match-detail/?id=1629042"):
     odds_table = soup.findAll('table')[5]
     
     odds_trs = odds_table.findAll('tr')
+    odds_home = np.nan
+    odds_away = np.nan
+    
     
     for tr in odds_trs:
         if (tr.a) :
