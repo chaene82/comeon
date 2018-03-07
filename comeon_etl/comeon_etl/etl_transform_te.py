@@ -97,7 +97,7 @@ def updateMatchDetails(row) :
     #print("update player", row['player_name'], )
     #print("dob", convertDate(row['player_dob']), )
     
-    clause = update(tbl_match).where(tbl_match.columns.te_link==row['match_link']).values(surface=row['surface'], update=dt) 
+    clause = update(tbl_match).where(tbl_match.columns.te_link==row['match_link']).values(surface=row['surface'], player1_pin_odds=row['player1_pin_odds'], player2_pin_odds=row['player2_pin_odds'], update=dt) 
 
     con_postgres.execute(clause)   
 

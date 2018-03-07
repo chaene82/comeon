@@ -49,8 +49,19 @@ def get_te_match(match_url = "/match-detail/?id=1629042"):
     
     soup.unicode
     
-    site = soup.find_all("div", attrs={"id": "center"})
+    odds_table = soup.findAll('table')[5]
     
+    odds_trs = odds_table.findAll('tr')
+    
+    for tr in odds_trs:
+        if (tr.a) :
+            if 'Pinnacle' in tr.a.text :
+                tds_home = tr.findAll('td', {'class' : 'k1'})
+                tds_away = tr.findAll('td', {'class' : 'k2'})
+                odds_home = float(tds_home[0].find(text=True))
+                odds_away = float(tds_away[0].find(text=True))
+               
+       
     if soup.find(text=re.compile(r'hard')) :  
         #print("hard surface")
         surface = 'hard'
@@ -69,7 +80,10 @@ def get_te_match(match_url = "/match-detail/?id=1629042"):
                             
     ## putting data together    
     dict = { 'match_link' : match_url,
-             'surface'    : surface
+             'surface'    : surface,
+             'player1_pin_odds' : odds_home,
+             'player2_pin_odds' : odds_away,
+             
              #'html'       : html
             }
        
