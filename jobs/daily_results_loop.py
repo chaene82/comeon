@@ -20,6 +20,7 @@ log = startBetLogging("etl")
 
 todate = datetime.now().date() 
 date = datetime.strptime("17/02/18", "%d/%m/%y").date()
+
 #todate = date 
 
 

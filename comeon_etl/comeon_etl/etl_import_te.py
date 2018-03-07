@@ -25,7 +25,7 @@ def etl_import_te_matchlist(conn_sqllite3, con_postgres, days = 10000) :
     try:
         df_input = pd.read_sql('select * from tmp_te_matchlist where "MatchDate" > date("now","-' + str(days) + ' days") ', conn_sqllite3)
     except:
-        pass
+        return
         
     
     

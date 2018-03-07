@@ -217,5 +217,7 @@ def etl_transform_te_players():
     #transform_te_player(con_postgres)        
     
 def etl_transform_te_matchdetails():
+    con_postgres, meta = connect()  
+
     transform_te_matchdetail(con_postgres)
     #transform_te_player(con_postgres)          

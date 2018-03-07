@@ -23,8 +23,12 @@ from comeon_common import connect
 
 def store_player_to_database (df) :
     conn = sqlite3.connect('te_data.db')
+    try:
 
-    df.to_sql('tmp_te_player', conn, if_exists='append')
+        df.to_sql('tmp_te_player', conn, if_exists='append')
+    
+    except:
+        pass
     
     conn.close()
 
@@ -135,7 +139,7 @@ def etl_te_get_missing_players() :
     
     for link_list in players:
         link = link_list[0]
-        print(link)
+        #print(link)
         link = link.replace('â' , 'a')
         df = get_te_player(link)
         store_player_to_database(df)
