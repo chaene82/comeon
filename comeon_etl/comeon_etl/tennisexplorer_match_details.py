@@ -126,4 +126,27 @@ def etl_te_get_matchesdetails() :
             print(i, "done")
 
 
-
+def etl_te_get_matchesdetails_all() : 
+    
+    con, meta = connect()    
+    conn = sqlite3.connect('te_data.db')
+    
+    
+    sql = """
+          SELECT te_link, "MatchDate"
+        	FROM public.tbl_match
+            where "MatchDate" > '2017-01-01'::date
+        """
+    
+    match_list = con.execute(sql )
+    
+    
+    i = 0
+    for match in match_list :
+        link = match[0]
+        df = get_te_match(link)
+        store_matches_to_database(df, conn)
+        
+        i = i + 1
+        if i % 100 == 0:
+            print(i, "done")

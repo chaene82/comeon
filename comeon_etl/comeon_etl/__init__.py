@@ -10,4 +10,4 @@ from .calc_fair_odds import calcFairOdds
 from .tennisexplorer_results import etl_te_get_matches
 from .tennisexplorer_ranking import etl_te_get_ranking
 from .tennisexplorer_player import etl_te_get_missing_players
-from .tennisexplorer_match_details import etl_te_get_matchesdetails
+from .tennisexplorer_match_details import etl_te_get_matchesdetails, etl_te_get_matchesdetails_all
