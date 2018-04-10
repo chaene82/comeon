@@ -86,7 +86,7 @@ def ta_proba() :
     if not good_away_winner.empty :    
         good_away_winner['winner'] = 'away'
     
-    if not (good_home_winner.empty and good_away_winner.empty) :  
+    if not (good_home_winner.empty or good_away_winner.empty) :  
         good_winners = pd.concat([good_home_winner, good_away_winner])
     elif not good_home_winner.empty :
         good_winners = good_home_winner
