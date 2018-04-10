@@ -235,7 +235,7 @@ class pinnacle:
             return response['betId'], "bet placed", response
         else :
             log.info("bet was not place")
-            return -1, "error placing bet, Errorcode " + response['errorCode'], response
+            return -1, "error placing bet, Errorcode " + str(response['errorCode']), response
 
 
         
