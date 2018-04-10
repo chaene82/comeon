@@ -90,7 +90,7 @@ def ta_proba() :
         good_winners = pd.concat([good_home_winner, good_away_winner])
     elif not good_home_winner.empty :
         good_winners = good_home_winner
-    elif not good_away_winner :
+    elif not good_away_winner.empty :
         good_winners = good_away_winner
     else :
         return False
