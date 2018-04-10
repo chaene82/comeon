@@ -85,6 +85,7 @@ def get_ta_proba(tournament_url = "2018ATPHouston.html", round = [2,4,8,16,32,64
 
 def get_current_tournament():
 
+    
     url = 'http://www.tennisabstract.com'
     req = urllib.request.Request(url)
     
@@ -106,12 +107,15 @@ def get_current_tournament():
     
 
 def get_ta_current():
-    tournament_list = get_current_tournament()
-    conn = sqlite3.connect('ta_data.db')
-    c = conn.cursor()
-    c.execute("DELETE FROM tmp_ta_proba")
-    conn.commit()
-    conn.close()
+    try :
+        tournament_list = get_current_tournament()
+        conn = sqlite3.connect('ta_data.db')
+        c = conn.cursor()
+        c.execute("DELETE FROM tmp_ta_proba")
+        conn.commit()
+        conn.close()
+    except:
+        print("error deleting file")
     
     
     for tournament in tournament_list:

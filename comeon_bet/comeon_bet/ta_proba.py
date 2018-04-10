@@ -7,15 +7,11 @@ ToDo:
 @author: haenec
 """
 
-from sqlalchemy import create_engine, MetaData, select, update
-from sqlalchemy.dialects.postgresql import insert
-from datetime import datetime
-import numpy as np
-import math
+
 import pandas as pd
-from comeon_common import connect, getBtcEurPrice
+from comeon_common import connect
 from comeon_common import startBetLogging
-from comeon_common import checkBetforPlace, placeBet, checkOffer, placeOffer, closeOffer
+from comeon_common import placeBet
 
 
 # load data from the configuration
