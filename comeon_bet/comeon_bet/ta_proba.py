@@ -67,20 +67,30 @@ def ta_proba() :
         and oa.odds_id not in (select odds_id from public.tbl_orderbook);
     """
     df_ta_bet_events = pd.read_sql(sql, con)
+    
+    if df_ta_bet_events.empty :
+        return False
+    
     df_ta_bet_events['home_odds_proba'] = (1 / df_ta_bet_events['home_odds']) * 100
     df_ta_bet_events['away_odds_proba'] = (1 / df_ta_bet_events['away_odds']) * 100
     
+    
     home_winner = df_ta_bet_events[df_ta_bet_events['home_player_proba'] > 50]
     away_winner = df_ta_bet_events[df_ta_bet_events['away_player_proba'] > 50]
-    
+       
     good_home_winner = home_winner[home_winner['home_player_proba'] >= (home_winner['home_odds_proba'] + margin) ]
-    good_home_winner['winner'] = 'home'
+    if not good_home_winner.empty :
+        good_home_winner['winner'] = 'home'
+    
     good_away_winner = away_winner[away_winner['away_player_proba'] >= (away_winner['away_odds_proba'] + margin) ]
-    good_away_winner['winner'] = 'away'
+    if not good_away_winner.empty :    
+        good_away_winner['winner'] = 'away'
     
     good_winners = pd.concat([good_home_winner, good_away_winner])
     
     if not good_winners.empty :
         good_winners.apply(place_ta_bet, axis=1)
         #good_away_winner.apply(place_ta_bet, axis=1)
+        
+    return True
 
