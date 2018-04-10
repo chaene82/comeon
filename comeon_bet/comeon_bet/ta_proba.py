@@ -19,7 +19,7 @@ import yaml
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
-stakes = 1
+stakes = 1.2
 margin = 5 #prcent better bet 
 
 
