@@ -80,6 +80,7 @@ def ta_proba() :
     
     good_winners = pd.concat([good_home_winner, good_away_winner])
     
-    good_winners.apply(place_ta_bet, axis=1)
-    #good_away_winner.apply(place_ta_bet, axis=1)
+    if not good_winners.empty :
+        good_winners.apply(place_ta_bet, axis=1)
+        #good_away_winner.apply(place_ta_bet, axis=1)
 
