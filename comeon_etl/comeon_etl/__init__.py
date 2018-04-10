@@ -11,3 +11,6 @@ from .tennisexplorer_results import etl_te_get_matches
 from .tennisexplorer_ranking import etl_te_get_ranking
 from .tennisexplorer_player import etl_te_get_missing_players
 from .tennisexplorer_match_details import etl_te_get_matchesdetails, etl_te_get_matchesdetails_all
+from .tennisabstract_proba import get_ta_current
+from .etl_import_ta import etl_import_ta
+from .etl_transform_ta import etl_transform_ta

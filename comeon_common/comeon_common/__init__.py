@@ -1,5 +1,5 @@
 #
-from .getEvents import getEvents, updateEventsPlayerID
+from .getEvents import getEvents, updateEventsPlayerID, getPlayerId, checkPlayerExists
 from .getOdds import getOdds
 from .getPrice import getBtcEurPrice
 from .getBalance import getBalance

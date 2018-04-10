@@ -105,6 +105,8 @@ def getPlayerId(player_name, con, bookie) :
             else :
                 stm = update(tbl_event_player).where(tbl_event_player.c.event_player_id == player_id).values(pin_player_name=player_name)
                 con.execute(stm)   
+        else:
+            player_id = player_id[0]
 
     if bookie == 'betbtc' :
         player_id = con.execute("Select event_player_id from tbl_event_player WHERE betbtc_player_name = '" + str(player_name) + "'").fetchone()
@@ -160,6 +162,7 @@ def getPlayerId(player_name, con, bookie) :
                 
     if type(player_id) != int :
         player_id = 0
+
     return player_id
 
 
@@ -315,7 +318,8 @@ def getEvents() :
     ## create, updated events
         
             
-    bookies = ['betbtc', 'pinnacle', 'matchbook', 'betdaq']
+    #bookies = ['betbtc', 'pinnacle', 'matchbook', 'betdaq']
+    bookies = ['pinnacle']
     
     for bookie in bookies :
         log.info("bookie : " + bookie)
