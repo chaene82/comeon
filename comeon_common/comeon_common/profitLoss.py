@@ -31,7 +31,7 @@ def getProfitLoss() :
     sql = """
     SELECT sum(winnings_eur - turnover_eur) as profitLoss
     FROM public.tbl_orderbook
-    where bet_settlement_date = current_date - 1;
+    where bet_settlement_date > current_date - 1;
     """
     
     yesterday = con.execute(sql).fetchone()
