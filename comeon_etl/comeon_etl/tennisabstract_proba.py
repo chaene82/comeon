@@ -57,13 +57,19 @@ def get_ta_proba(tournament_url = "2018ATPHouston.html", round = [2,4,8,16,32,64
               
                 home_player = proba_table[i]
                 home_player_tds = home_player.findAll('td')
+                if not home_player_tds[0].a :
+                    break
                 home_player_name = home_player_tds[0].a.text
                 home_player_proba = float(home_player_tds[2].text.strip('%'))
                 #print(home_player_name, home_player_proba)
                 
+                #print(proba_table[i+1])
                 away_player = proba_table[i+1]
                 away_player_tds = away_player.findAll('td')
-                away_player_name = away_player_tds[0].a.text            
+                if not away_player_tds[0].a :
+                    break
+                away_player_name = away_player_tds[0].a.text   
+                
                 away_player_proba = float(away_player_tds[2].text.strip('%'))
                 #print(away_player_name, away_player_proba)
                 
