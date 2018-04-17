@@ -38,13 +38,19 @@ def place_ta_bet(row) :
         winner_odds_id = row['away_odds_id']        
         winner_odds = row['away_odds']
         winner_proba = row['away_player_proba']
-    log.warn("place bet on event '" + str(row['home_player_name']) + " vs " + str(row['away_player_name']) + \
-             "' winner " + str(winner_name) + \
-             " odds : " + str(winner_odds) + \
-             " proba : " + str(winner_proba))
+
     
-    placeBet(winner_odds_id, winner_odds, stakes, product_id=5)
+    calc_stakes = round(stakes / (winner_odds - 1),1)
     
+    status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=5)
+    
+    if status :
+        log.warn("place bet on event '" + str(row['home_player_name']) + " vs " + str(row['away_player_name']) + \
+                 "' winner " + str(winner_name) + \
+                 " stakes : " + str(calc_stakes) + \
+                 " odds : " + str(winner_odds) + \
+                 " proba : " + str(winner_proba))
+        
     return True
 
 
