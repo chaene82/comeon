@@ -85,7 +85,7 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
         betid, message, resultset = api.placeBet(betbtc_event_id, player_name, backlay, request_odds, stake)
     
     
-    log.info("place Bet for [ID " + str(odds_id) + "] " + message + ", " + str(resultset) )
+    log.warning("place Bet for [ID " + str(odds_id) + "] " + message + ", " + str(resultset) )
     log.debug("Full resultset :  " + str(resultset))
     
     if betid > 0:
