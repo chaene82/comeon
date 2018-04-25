@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 from .betbtc import betbtc
 from .Pinnacle import pinnacle
-from .Matchbook import matchbook
+#from .Matchbook import matchbook
 from .Betdaq import betdaq
 from .base import connect, startBetLogging
 
@@ -22,7 +22,7 @@ dt = datetime.now()
   
 api_betbtc = betbtc('back')
 api_pinnacle = pinnacle()
-api_matchbook = matchbook()
+#api_matchbook = matchbook()
 api_betdaq = betdaq()
 
 
@@ -91,14 +91,14 @@ def getOdds(event_id=None) :
             df_pinnacle['bookie_id'] = 1          
             df_pinnacle['event_id'] = event[0]             
             df_pinnacle.apply((lambda x: updateOdds(x, tbl_odds, con)), axis=1)                             
-        if event[5] != None :        
-            try :
-                df_matchbook = api_matchbook.getOdds(event[5], event[7], event[8])
-            except TypeError:
-                continue            
-            df_matchbook['bookie_id'] = 5 
-            df_matchbook['event_id'] = event[0]             
-            df_matchbook.apply((lambda x: updateOdds(x, tbl_odds, con)), axis=1)                        
+#        if event[5] != None :        
+#            try :
+#                df_matchbook = api_matchbook.getOdds(event[5], event[7], event[8])
+#            except TypeError:
+#                continue            
+#            df_matchbook['bookie_id'] = 5 
+#            df_matchbook['event_id'] = event[0]             
+#            df_matchbook.apply((lambda x: updateOdds(x, tbl_odds, con)), axis=1)                        
                     
         if event[6] != None :
             df_betdaq = api_betdaq.getOdds(event[6], event[9], event[10])
