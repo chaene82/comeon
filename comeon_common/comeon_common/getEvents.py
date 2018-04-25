@@ -36,7 +36,7 @@ con, meta = connect()
 tbl_events = meta.tables['tbl_events']
 tbl_event_player = meta.tables['tbl_event_player']
 
-api_matchbook = matchbook()
+#api_matchbook = matchbook()
 api_betbtc = betbtc('back')
 api_pinnacle = pinnacle()
 api_betdaq = betdaq()
@@ -289,8 +289,8 @@ def getBookieEvents(bookie) :
         bookie_api = api_pinnacle
     elif bookie == "betbtc" :
         bookie_api = api_betbtc
-    elif bookie == "matchbook" :
-        bookie_api = api_matchbook          
+#    elif bookie == "matchbook" :
+#        bookie_api = api_matchbook          
     elif bookie == "betdaq" :
         bookie_api = api_betdaq      
         
@@ -305,8 +305,8 @@ def getBookieEvents(bookie) :
         df_concat_events.rename(columns={'bookie_event_id': 'pinnacle_event_id'}, inplace=True)
     elif bookie == "betbtc" :
         df_concat_events.rename(columns={'bookie_event_id': 'betbtc_event_id'}, inplace=True)
-    elif bookie == "matchbook" :
-        df_concat_events.rename(columns={'bookie_event_id': 'matchbook_event_id'}, inplace=True)
+#    elif bookie == "matchbook" :
+#        df_concat_events.rename(columns={'bookie_event_id': 'matchbook_event_id'}, inplace=True)
     elif bookie == "betdaq" :
         df_concat_events.rename(columns={'bookie_event_id': 'betdaq_event_id'}, inplace=True)        
     
