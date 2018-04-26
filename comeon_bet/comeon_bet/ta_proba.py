@@ -69,6 +69,7 @@ def ta_proba() :
         Where e."StartDateTime" >= NOW()  and  e."StartDateTime" <= (NOW() + INTERVAL '2 hours' )
         and oh.bookie_id = 1 and oh.way=1
         and oa.bookie_id = 1 and oa.way=2
+        and not ta.ta_tournament like '%Challenger%'
         and oh.odds_id not in (select odds_id from public.tbl_orderbook)
         and oa.odds_id not in (select odds_id from public.tbl_orderbook);
     """
