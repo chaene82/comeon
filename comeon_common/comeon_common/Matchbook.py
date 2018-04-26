@@ -80,6 +80,11 @@ class matchbook:
     
     
     def __init__(self):
+        print("init")
+        
+        # remove because getting an error
+        
+        
 #        with open("config.yml", 'r') as ymlfile:
 #            self.cfg = yaml.load(ymlfile)
 #            username = self.cfg['matchbook']['api']['username']
