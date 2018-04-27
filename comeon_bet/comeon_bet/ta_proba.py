@@ -73,6 +73,7 @@ def ta_proba() :
         and oh.odds_id not in (select odds_id from public.tbl_orderbook)
         and oa.odds_id not in (select odds_id from public.tbl_orderbook);
     """
+
     df_ta_bet_events = pd.read_sql(sql, con)
     
     if df_ta_bet_events.empty :
