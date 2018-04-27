@@ -57,21 +57,7 @@ def place_ta_bet(row) :
 def ta_proba() :
 
     sql = """
-    SELECT e.event_id, e."StartDateTime",
-            e.home_player_id, h.pin_player_name as home_player_name, ta.home_player_proba, oh.odds as home_odds, oh.odds_id as home_odds_id,
-            e.away_player_id, a.pin_player_name as away_player_name, ta.away_player_proba, oa.odds as away_odds, oa.odds_id as away_odds_id
-    	FROM public.tbl_events e
-        inner join public.tbl_event_player h on (e.home_player_id = h.event_player_id)
-        inner join public.tbl_event_player a on (e.away_player_id = a.event_player_id)
-    	inner join public.tbl_ta_events ta on (e.event_id = ta.event_id)
-        inner join public.tbl_odds oh on (e.event_id = oh.event_id)
-        inner join public.tbl_odds oa on (e.event_id = oa.event_id)
-        Where e."StartDateTime" >= NOW()  and  e."StartDateTime" <= (NOW() + INTERVAL '2 hours' )
-        and oh.bookie_id = 1 and oh.way=1
-        and oa.bookie_id = 1 and oa.way=2
-    --    and not ta.ta_tournament like '%Challenger%'
-        and oh.odds_id not in (select odds_id from public.tbl_orderbook)
-        and oa.odds_id not in (select odds_id from public.tbl_orderbook);
+    SELECT * from v_ta_next_events;
     """
 
     df_ta_bet_events = pd.read_sql(sql, con)
