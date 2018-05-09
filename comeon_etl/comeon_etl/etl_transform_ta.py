@@ -65,7 +65,7 @@ def updateTAEvent(row) :
 
 def etl_transform_ta() :
     # get new TAX matches
-    df_ta_matchlist = pd.read_sql('select * from tbl_ta_proba', con_postgres)
+    df_ta_matchlist = pd.read_sql('select * from tbl_ta_proba where home_player_proba > 0 and home_player_proba < 100', con_postgres)
     
     df_ta_matchlist['home_player_id']  = df_ta_matchlist.home_player_name.apply(get_player_id_from_table)
     df_ta_matchlist['away_player_id']  = df_ta_matchlist.away_player_name.apply(get_player_id_from_table)
