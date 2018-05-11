@@ -34,7 +34,7 @@ def store_matchlist_to_database (df) :
 
 def get_te_matchlist(year = '2018', month = '05', day = '07', match_type="atp-single"):
 
-    url = 'http://www.tennisexplorer.com/results/?type=' + match_type + '&year' + year + '&month=' + month + '&day=' + day
+    url = 'http://www.tennisexplorer.com/matches/?type=' + match_type + '&year' + year + '&month=' + month + '&day=' + day
     
     req = urllib.request.Request(url)
     #http://live-tennis.eu/en/official-atp-ranking
@@ -66,6 +66,7 @@ def get_te_matchlist(year = '2018', month = '05', day = '07', match_type="atp-si
     return result
 
 def get_te_match(match_url = "/match-detail/?id=1680141", matchtype='single', tour='atp'):
+    result_id = 5
 
     url = 'http://www.tennisexplorer.com' + str(match_url) 
     
@@ -202,20 +203,23 @@ def get_te_match(match_url = "/match-detail/?id=1680141", matchtype='single', to
     # Head to Head
     headtohead = center.findAll("h2", attrs={"class": "bg"})[0].text
     head_to_head_formated = headtohead[-5:]
-    player_left_head_to_head = int(head_to_head_formated[:1])
-    player_right_head_to_head = int(head_to_head_formated[-1:])
-
+    if head_to_head_formated != '-head' :
+        player_left_head_to_head = int(head_to_head_formated[:1])
+        player_right_head_to_head = int(head_to_head_formated[-1:])
     
-    if change_sort :
-        head_to_head = {'head-to-head' : head_to_head_formated[::-1], \
-                        'player1' : player_right_head_to_head, \
-                        'player2' : player_left_head_to_head}
+        
+        if change_sort :
+            head_to_head = {'head-to-head' : head_to_head_formated[::-1], \
+                            'player1' : player_right_head_to_head, \
+                            'player2' : player_left_head_to_head}
+        else :
+            head_to_head = {'head-to-head' : head_to_head_formated, \
+                            'player1' : player_left_head_to_head, \
+                            'player2' : player_right_head_to_head}
+         
+        event['head-to-head'] =  head_to_head
     else :
-        head_to_head = {'head-to-head' : head_to_head_formated, \
-                        'player1' : player_left_head_to_head, \
-                        'player2' : player_right_head_to_head}
-     
-    event['head-to-head'] =  head_to_head
+        result_id = result_id - 1
         
     # ODDS
     
@@ -231,35 +235,35 @@ def get_te_match(match_url = "/match-detail/?id=1680141", matchtype='single', to
    
     # Result Odds  
     if odds_result != [] :
-        odds_table = odds_result[5].findAll('tr')
+        odds_table = odds_result[result_id].findAll('tr')
         
-        if odds_table[0]['class'] == 'one' or odds_table[0]['class'] == 'two' : 
+        #if odds_table[0]['class'] == 'one' or odds_table[0]['class'] == 'two' : 
         
-            odds = {}
-            for tr in odds_table:
-                if (tr.a) :
-                        bookie = tr.a.text.replace('\xa0','').lower()
-                        odds_left = float(tr.findAll('td', {'class' : 'k1'})[0].find(text=True))
-                        odds_right = float(tr.findAll('td', {'class' : 'k2'})[0].find(text=True))
-                        if change_sort :
-                            player1_odds = odds_right
-                            player2_odds = odds_left
-                        else :
-                            player1_odds = odds_left
-                            player2_odds = odds_right     
-                        odds.update({bookie : {'player1' : player1_odds, 'player2' : player2_odds}})
-                        #odds[bookie] = {'player1' : player1_odds, 'player2' : player2_odds}
-                        #odds[bookie].update({'bookie' : bookie'player1' : player1_odds, 'player2' : player2_odds})
-                        #odds[bookie].update({'player1' : player1_odds, 'player2' : player2_odds})
-                        
-                        #print(bookie, odds_left, odds_right)
-            #            if 'Pinnacle' in tr.a.text :
-            #                tds_home = tr.findAll('td', {'class' : 'k1'})
-            #                tds_away = tr.findAll('td', {'class' : 'k2'})
-            #                odds_home = float(tds_home[0].find(text=True))
-            #                odds_away = float(tds_away[0].find(text=True))
-                       
-            event['te_odds'] = {'result' : odds }
+        odds = {}
+        for tr in odds_table:
+            if ((tr.a) and (tr['class'] == ['one'] or tr['class'] == ['two'])) :
+                bookie = tr.a.text.replace('\xa0','').lower()
+                odds_left = float(tr.findAll('td', {'class' : 'k1'})[0].find(text=True))
+                odds_right = float(tr.findAll('td', {'class' : 'k2'})[0].find(text=True))
+                if change_sort :
+                    player1_odds = odds_right
+                    player2_odds = odds_left
+                else :
+                    player1_odds = odds_left
+                    player2_odds = odds_right     
+                odds.update({bookie : {'player1' : player1_odds, 'player2' : player2_odds}})
+                #odds[bookie] = {'player1' : player1_odds, 'player2' : player2_odds}
+                #odds[bookie].update({'bookie' : bookie'player1' : player1_odds, 'player2' : player2_odds})
+                #odds[bookie].update({'player1' : player1_odds, 'player2' : player2_odds})
+                
+                #print(bookie, odds_left, odds_right)
+    #            if 'Pinnacle' in tr.a.text :
+    #                tds_home = tr.findAll('td', {'class' : 'k1'})
+    #                tds_away = tr.findAll('td', {'class' : 'k2'})
+    #                odds_home = float(tds_home[0].find(text=True))
+    #                odds_away = float(tds_away[0].find(text=True))
+                   
+        event['te_odds'] = {'result' : odds }
     
     # Over,Under Odds
     if odds_ou != [] :
@@ -340,17 +344,22 @@ def get_te_match(match_url = "/match-detail/?id=1680141", matchtype='single', to
                 
         event['te_odds']['correct_score'] =  odds 
                 
-        return event
+    return event
 
 
 #test 
 
-matches = get_te_matchlist()
+i = 0
+matches = get_te_matchlist(year = '2018', month = '05', day = '11', match_type="atp-single")
 for match in matches :
     #try :
         print(match)
         events = get_te_match(match_url = match)
-        print(events['event_name'])
+        print(events['event_name'], events['status'])
+        i = i +1
+        print(i)
+        if i > 20 :
+            break
     #except :
         #print("error", match)
     
