@@ -21,7 +21,7 @@ with open("config.yml", 'r') as ymlfile:
 
 stakes = 1
 margin = 5 #prcent better bet 
-margin_btc = 9
+margin_btc = 7
 
 
 log = startBetLogging("common")
