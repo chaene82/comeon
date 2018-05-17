@@ -43,8 +43,8 @@ def place_ta_bet(row) :
     
     calc_stakes = round(stakes / (winner_odds - 1),1)
     
-    #status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=5)
-    status = False
+    status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=5)
+    #status = False
     
     if status :
         log.warn("place bet on event '" + str(row['home_player_name']) + " vs " + str(row['away_player_name']) + \
