@@ -45,6 +45,7 @@ api_betdaq = betdaq()
 def checkPlayerExists(player_name, con) :
     
     
+    
     sql = """
     Select event_player_id     
     from tbl_event_player   
@@ -61,12 +62,33 @@ def checkPlayerExists(player_name, con) :
     
     sql = sql.format(**d)
     
+    
     resultset = con.execute(sql).fetchone()
     
-    if resultset == None :
+    if resultset == None :   
         player_id = -1
     else :
         player_id = resultset[0]
+    
+    
+    if player_id == -1 :
+        sql = """
+        Select event_player_id     
+        from tbl_event_player   
+        WHERE soundex(pin_player_name) = soundex('{player_name}')
+        """
+        
+        d = { 'player_name': player_name }
+        
+        sql = sql.format(**d)
+        
+        
+        resultset = con.execute(sql).fetchone()
+        
+        if resultset == None :   
+            player_id = -1
+        else :
+            player_id = resultset[0]
     
     return player_id
 
