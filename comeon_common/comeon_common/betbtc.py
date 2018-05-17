@@ -194,31 +194,33 @@ class betbtc:
                 home_lay_max = np.nan
                 away_back_max = np.nan
                 away_lay_max = np.nan
-
-        if not isinstance(home_back, float) : home_back = np.nan
-        if not isinstance(home_lay, float)  : home_lay = np.nan
-        if not isinstance(away_back, float) : away_back = np.nan
-        if not isinstance(away_lay, float)  : away_lay = np.nan
-        
-                        
-        dict_home_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 1,
-                             'odds' : home_back, 'minStake': 0, 'maxStake' : home_back_max, 'pin_line_id' : 0})
-
-        dict_home_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 1,
-                             'odds' : home_lay, 'minStake': 0, 'maxStake' : home_lay_max, 'pin_line_id' : 0})                         
-
-        dict_away_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 2,
-                             'odds' : away_back, 'minStake': 0, 'maxStake' : away_back_max, 'pin_line_id' : 0})
-
-        dict_away_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 2,
-                             'odds' : away_lay, 'minStake': 0, 'maxStake' : away_lay_max, 'pin_line_id' : 0})                          
-        
-        result = pd.DataFrame()
-        
-        result = result.append([dict_home_back])
-        result = result.append([dict_home_lay])                 
-        result = result.append([dict_away_back])
-        result = result.append([dict_away_lay])    
+        try :
+            if not isinstance(home_back, float) : home_back = np.nan
+            if not isinstance(home_lay, float)  : home_lay = np.nan
+            if not isinstance(away_back, float) : away_back = np.nan
+            if not isinstance(away_lay, float)  : away_lay = np.nan
+            
+                            
+            dict_home_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 1,
+                                 'odds' : home_back, 'minStake': 0, 'maxStake' : home_back_max, 'pin_line_id' : 0})
+    
+            dict_home_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 1,
+                                 'odds' : home_lay, 'minStake': 0, 'maxStake' : home_lay_max, 'pin_line_id' : 0})                         
+    
+            dict_away_back = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 1, 'way' : 2,
+                                 'odds' : away_back, 'minStake': 0, 'maxStake' : away_back_max, 'pin_line_id' : 0})
+    
+            dict_away_lay  = collections.OrderedDict({'bookie_event_id': bookie_event_id, 'bettype' : 1, 'backlay' : 2, 'way' : 2,
+                                 'odds' : away_lay, 'minStake': 0, 'maxStake' : away_lay_max, 'pin_line_id' : 0})                          
+            
+            result = pd.DataFrame()
+            
+            result = result.append([dict_home_back])
+            result = result.append([dict_home_lay])                 
+            result = result.append([dict_away_back])
+            result = result.append([dict_away_lay])    
+        except :
+            result = pd.DataFrame()
         
         return result
 

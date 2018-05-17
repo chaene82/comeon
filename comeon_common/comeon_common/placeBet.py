@@ -42,9 +42,15 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
        False: there was a problem placing the bet
     """  
     
-    
+    data = con.execute("SELECT bookie_id FROM public.tbl_odds where odds_id =" + str(odds_id) + ";").fetchone()
+    bookie_id = data[0]
     dt = datetime.now()
-    data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, home_player_name, away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id, pin_line_id FROM public.tbl_odds o inner join public.tbl_events e using(event_id) where odds_id =" + str(odds_id) + ";").fetchone()
+    if bookie_id == 1 :
+        data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, home_player_name, away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id, pin_line_id FROM public.tbl_odds o inner join public.tbl_events e using(event_id) where odds_id =" + str(odds_id) + ";").fetchone()
+    elif bookie_id == 2 :
+        data = con.execute("SELECT odds_id, event_id, bettyp_id, bookie_id, way, backlay, odds_update, odds, h.betbtc_player_name as home_player_name, a.betbtc_player_name as away_player_name, pinnacle_league_id, pinnacle_event_id, betbtc_event_id, pin_line_id  FROM public.tbl_odds o  inner join public.tbl_events e using(event_id) inner join public.tbl_event_player h on (e.home_player_id = h.event_player_id)  inner join public.tbl_event_player a on (e.away_player_id = a.event_player_id)  where odds_id =" + str(odds_id) + ";").fetchone()
+        
+
     
     event_id = data[1]
     bettyp_id = data[2]
@@ -80,7 +86,7 @@ def placeBet(odds_id, request_odds, request_stake, product_id=0, surebet_id=0, o
         stake = request_stake / getBtcEurPrice()
         currency = 'BTC'
          
-
+        print(player_name)
         
         betid, message, resultset = api.placeBet(betbtc_event_id, player_name, backlay, request_odds, stake)
     

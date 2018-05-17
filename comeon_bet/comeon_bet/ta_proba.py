@@ -21,6 +21,7 @@ with open("config.yml", 'r') as ymlfile:
 
 stakes = 1
 margin = 5 #prcent better bet 
+margin_btc = 9
 
 
 log = startBetLogging("common")
@@ -42,7 +43,35 @@ def place_ta_bet(row) :
     
     calc_stakes = round(stakes / (winner_odds - 1),1)
     
-    status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=5)
+    #status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=5)
+    status = False
+    
+    if status :
+        log.warn("place bet on event '" + str(row['home_player_name']) + " vs " + str(row['away_player_name']) + \
+                 "' winner " + str(winner_name) + \
+                 " stakes : " + str(calc_stakes) + \
+                 " odds : " + str(winner_odds) + \
+                 " proba : " + str(winner_proba))
+        
+    return True
+
+def place_ta_bet_betbtc(row) :
+    if row['winner'] == 'home' :
+        winner_name = row['home_player_name']
+        winner_odds_id = row['home_odds_id']
+        winner_odds = row['home_odds']
+        winner_proba = row['home_player_proba']
+    else :
+        winner_name = row['away_player_name']
+        winner_odds_id = row['away_odds_id']        
+        winner_odds = row['away_odds']
+        winner_proba = row['away_player_proba']
+
+    
+    calc_stakes = round(stakes / (winner_odds - 1),1)
+    
+    status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=6)
+    #status = False
     
     if status :
         log.warn("place bet on event '" + str(row['home_player_name']) + " vs " + str(row['away_player_name']) + \
@@ -95,3 +124,43 @@ def ta_proba() :
         
     return True
 
+def ta_proba_btc() :
+
+    sql = """
+    SELECT * from v_ta_betbtc_next_events;
+    """
+
+    df_ta_bet_events = pd.read_sql(sql, con)
+    
+    if df_ta_bet_events.empty :
+        return False
+    
+    df_ta_bet_events['home_odds_proba'] = (1 / df_ta_bet_events['home_odds']) * 100
+    df_ta_bet_events['away_odds_proba'] = (1 / df_ta_bet_events['away_odds']) * 100
+    
+    
+    home_winner = df_ta_bet_events[df_ta_bet_events['home_player_proba'] > 50]
+    away_winner = df_ta_bet_events[df_ta_bet_events['away_player_proba'] > 50]
+       
+    good_home_winner = home_winner[home_winner['home_player_proba'] >= (home_winner['home_odds_proba'] + margin_btc) ]
+    if not good_home_winner.empty :
+        good_home_winner['winner'] = 'home'
+    
+    good_away_winner = away_winner[away_winner['away_player_proba'] >= (away_winner['away_odds_proba'] + margin_btc) ]
+    if not good_away_winner.empty :    
+        good_away_winner['winner'] = 'away'
+    
+    if not (good_home_winner.empty or good_away_winner.empty) :  
+        good_winners = pd.concat([good_home_winner, good_away_winner])
+    elif not good_home_winner.empty :
+        good_winners = good_home_winner
+    elif not good_away_winner.empty :
+        good_winners = good_away_winner
+    else :
+        return False
+    
+    if not good_winners.empty :
+        good_winners.apply(place_ta_bet_betbtc, axis=1)
+        #good_away_winner.apply(place_ta_bet, axis=1)
+        
+    return True
