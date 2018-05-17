@@ -195,7 +195,7 @@ def updateEvents(row, bookie, tbl_events, con) :
 
         clause = clause.on_conflict_do_update(
         index_elements=['StartDate', 'home_player_id','away_player_id'],
-        set_=dict(pinnacle_event_id=row['pinnacle_event_id'], pinnacle_league_id=row['pinnacle_league_id'], Live=row['live'] ,LastUpdate=dt)
+        set_=dict(pinnacle_event_id=row['pinnacle_event_id'], pinnacle_league_id=row['pinnacle_league_id'], StartDateTime=row['StartDateTime'], Live=row['live'] ,LastUpdate=dt)
         )
         
         con.execute(clause)          
