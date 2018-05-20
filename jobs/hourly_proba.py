@@ -19,7 +19,10 @@ from comeon_bet import ta_proba, ta_proba_btc
 
 getEvents(bookies = ['pinnacle'])
 getOdds()
-get_ta_current()
+try :
+    get_ta_current()
+except: 
+    print("Error loading new TA results")
 etl_import_ta()
 etl_transform_ta()
 ta_proba()
