@@ -106,8 +106,10 @@ def get_current_tournament():
     tournament_links = []
     
     for tournament in tournaments:
-        tournament_links.append(tournament['href'])
-
+        try: 
+            tournament_links.append(tournament['href'])
+        except:
+            print("tournament not loadable")
     return tournament_links     
     
     
