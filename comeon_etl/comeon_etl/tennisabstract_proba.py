@@ -127,8 +127,10 @@ def get_ta_current():
     
     
     for tournament in tournament_list:
-        result = get_ta_proba(tournament_url = tournament, round = ['Current'])
-    
+        try :
+            result = get_ta_proba(tournament_url = tournament, round = ['Current'])
+        except :
+            print("error loading TA page")
         store_matches_to_database(result)
         
 
