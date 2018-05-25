@@ -14,3 +14,5 @@ from .tennisexplorer_match_details import etl_te_get_matchesdetails, etl_te_get_
 from .tennisabstract_proba import get_ta_current
 from .etl_import_ta import etl_import_ta
 from .etl_transform_ta import etl_transform_ta
+from .ttt_email import get_ttt_current
+from .etl_import_ttt import etl_import_ttt_current
