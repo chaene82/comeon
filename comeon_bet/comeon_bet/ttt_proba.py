@@ -27,6 +27,7 @@ con, meta = connect()
 
 
 def place_ttt_bet(row) :
+    log = startBetLogging("common")
     winner_name = row['winner_player_name']
     winner_odds_id = row['winner_odds_id']
     winner_odds = row['winner_odds']

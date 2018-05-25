@@ -24,11 +24,11 @@ margin = 5 #prcent better bet
 margin_btc = 7
 
 
-log = startBetLogging("common")
 con, meta = connect()  
 
 
 def place_ta_bet(row) :
+    log = startBetLogging("common")
     if row['winner'] == 'home' :
         winner_name = row['home_player_name']
         winner_odds_id = row['home_odds_id']
@@ -56,6 +56,8 @@ def place_ta_bet(row) :
     return True
 
 def place_ta_bet_betbtc(row) :
+    log = startBetLogging("common")
+
     if row['winner'] == 'home' :
         winner_name = row['home_player_name']
         winner_odds_id = row['home_odds_id']
