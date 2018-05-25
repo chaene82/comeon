@@ -6,16 +6,16 @@ Created on Mon Nov 13 17:25:55 2017
 """
 
 
-from comeon_etl import get_ta_current, etl_import_ta, etl_transform_ta, get_ttt_current, etl_import_ttt_current
+from comeon_etl import get_ta_current, etl_import_ta, etl_transform_ta, get_ttt_current, etl_import_ttt, etl_transform_ttt
 from comeon_common import getEvents
 from comeon_common import getOdds
-from comeon_bet import ta_proba, ta_proba_btc
+from comeon_bet import ta_proba, ttt_proba
 
 
 
 
 
-#sqllite3_path = 'c:\\users/haenec/python/home/comeon/data/te_data.db'
+sqllite3_path = 'c:\\users/haenec/python/home/comeon/data/te_data.db'
 
 getEvents(bookies = ['pinnacle'])
 getOdds()
@@ -25,8 +25,13 @@ except:
     print("Error loading new TA results")
 etl_import_ta()
 etl_transform_ta()
-#ta_proba()
+ta_proba()
 
 # get TTT data
-get_ttt_current()
-etl_import_ttt_current()
+try :
+    get_ttt_current()
+    etl_import_ttt()
+    etl_transform_ttt()
+except: 
+    print("Error fetching emails (ttt)")    
+ttt_proba()
