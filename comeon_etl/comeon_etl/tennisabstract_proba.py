@@ -101,7 +101,7 @@ def get_current_tournament():
     
     soup = BeautifulSoup(html, "html.parser")  
     
-    tournaments = soup.findAll('a', href=True, text='Results and Forecasts')
+    tournaments = soup.findAll('a', href=True, text='Forecasts')
     
     tournament_links = []
     
