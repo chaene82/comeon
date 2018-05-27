@@ -22,12 +22,11 @@ with open("config.yml", 'r') as ymlfile:
 stakes = 2
 
 
-log = startBetLogging("common")
 con, meta = connect()  
 
 
 def place_ttt_bet(row) :
-    log = startBetLogging("common")
+    loglocal = startBetLogging("common")
     winner_name = row['winner_player_name']
     winner_odds_id = row['winner_odds_id']
     winner_odds = row['winner_odds']
@@ -41,7 +40,7 @@ def place_ttt_bet(row) :
     #status = False
     
     if status :
-        log.warn("place bet on event '" + str(row['winner_player_name']) + \
+    loglocal.warn("place bet on event '" + str(row['winner_player_name']) + \
                  "' winner " + str(winner_name) + \
                  " stakes : " + str(calc_stakes) + \
                  " odds : " + str(winner_odds) + \
