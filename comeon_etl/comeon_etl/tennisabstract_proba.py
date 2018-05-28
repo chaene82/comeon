@@ -89,6 +89,67 @@ def get_ta_proba(tournament_url = "2018ATPHouston.html", round = [2,4,8,16,32,64
     return result
 
 
+
+def get_ta_proba_gs(tournament_url = "2018ATPHouston.html", round = [2,4,8,16,32,64]):
+
+    url = tournament_url
+    
+    req = urllib.request.Request(url)
+    #http://live-tennis.eu/en/official-atp-ranking
+    response = urllib.request.urlopen(req)
+
+    html = response.read()
+
+    soup = BeautifulSoup(html, "html.parser")
+    
+    tour_title = soup.title.text
+    
+    result = pd.DataFrame()
+    
+    result_table = soup.findAll('table')[2]
+    
+    proba_table = result_table.findAll('tr')
+    print(url)
+        
+    for i in range(2, len(proba_table), 2) :
+        
+        if proba_table[i].a and proba_table[i].td.text != 'Bye' and proba_table[i+1].td.text != 'Bye' \
+                            and proba_table[i].td.text[0:9] != 'Qualifier' and proba_table[i+1].td.text[0:9] != 'Qualifier' : 
+          
+            home_player = proba_table[i]
+            home_player_tds = home_player.findAll('td')
+            if not home_player_tds[0].a :
+                break
+            home_player_name = home_player_tds[0].a.text
+            home_player_proba = float(home_player_tds[2].text.strip('%'))
+            #print(home_player_name, home_player_proba)
+            
+            #print(proba_table[i+1])
+            away_player = proba_table[i+1]
+            away_player_tds = away_player.findAll('td')
+            if not away_player_tds[0].a :
+                break
+            away_player_name = away_player_tds[0].a.text   
+            
+            away_player_proba = float(away_player_tds[2].text.strip('%'))
+            #print(away_player_name, away_player_proba)
+            
+            
+                    ## putting data together    
+            dict = { 'tournament' : tour_title,
+                     'home_player_name' :  home_player_name,
+                     'away_player_name' :  away_player_name,
+                     'home_player_proba' :  home_player_proba,
+                     'away_player_proba' :  away_player_proba
+                    }
+            
+            data = pd.DataFrame([dict])
+            
+            result = result.append(data, ignore_index=True) 
+                                       
+    return result
+
+
 def get_current_tournament():
 
     
@@ -110,11 +171,48 @@ def get_current_tournament():
             tournament_links.append(tournament['href'])
         except:
             print("tournament not loadable")
+                       
+            
     return tournament_links     
+
+def get_current_tournament_gs():
+
+    
+    url = 'http://www.tennisabstract.com'
+    req = urllib.request.Request(url)
+    
+    response = urllib.request.urlopen(req)
+    
+    html = response.read()
+    
+    soup = BeautifulSoup(html, "html.parser")  
+    
+   
+    tournament_links = []
+
+            
+    tournaments_gs_men = soup.findAll('a', href=True, text="Men's Singles Forecast")    
+    tournaments_gs_woman = soup.findAll('a', href=True, text="Women's Singles Forecast")    
+    
+    for tournament in tournaments_gs_men:
+        try: 
+            tournament_links.append(tournament['href'])
+        except:
+            print("tournament not loadable") 
+            
+    for tournament in tournaments_gs_woman:
+        try: 
+            tournament_links.append(tournament['href'])
+        except:
+            print("tournament not loadable")             
+            
+            
+    return tournament_links  
     
     
 
 def get_ta_current():
+    
     try :
         tournament_list = get_current_tournament()
         conn = sqlite3.connect('ta_data.db')
@@ -125,6 +223,7 @@ def get_ta_current():
     except:
         print("error deleting file")
     
+    #get normal tournaments
     
     for tournament in tournament_list:
         try :
@@ -134,6 +233,18 @@ def get_ta_current():
         store_matches_to_database(result)
         
 
+    #get grand slam
+    try :
+        tournament_list = get_current_tournament_gs()
+    except:
+        print("error loading grand slam")
+        
+    for tournament in tournament_list:
+        try :
+            result = get_ta_proba_gs(tournament_url = tournament, round = ['Current'])
+        except :
+            print("error loading TA page")
+        store_matches_to_database(result)
 
 
 #def etl_te_get_matchesdetails_all() : 
