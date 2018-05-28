@@ -28,7 +28,7 @@ con, meta = connect()
 
 
 def place_ta_bet(row) :
-    log = startBetLogging("common")
+    l_log = startBetLogging("common")
     if row['winner'] == 'home' :
         winner_name = row['home_player_name']
         winner_odds_id = row['home_odds_id']
@@ -47,7 +47,7 @@ def place_ta_bet(row) :
     #status = False
     
     if status :
-        log.warn("place bet on event '" + str(row['home_player_name']) + " vs " + str(row['away_player_name']) + \
+        l_log.warn("place bet on event '" + str(row['home_player_name']) + " vs " + str(row['away_player_name']) + \
                  "' winner " + str(winner_name) + \
                  " stakes : " + str(calc_stakes) + \
                  " odds : " + str(winner_odds) + \
@@ -56,7 +56,7 @@ def place_ta_bet(row) :
     return True
 
 def place_ta_bet_betbtc(row) :
-    log = startBetLogging("common")
+    l_log = startBetLogging("common")
 
     if row['winner'] == 'home' :
         winner_name = row['home_player_name']
@@ -76,7 +76,7 @@ def place_ta_bet_betbtc(row) :
     #status = False
     
     if status :
-        log.warn("place bet on event '" + str(row['home_player_name']) + " vs " + str(row['away_player_name']) + \
+        l_log.warn("place bet on event '" + str(row['home_player_name']) + " vs " + str(row['away_player_name']) + \
                  "' winner " + str(winner_name) + \
                  " stakes : " + str(calc_stakes) + \
                  " odds : " + str(winner_odds) + \
