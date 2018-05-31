@@ -31,7 +31,7 @@ def get_event_id_from_table(row):
     home_player_id = row['home_player_id']
     away_player_id = row['away_player_id']
 
-    event_id = con_postgres.execute("Select event_id from tbl_events WHERE "StartDateTime" >= (now() - '48:00:00'::interval) AND  home_player_id = " + str(home_player_id) + \
+    event_id = con_postgres.execute("Select event_id from tbl_events WHERE StartDateTime >= (now() - '48:00:00'::interval) AND  home_player_id = " + str(home_player_id) + \
                                    "AND away_player_id = " + str(away_player_id) + "").fetchone()   
     if event_id == None :
         event_id = 0
