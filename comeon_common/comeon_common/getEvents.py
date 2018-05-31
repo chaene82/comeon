@@ -341,7 +341,7 @@ def getEvents(bookies) :
         
             
     #bookies = ['betbtc', 'pinnacle', 'matchbook', 'betdaq']
-    bookies = ['pinnacle', 'betbtc']
+    bookies = ['pinnacle']
     
     for bookie in bookies :
         log.info("bookie : " + bookie)
