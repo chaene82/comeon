@@ -32,7 +32,7 @@ def get_event_id_from_table(row):
     away_player_id = row['away_player_id']
 
     event_id = con_postgres.execute("Select event_id from tbl_events WHERE  home_player_id = " + str(home_player_id) + \
-                                   "AND away_player_id = " + str(away_player_id) + "").fetchone()   
+                                   "AND away_player_id = " + str(away_player_id) + " order by event_id desc ").fetchone()   
     if event_id == None :
         event_id = 0
     else:
