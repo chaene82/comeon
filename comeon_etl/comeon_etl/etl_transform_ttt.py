@@ -22,6 +22,9 @@ tbl_ttt_events= meta.tables['tbl_ttt_events']
 
 
 def get_player_id_from_table(name):
+    # bad fix 
+    name = name.replace('Samantha Stosur', 'Sam Stosur')
+    
     return checkPlayerExists(name , con_postgres)
 
 def get_event_id_from_table(row):
