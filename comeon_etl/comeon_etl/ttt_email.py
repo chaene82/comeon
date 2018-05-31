@@ -38,7 +38,7 @@ def get_actual_picks() :
 
             
             
-    ttt_msgs = service.users().messages().list(userId='me',labelIds=['INBOX'], q="from:support@toptennistips.com newer_than:12h").execute()
+    ttt_msgs = service.users().messages().list(userId='me',labelIds=['INBOX'], q="from:support@toptennistips.com newer_than:5d").execute()
     
     result = pd.DataFrame()
     
