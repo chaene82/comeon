@@ -19,7 +19,7 @@ import yaml
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
-stakes = 1
+stakes = 2
 margin = 5 #prcent better bet 
 margin_btc = 7
 
@@ -41,9 +41,10 @@ def place_ta_bet(row) :
         winner_proba = row['away_player_proba']
 
     
-    calc_stakes = round(stakes / (winner_odds - 1),1)
+    #calc_stakes = round(stakes / (winner_odds - 1),1)
+    calc_stakes =  stakes
     
-    status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=5)
+    status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=8)
     #status = False
     
     if status :
