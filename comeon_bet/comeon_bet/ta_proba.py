@@ -155,7 +155,7 @@ def ta_proba() :
     
     if not good_winners.empty :
         good_winners.apply(place_ta_bet, axis=1)
-        good_winners.apply(place_ta_bet_fix, axis=1)        
+       # good_winners.apply(place_ta_bet_fix, axis=1)        
         place_ta_bet_fix
         #good_away_winner.apply(place_ta_bet, axis=1)
         
