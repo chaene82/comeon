@@ -46,7 +46,7 @@ def place_ta_bet(row) :
     calc_stakes = round(stakes / (winner_odds - 1),1)
     #calc_stakes =  stakes
     
-    status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=8)
+    status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=5)
     #status = False
     
     if status :
