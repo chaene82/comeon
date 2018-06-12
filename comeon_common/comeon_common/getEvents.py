@@ -71,24 +71,24 @@ def checkPlayerExists(player_name, con) :
         player_id = resultset[0]
     
     
-    if player_id == -1 :
-        sql = """
-        Select event_player_id     
-        from tbl_event_player   
-        WHERE soundex(pin_player_name) = soundex('{player_name}')
-        """
-        
-        d = { 'player_name': player_name }
-        
-        sql = sql.format(**d)
-        
-        
-        resultset = con.execute(sql).fetchone()
-        
-        if resultset == None :   
-            player_id = -1
-        else :
-            player_id = resultset[0]
+#    if player_id == -1 :
+#        sql = """
+#        Select event_player_id     
+#        from tbl_event_player   
+#        WHERE soundex(pin_player_name) = soundex('{player_name}')
+#        """
+#        
+#        d = { 'player_name': player_name }
+#        
+#        sql = sql.format(**d)
+#        
+#        
+#        resultset = con.execute(sql).fetchone()
+#        
+#        if resultset == None :   
+#            player_id = -1
+#        else :
+#            player_id = resultset[0]
     
     return player_id
 
@@ -201,7 +201,7 @@ def updateEvents(row, bookie, tbl_events, con) :
     
     print ("home player id", home_player_id)
     print ("away player id", away_player_id)
-        
+    
     
     if bookie == 'pinnacle' :
         clause = insert(tbl_events).values(pinnacle_event_id=row['pinnacle_event_id'], \
