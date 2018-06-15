@@ -203,24 +203,48 @@ def updateEvents(row, bookie, tbl_events, con) :
     print ("away player id", away_player_id)
     
     
-    if bookie == 'pinnacle' :
-        clause = insert(tbl_events).values(pinnacle_event_id=row['pinnacle_event_id'], \
-                                           pinnacle_league_id=row['pinnacle_league_id'],\
-                                           StartDate=row['StartDate'], \
-                                           StartDateTime=row['StartDateTime'], \
-                                           #home_player_name=row['home_player_name'], \
-                                           #away_player_name=row['away_player_name'], \
-                                           home_player_id=home_player_id, \
-                                           away_player_id=away_player_id, \
-                                           Live=row['live'], \
-                                           LastUpdate=dt)
+    
 
-        clause = clause.on_conflict_do_update(
-        index_elements=['StartDate', 'home_player_id','away_player_id'],
-        set_=dict(pinnacle_event_id=row['pinnacle_event_id'], pinnacle_league_id=row['pinnacle_league_id'], StartDateTime=row['StartDateTime'], Live=row['live'] ,LastUpdate=dt)
-        )
+    
+    
+    if bookie == 'pinnacle' :
         
-        con.execute(clause)          
+        # check if event is existing
+        
+        
+        event_id = con.execute('Select event_id from tbl_events WHERE home_player_id = ' + str(home_player_id)\
+                               + ' and away_player_id = ' + str(away_player_id)\
+                               + ' and pinnacle_event_id = ' + str(row['pinnacle_event_id']) + '' ).fetchone()
+        
+        print(str(row['pinnacle_event_id']))
+        print(event_id)
+        if event_id != None :
+            stm = update(tbl_events).where(tbl_events.c.pinnacle_event_id == row['pinnacle_event_id'])\
+                .values(pinnacle_league_id=row['pinnacle_league_id'], StartDateTime=row['StartDateTime'], Live=row['live'] ,LastUpdate=dt)
+
+            con.execute(stm)
+            
+            print("Event found and updated", event_id[0])
+        
+        else :
+        
+            clause = insert(tbl_events).values(pinnacle_event_id=row['pinnacle_event_id'], \
+                                               pinnacle_league_id=row['pinnacle_league_id'],\
+                                               StartDate=row['StartDate'], \
+                                               StartDateTime=row['StartDateTime'], \
+                                               #home_player_name=row['home_player_name'], \
+                                               #away_player_name=row['away_player_name'], \
+                                               home_player_id=home_player_id, \
+                                               away_player_id=away_player_id, \
+                                               Live=row['live'], \
+                                               LastUpdate=dt)
+    
+            clause = clause.on_conflict_do_update(
+            index_elements=['StartDate', 'home_player_id','away_player_id'],
+            set_=dict(pinnacle_event_id=row['pinnacle_event_id'], pinnacle_league_id=row['pinnacle_league_id'], StartDateTime=row['StartDateTime'], Live=row['live'] ,LastUpdate=dt)
+            )
+            
+            con.execute(clause)          
         
     elif bookie == 'betbtc' :
             
