@@ -9,7 +9,7 @@ Created on Mon Nov 13 17:25:55 2017
 from comeon_etl import get_ta_current, etl_import_ta, etl_transform_ta, get_ttt_current, etl_import_ttt, etl_transform_ttt
 from comeon_common import getEvents
 from comeon_common import getOdds
-from comeon_bet import ta_proba, ttt_proba
+from comeon_bet import ta_proba, ttt_proba, ta_proba_fix, ta_proba_value
 
 
 
@@ -26,6 +26,8 @@ except:
 etl_import_ta()
 etl_transform_ta()
 ta_proba()
+ta_proba_fix()
+ta_proba_value()
 
 # get TTT data
 try :

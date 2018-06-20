@@ -7,4 +7,4 @@ Created on Wed Nov  1 10:41:37 2017
 
 from comeon_common import getEvents
 
-getEvents()
+getEvents('pinnacle')

@@ -16,18 +16,18 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET row_security = off;
 
-DROP DATABASE tennis;
+--DROP DATABASE tennis;
 --
 -- TOC entry 2263 (class 1262 OID 16749)
 -- Name: tennis; Type: DATABASE; Schema: -; Owner: tennis
 --
 
-CREATE DATABASE tennis WITH TEMPLATE = template0 ENCODING = 'UTF8';
+--CREATE DATABASE tennis WITH TEMPLATE = template0 ENCODING = 'UTF8';
 
 
-ALTER DATABASE tennis OWNER TO tennis;
+--ALTER DATABASE tennis OWNER TO tennis;
 
-\connect tennis
+--connect tennis
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
