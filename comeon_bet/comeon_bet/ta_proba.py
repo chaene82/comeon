@@ -118,7 +118,7 @@ def place_ta_bet_value(row) :
                  "' winner " + str(winner_name) + \
                  " stakes : " + str(calc_stakes) + \
                  " odds : " + str(winner_odds) + \
-                 " value : " + str(round(winner_value),2) + \
+                 " value : " + str(round(winner_value, 2)) + \
                  " proba : " + str(winner_proba))
         
     return True
