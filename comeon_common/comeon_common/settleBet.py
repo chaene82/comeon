@@ -12,6 +12,7 @@ from .base import startBetLogging
 from .getPrice import getBtcEurPrice
 from .base import connect
 from datetime import datetime
+import time
 
 
 log = startBetLogging("settle")
@@ -146,4 +147,5 @@ def settleAllBets():
     
     for id in order_ids:
         settleBet(id[0])
+        time.sleep(5)
     
