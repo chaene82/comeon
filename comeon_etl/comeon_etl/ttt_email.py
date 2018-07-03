@@ -38,7 +38,7 @@ def get_actual_picks() :
 
             
             
-    ttt_msgs = service.users().messages().list(userId='me',labelIds=['INBOX'], q="from:support@toptennistips.com newer_than:5d").execute()
+    ttt_msgs = service.users().messages().list(userId='me',labelIds=['INBOX'], q="from:support@toptennistips.com newer_than:2d").execute()
     
     result = pd.DataFrame()
     
@@ -68,9 +68,10 @@ def get_actual_picks() :
                     dict = { 'matchdatetime' : tds[0].text.strip(),
                          'match'    : tds[1].text.strip(),
                          'winner' : tds[2].text.strip(),
-                         'win_proba' : float(tds[3].text.strip()[0:4]),
+                         'bet_value' : tds[3].text.strip()[0:4],
+                         'win_proba' : float(tds[5].text.strip()[0:4]),
                          'at_odd' : float(tds[4].text.strip()),
-                         'bet_value' : float(tds[5].text.strip()),
+                 #        'bet_value' : float(tds[6].text.strip()),
                          'event' : tds[6].text.strip(),
                          'level' : tds[7].text.strip(),
                 
@@ -84,7 +85,7 @@ def get_actual_picks() :
                 
                     result = result.append(data, ignore_index=True) 
     
-    return (result)
+    return result
 
 
 
