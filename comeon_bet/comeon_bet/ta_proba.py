@@ -25,6 +25,8 @@ stakes_fix = 2
 margin = 5 #prcent better bet 
 margin_btc = 7
 
+proba_fix = 70
+
 bet_on_value = 1.2
 
 
@@ -211,8 +213,8 @@ def ta_proba_fix() :
     df_ta_bet_events['away_odds_proba'] = (1 / df_ta_bet_events['away_odds']) * 100
     
     
-    home_winner = df_ta_bet_events[df_ta_bet_events['home_player_proba'] > 50]
-    away_winner = df_ta_bet_events[df_ta_bet_events['away_player_proba'] > 50]
+    home_winner = df_ta_bet_events[df_ta_bet_events['home_player_proba'] > proba_fix]
+    away_winner = df_ta_bet_events[df_ta_bet_events['away_player_proba'] > proba_fix]
        
     good_home_winner = home_winner[home_winner['home_player_proba'] >= (home_winner['home_odds_proba'] + margin) ]
     if not good_home_winner.empty :
