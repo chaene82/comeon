@@ -21,6 +21,7 @@ with open("config.yml", 'r') as ymlfile:
 
 stakes = 2
 stakes_fix = 2
+stakes_value = 5
 
 margin = 5 #prcent better bet 
 margin_btc = 7
@@ -110,7 +111,7 @@ def place_ta_bet_value(row) :
 
     
     #calc_stakes = round(stakes / (winner_odds - 1),1)
-    calc_stakes =  stakes_fix
+    calc_stakes =  stakes_value
     
     status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=9)
     #status = False
