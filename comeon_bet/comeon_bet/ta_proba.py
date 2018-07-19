@@ -20,7 +20,7 @@ with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
 stakes = 2
-stakes_fix = 2
+stakes_fix = 5
 stakes_value = 5
 
 margin = 5 #prcent better bet 
