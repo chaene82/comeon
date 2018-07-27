@@ -21,7 +21,9 @@ with open("config.yml", 'r') as ymlfile:
 
 stakes = 2
 stakes_fix = 5
-stakes_value = 5
+stakes_value_challenger = 5
+stakes_value_wta = 2
+stakes_value_atp = 2
 
 margin = 5 #prcent better bet 
 margin_btc = 7
@@ -109,11 +111,21 @@ def place_ta_bet_value(row) :
         winner_proba = row['away_player_proba']
         winner_value = row['away_value']
 
+
     
+        
     #calc_stakes = round(stakes / (winner_odds - 1),1)
-    calc_stakes =  stakes_value
+    if 'Challenger' in row['ta_tournament'] :
+        calc_stakes =  stakes_value_challenger
+        product = 9
+    elif 'ATP' in row['ta_tournament'] :
+        calc_stakes =  stakes_value_atp
+        product = 10     
+    elif 'WTA' in row['ta_tournament'] :
+        calc_stakes =  stakes_value_wta
+        product = 11  
     
-    status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=9)
+    status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=product)
     #status = False
     
     if status :
