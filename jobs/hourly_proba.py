@@ -26,7 +26,7 @@ except:
 etl_import_ta()
 etl_transform_ta()
 ta_proba()
-ta_proba_fix()
+#ta_proba_fix()
 ta_proba_value()
 
 # get TTT data

@@ -22,8 +22,8 @@ with open("config.yml", 'r') as ymlfile:
 stakes = 2
 stakes_fix = 5
 stakes_value_challenger = 5
-stakes_value_wta = 2
-stakes_value_atp = 2
+stakes_value_wta = 5
+stakes_value_atp = 5
 
 margin = 5 #prcent better bet 
 margin_btc = 7
