@@ -44,7 +44,7 @@ def getProfitLoss() :
     sql = """
     SELECT sum(winnings_eur - turnover_eur) as profitLoss
     FROM public.tbl_orderbook
-    where date_trunc('month', bet_settlement_date) = date_trunc('month', current_date);
+    where date_trunc('month', bet_settlement_date) = date_trunc('month', current_date - 1);
     """
     
     monthToDate = con.execute(sql).fetchone()    
@@ -57,7 +57,7 @@ def getProfitLoss() :
     sql = """
     SELECT sum(winnings_eur - turnover_eur) as profitLoss
     FROM public.tbl_orderbook
-    where date_trunc('year', bet_settlement_date) = date_trunc('year', current_date);
+    where date_trunc('year', bet_settlement_date) = date_trunc('year', current_date - 1);
     """
     
     yearToDate = con.execute(sql).fetchone() 
