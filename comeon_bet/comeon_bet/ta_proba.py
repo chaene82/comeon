@@ -10,7 +10,7 @@ ToDo:
 
 import pandas as pd
 from comeon_common import connect
-from comeon_common import startBetLogging, 
+from comeon_common import startBetLogging
 from comeon_common import placeBet
 
 
