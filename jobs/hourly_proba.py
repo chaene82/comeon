@@ -25,7 +25,7 @@ except:
     print("Error loading new TA results")
 etl_import_ta()
 etl_transform_ta()
-ta_proba()
+#ta_proba()
 #ta_proba_fix()
 ta_proba_value()
 

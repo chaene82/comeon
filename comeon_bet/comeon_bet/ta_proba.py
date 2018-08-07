@@ -10,7 +10,7 @@ ToDo:
 
 import pandas as pd
 from comeon_common import connect
-from comeon_common import startBetLogging
+from comeon_common import startBetLogging, 
 from comeon_common import placeBet
 
 
@@ -125,8 +125,11 @@ def place_ta_bet_value(row) :
         calc_stakes =  stakes_value_wta
         product = 11  
     
-    status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=product)
-    #status = False
+    if product != 11 :
+        status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=product)
+    else :
+        status = False
+    
     
     if status :
         l_log.warn("place bet on event '" + str(row['home_player_name']) + " vs " + str(row['away_player_name']) + \
