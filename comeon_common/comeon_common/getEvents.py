@@ -48,7 +48,7 @@ def checkPlayerExists(player_name, con) :
     sql = """
     Select event_player_id     
     from tbl_event_player   
-    WHERE pin_player_name = '{player_name}')    
+    WHERE pin_player_name = '{player_name}' 
     """
     d = { 'player_name': player_name }
     
