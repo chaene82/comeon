@@ -44,6 +44,8 @@ def updateTAEvent(row) :
 
     #print("update player", row['player_name'], )
     #print("dob", convertDate(row['player_dob']), )
+    
+    print ('add TA event' , row['event_id'], row['home_player_id'], row['away_player_id'])
 
     clause = insert(tbl_ta_events).values(event_id=row['event_id'], \
                                           home_player_id=row['home_player_id'], \
@@ -70,6 +72,7 @@ def etl_transform_ta() :
     df_ta_matchlist['home_player_id']  = df_ta_matchlist.home_player_name.apply(get_player_id_from_table)
     df_ta_matchlist['away_player_id']  = df_ta_matchlist.away_player_name.apply(get_player_id_from_table)
     df_ta_matchlist['event_id']  = df_ta_matchlist.apply(get_event_id_from_table, axis=1)
+    
     
     
     df_ta_matchlist.apply(updateTAEvent, axis=1)
