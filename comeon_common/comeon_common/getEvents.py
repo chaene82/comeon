@@ -44,32 +44,45 @@ api_betdaq = betdaq()
 
 def checkPlayerExists(player_name, con) :
     
-    
-    
+    # check excact name
     sql = """
     Select event_player_id     
     from tbl_event_player   
-    WHERE metaphone(pin_player_name, 12) = metaphone('{player_name}', 12) or 
-    metaphone(betbtc_player_name, 12) = metaphone('{player_name}', 12) or 
-    metaphone(matchbook_player_name, 12) = metaphone('{player_name}', 12) or 
-    metaphone(betdaq_player_name, 12) = metaphone('{player_name}', 12) or 
-    metaphone(betfair_player_name, 12) = metaphone('{player_name}', 12) or
-    metaphone(left(pin_player_name, 1) || substring(pin_player_name, position(' ' in pin_player_name)), 12) = metaphone('{player_name}', 12) 
-
+    WHERE pin_player_name = {player_name})    
     """
-    
     d = { 'player_name': player_name }
     
     sql = sql.format(**d)
     
     
-    resultset = con.execute(sql).fetchone()
+    resultset = con.execute(sql).fetchone()    
     
-    if resultset == None :   
-        player_id = -1
+    if resultset == None :     
+        sql = """
+        Select event_player_id     
+        from tbl_event_player   
+        WHERE metaphone(pin_player_name, 12) = metaphone('{player_name}', 12) or 
+        metaphone(betbtc_player_name, 12) = metaphone('{player_name}', 12) or 
+        metaphone(matchbook_player_name, 12) = metaphone('{player_name}', 12) or 
+        metaphone(betdaq_player_name, 12) = metaphone('{player_name}', 12) or 
+        metaphone(betfair_player_name, 12) = metaphone('{player_name}', 12) or
+        metaphone(left(pin_player_name, 1) || substring(pin_player_name, position(' ' in pin_player_name)), 12) = metaphone('{player_name}', 12) 
+    
+        """
+        
+        d = { 'player_name': player_name }
+        
+        sql = sql.format(**d)
+        
+        
+        resultset = con.execute(sql).fetchone()
+    
+        if resultset == None :   
+            player_id = -1
+        else :
+            player_id = resultset[0]
     else :
-        player_id = resultset[0]
-    
+        player_id = resultset[0]    
     
 #    if player_id == -1 :
 #        sql = """
