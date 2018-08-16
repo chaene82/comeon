@@ -125,7 +125,7 @@ def place_ta_bet_value(row) :
         calc_stakes =  stakes_value_wta
         product = 11  
     
-    if product != 11 :
+    if product != 12 :
         status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=product)
     else :
         status = False
