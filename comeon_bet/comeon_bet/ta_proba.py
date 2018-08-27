@@ -24,6 +24,7 @@ stakes_fix = 5
 stakes_value_challenger = 5
 stakes_value_wta = 5
 stakes_value_atp = 5
+stakes_value_gs = 10
 
 margin = 5 #prcent better bet 
 margin_btc = 7
@@ -125,7 +126,9 @@ def place_ta_bet_value(row) :
         calc_stakes =  stakes_value_wta
         product = 11
     else :
+        calc_stakes = stakes_value_gs
         product = 12
+        
     
     if product != 13 :
         status = placeBet(winner_odds_id, winner_odds, calc_stakes, product_id=product)
