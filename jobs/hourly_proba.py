@@ -29,11 +29,11 @@ etl_transform_ta()
 #ta_proba_fix()
 ta_proba_value()
 
-# get TTT data
-#try :
-    #get_ttt_current()
-    #etl_import_ttt()
-    #etl_transform_ttt()
-#except: 
-#    print("Error fetching emails (ttt)")    
-#ttt_proba()
+#get TTT data
+try :
+    get_ttt_current()
+    etl_import_ttt()
+    etl_transform_ttt()
+except: 
+    print("Error fetching emails (ttt)")    
+ttt_proba()
