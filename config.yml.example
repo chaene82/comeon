@@ -1,0 +1,64 @@
+database:
+    db:   
+    user: 
+    pwd:  
+    host: 
+    port: 
+
+# Configuration for logging
+log:
+    slack:
+        api_key: 
+        surebet:
+            channel: '#surebot'
+        laybet:
+            channel: '#laybet'
+        balance:
+            channel: '#balance'
+        etl:
+            channel: '#etl'            
+        common:
+            channel: '#common'
+        p_l:
+            channel: '#p_l'            
+            
+# Configuration for the Bookmaker API's
+
+pinnacle:
+    api:
+        username : 
+        password : 
+        
+
+betbtc:
+    api:
+        back:
+            token: 
+        lay:
+            token: 
+            
+        tennis: 3
+        
+matchbook:
+    api:
+        username : 
+        password : 
+        tennis: 9
+        
+betdaq:
+    api:
+        username : 
+        password : 
+        tennis: 9        
+
+laybet:
+    invest : 20
+    concurrent_open_bets : 16    
+
+
+surebet:
+    stake_total : 20
+    margin : 0
+    high_risk_margin : 0
+    betbtc_margin : 2
+    
