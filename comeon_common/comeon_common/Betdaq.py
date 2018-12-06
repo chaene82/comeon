@@ -7,8 +7,8 @@ Created on Sun Sep 10 16:19:16 2017
 """
 
 import pandas as pd
-#from betdaq.apiclient import APIClient
-#import numpy as np
+from betdaq.apiclient import APIClient
+import numpy as np
 #import collections
 #from .base import startBetLogging, removeTime
 #import yaml
@@ -21,6 +21,8 @@ import pandas as pd
 
 ## Class for as Wrapper
 
+username = 'chrhae'
+password = '4access2Malta'
 
 
 class betdaq:
@@ -29,10 +31,8 @@ class betdaq:
     api = ''
     odds = None
     
-#    def __init__(self):
-#        with open("config.yml", 'r') as ymlfile:
-#            self.cfg = yaml.load(ymlfile)          
-#            self.api = APIClient(self.cfg['betdaq']['api']['username'] , self.cfg['betdaq']['api']['password'] )
+    def __init__(self):
+        self.api = APIClient(username , password)
                   
     
     def checkBalance(self) :
@@ -46,11 +46,11 @@ class betdaq:
             availiable : availiable balance for betting
             blocked : placed balance
         """ 
-#        account = self.api.account.get_account_balances()
-#        availiable = account['available_funds']
-#        blocked = account['exposure']
+        account = self.api.account.get_account_balances()
+        availiable = account['available_funds']
+        blocked = account['exposure']
         
-        return 0, 0 ,
+        return availiable + blocked, availiable ,blocked
 
 
     def getEvents(self) :

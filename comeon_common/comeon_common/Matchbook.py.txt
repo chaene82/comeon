@@ -85,16 +85,16 @@ class matchbook:
         # remove because getting an error
         
         
-        with open("config.yml", 'r') as ymlfile:
-            self.cfg = yaml.load(ymlfile)
-            username = self.cfg['matchbook']['api']['username']
-            password = self.cfg['matchbook']['api']['password']           
-            self.login = '{"username": "' + username + '", "password": "' + password + '"}'
-            self.response = requests.post('https://www.matchbook.com/edge/rest/security/session', data=self.login, headers=self.header)
-            self.session = loads(self.response.text)['session-token']
-            self.balance = loads(self.response.text)['account']['balance']
-            self.exposure = loads(self.response.text)['account']['exposure']
-            self.sports = self.cfg['matchbook']['api']['tennis']  
+#        with open("config.yml", 'r') as ymlfile:
+#            self.cfg = yaml.load(ymlfile)
+#            username = self.cfg['matchbook']['api']['username']
+#            password = self.cfg['matchbook']['api']['password']           
+#            self.login = '{"username": "' + username + '", "password": "' + password + '"}'
+#            self.response = requests.post('https://www.matchbook.com/edge/rest/security/session', data=self.login, headers=self.header)
+#            self.session = loads(self.response.text)['session-token']
+#            self.balance = loads(self.response.text)['account']['balance']
+#            self.exposure = loads(self.response.text)['account']['exposure']
+#            self.sports = self.cfg['matchbook']['api']['tennis']  
 
                    
     

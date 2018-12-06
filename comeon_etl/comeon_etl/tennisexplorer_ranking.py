@@ -29,7 +29,7 @@ def store_ranking_to_database (df) :
     df.to_sql('tmp_te_ranking', conn, if_exists='append')
 
 
-def get_te_ranking(year = '2018', month = '01', day = '22', page = 1):
+def get_te_ranking(year = '2018', month = '01', day = '15', page = 1):
 
     url = 'http://www.tennisexplorer.com/ranking/atp-men/' + year + '?date=' + year + '-' + month + '-' + day +'&page=' + str(page)
     
